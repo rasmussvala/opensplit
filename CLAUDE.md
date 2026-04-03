@@ -1,12 +1,14 @@
-# SplitApp — Project Specification
+# opensplit — Project Specification
 
-**Version:** 0.9 (Draft)  
+**Version:** 1.0 (Draft)  
 **Date:** 2026-04-03  
 **Status:** Pre-development
 
 ---
 
 ## 1. Overview
+
+**opensplit** — The simplest open source bill splitter. Fork it, connect your own Supabase, and host it free on GitHub Pages.
 
 A simple, open source, self-hostable bill-splitting web app. A privacy-friendly alternative to Splitwise with a focus on simplicity, ease of self-hosting, and a clean mobile experience via PWA.
 
@@ -45,7 +47,8 @@ A simple, open source, self-hostable bill-splitting web app. A privacy-friendly 
 | Concern | Decision |
 |---|---|
 | Frontend | React + Vite (PWA) |
-| Styling | Tailwind CSS |
+| Styling | Tailwind CSS v4 |
+| Component Library | shadcn/ui (built on Radix UI, owned components) |
 | Backend / DB | Supabase (open source, self-hosted per user) |
 | Frontend Hosting | GitHub Pages (free, per fork) |
 | DB Hosting | Supabase cloud free tier (per fork) |
@@ -245,7 +248,7 @@ End-to-end tests (e.g. Playwright) are explicitly skipped in v1 due to overhead.
 
 | Milestone | Scope |
 |---|---|
-| M1 — Foundation | Repo setup, Supabase project, migration files, GitHub Actions deploy to Pages, Vitest configured |
+| M1 — Foundation | Repo setup, Supabase project, migration files, GitHub Actions deploy to Pages, Vitest configured, Tailwind + shadcn/ui installed |
 | M2 — Core | TDD: expense model, equal splits, balance calculation (unit tested) |
 | M3 — Simplification | TDD: debt simplification algorithm (unit tested), settlement flow |
 | M4 — UI | Component tests for key interactions, React UI wired to Supabase |
