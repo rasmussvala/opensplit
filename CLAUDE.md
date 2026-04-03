@@ -90,7 +90,7 @@ Accounts may be considered for a future version to enable a "my groups" dashboar
 
 ### 7.3 Balances
 - Automatically calculate simplified balances (who owes whom, minimum transactions)
-- Debt simplification runs server-side
+- Debt simplification runs client-side
 - Real-time updates when expenses are added
 
 ### 7.4 Settlement
@@ -101,7 +101,7 @@ Accounts may be considered for a future version to enable a "my groups" dashboar
 
 ## 8. Debt Simplification Algorithm
 
-Runs server-side as a pure function.
+Runs client-side as a pure function.
 
 **Input:** list of expenses for a group  
 **Output:** simplified list of transactions (person A pays person B amount X)
