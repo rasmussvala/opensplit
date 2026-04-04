@@ -9,9 +9,7 @@ describe("simplifyDebts", () => {
 
   it("returns a single transaction for two people", () => {
     const transactions = simplifyDebts({ alice: 50, bob: -50 })
-    expect(transactions).toEqual([
-      { from: "bob", to: "alice", amount: 50 },
-    ])
+    expect(transactions).toEqual([{ from: "bob", to: "alice", amount: 50 }])
   })
 
   it("simplifies three-person debts into minimum transactions", () => {

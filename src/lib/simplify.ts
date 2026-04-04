@@ -23,7 +23,11 @@ export function simplifyDebts(balances: Record<string, number>): Transaction[] {
 
   while (i < debtors.length && j < creditors.length) {
     const settled = Math.min(debtors[i].amount, creditors[j].amount)
-    transactions.push({ from: debtors[i].name, to: creditors[j].name, amount: settled })
+    transactions.push({
+      from: debtors[i].name,
+      to: creditors[j].name,
+      amount: settled,
+    })
 
     debtors[i].amount -= settled
     creditors[j].amount -= settled
