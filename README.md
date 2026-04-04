@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
+# opensplit
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Open source bill splitter. Fork it, connect your own Supabase, and host it free on GitHub Pages.
 
-Currently, two official plugins are available:
+A privacy-friendly alternative to Splitwise for roommates, friend groups, and trips. No accounts required — just share a link.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Self-Hosting
 
-## React Compiler
+### 1. Fork this repo
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Create a Supabase project
 
-## Expanding the ESLint configuration
+Sign up at [supabase.com](https://supabase.com) and create a new project.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 3. Run migrations
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+supabase link --project-ref <your-project-ref>
+supabase db push
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 4. Add GitHub secrets
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+In your fork, go to **Settings > Secrets and variables > Actions** and add:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Secret | Where to find it |
+|---|---|
+| `VITE_SUPABASE_URL` | Supabase dashboard > Project Settings > API > Project URL |
+| `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase dashboard > Project Settings > API > Publishable key |
+| `SUPABASE_ACCESS_TOKEN` | [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens) |
+| `SUPABASE_DB_PASSWORD` | The database password you set when creating the project |
+| `SUPABASE_PROJECT_ID` | Supabase dashboard > Project Settings > General > Reference ID |
+
+### 5. Push to main
+
+GitHub Actions will automatically deploy the frontend to GitHub Pages and apply any new database migrations.
+
+## Local Development
+
+```bash
+cp .env.example .env    # fill in your Supabase credentials
+npm install
+npm run dev
 ```
+
+## License
+
+MIT
