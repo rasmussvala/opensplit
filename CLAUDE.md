@@ -4,6 +4,12 @@
 **Date:** 2026-04-03  
 **Status:** Pre-development
 
+## Dev Workflow
+
+- Always run `npm run check:fix` (Biome) after adding or modifying code.
+
+---
+
 ---
 
 ## 1. Overview
