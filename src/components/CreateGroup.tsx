@@ -9,9 +9,8 @@ export default function CreateGroup() {
   const navigate = useNavigate()
   const [name, setName] = useState("")
   const [currency, setCurrency] = useState("USD")
-  const [members, setMembers] = useState(["", ""])
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault()
     if (!name.trim()) return
 
@@ -23,21 +22,7 @@ export default function CreateGroup() {
 
     if (groupError || !group) return
 
-    const validMembers = members.map((m) => m.trim()).filter(Boolean)
-    if (validMembers.length > 0) {
-      await supabase.from("group_members").insert(
-        validMembers.map((guest_name) => ({
-          group_id: group.id,
-          guest_name,
-        })),
-      )
-    }
-
     navigate(`/groups/${group.invite_token}`)
-  }
-
-  function updateMember(index: number, value: string) {
-    setMembers((prev) => prev.map((m, i) => (i === index ? value : m)))
   }
 
   return (
@@ -77,28 +62,6 @@ export default function CreateGroup() {
             </option>
           ))}
         </select>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <span className="text-sm font-medium">Members</span>
-        {members.map((member, i) => (
-          <input
-            // biome-ignore lint/suspicious/noArrayIndexKey: order is stable
-            key={i}
-            type="text"
-            value={member}
-            onChange={(e) => updateMember(i, e.target.value)}
-            placeholder="Member name"
-            className="rounded border px-3 py-2 text-sm"
-          />
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setMembers((prev) => [...prev, ""])}
-        >
-          Add member
-        </Button>
       </div>
 
       <Button type="submit">Create group</Button>

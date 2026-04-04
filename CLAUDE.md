@@ -81,10 +81,12 @@ Accounts may be considered for a future version to enable a "my groups" dashboar
 
 ### 7.1 Groups
 - Create a group with a name and a currency code (e.g. USD, NOK, EUR)
+- Group creation only sets name and currency — no members are added at creation time
 - Currency is set once at group creation and applies to all expenses in the group
 - All amounts displayed as currency code + amount (e.g. "USD 42.50")
 - No conversion between currencies — one group, one currency
-- Invite members via a shareable link (no email infrastructure needed)
+- After creation, navigate to the group page where the invite link is available
+- Members join by opening the shareable invite link (no email infrastructure needed)
 - Link contains a unique unguessable token (UUID)
 - Group creator can revoke and regenerate the invite link
 - View all your groups from a dashboard

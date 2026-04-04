@@ -24,7 +24,7 @@ describe("CreateGroup", () => {
     vi.clearAllMocks()
   })
 
-  it("renders form with name, currency, and member inputs", () => {
+  it("renders form with name and currency inputs", () => {
     render(
       <MemoryRouter>
         <CreateGroup />
@@ -33,25 +33,12 @@ describe("CreateGroup", () => {
 
     expect(screen.getByLabelText(/group name/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/currency/i)).toBeInTheDocument()
-    expect(screen.getAllByPlaceholderText(/member name/i)).toHaveLength(2)
     expect(
       screen.getByRole("button", { name: /create group/i }),
     ).toBeInTheDocument()
   })
 
-  it("can add more member fields", () => {
-    render(
-      <MemoryRouter>
-        <CreateGroup />
-      </MemoryRouter>,
-    )
-
-    fireEvent.click(screen.getByRole("button", { name: /add member/i }))
-
-    expect(screen.getAllByPlaceholderText(/member name/i)).toHaveLength(3)
-  })
-
-  it("creates group and members in supabase on submit", async () => {
+  it("creates group in supabase and navigates to it on submit", async () => {
     const mockGroup = { id: "group-uuid", invite_token: "token-abc" }
 
     const mockInsertGroup = {
@@ -61,15 +48,10 @@ describe("CreateGroup", () => {
         }),
       }),
     }
-    const mockInsertMembers = {
-      insert: vi.fn().mockResolvedValue({ error: null }),
-    }
 
-    vi.mocked(supabase.from).mockImplementation((table: string) => {
-      if (table === "groups")
-        return mockInsertGroup as ReturnType<typeof supabase.from>
-      return mockInsertMembers as ReturnType<typeof supabase.from>
-    })
+    vi.mocked(supabase.from).mockReturnValue(
+      mockInsertGroup as unknown as ReturnType<typeof supabase.from>,
+    )
 
     render(
       <MemoryRouter>
@@ -81,26 +63,14 @@ describe("CreateGroup", () => {
       target: { value: "Trip to Oslo" },
     })
 
-    const memberInputs = screen.getAllByPlaceholderText(/member name/i)
-    fireEvent.change(memberInputs[0], { target: { value: "Alice" } })
-    fireEvent.change(memberInputs[1], { target: { value: "Bob" } })
-
     fireEvent.click(screen.getByRole("button", { name: /create group/i }))
 
     await waitFor(() => {
       expect(supabase.from).toHaveBeenCalledWith("groups")
       expect(mockInsertGroup.insert).toHaveBeenCalledWith({
         name: "Trip to Oslo",
-        currency: expect.any(String),
+        currency: "USD",
       })
-    })
-
-    await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith("group_members")
-      expect(mockInsertMembers.insert).toHaveBeenCalledWith([
-        { group_id: "group-uuid", guest_name: "Alice" },
-        { group_id: "group-uuid", guest_name: "Bob" },
-      ])
     })
 
     await waitFor(() => {
