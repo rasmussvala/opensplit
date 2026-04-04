@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { calculateBalances } from "./balances"
-
-interface Settlement {
-  from: string
-  to: string
-  amount: number
-}
+import { calculateBalances, type Settlement } from "./balances"
 
 describe("calculateBalances", () => {
   it("returns empty balances when there are no expenses", () => {

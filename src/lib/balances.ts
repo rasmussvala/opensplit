@@ -1,10 +1,10 @@
-interface Expense {
+export interface Expense {
   paid_by: string
   amount: number
   split_among: string[]
 }
 
-interface Settlement {
+export interface Settlement {
   from: string
   to: string
   amount: number
