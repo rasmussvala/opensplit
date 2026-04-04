@@ -55,6 +55,24 @@ describe("calculateBalances", () => {
     })
   })
 
+  it("handles uneven splits without floating point errors", () => {
+    const balances = calculateBalances([
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob", "charlie"],
+      },
+    ])
+
+    // 100 / 3 = 33.333...
+    // alice: +100 - 33.33 = +66.67
+    // bob: -33.33
+    // charlie: -33.33
+    // Sum should be 0 (no money created or lost)
+    const sum = Object.values(balances).reduce((a, b) => a + b, 0)
+    expect(sum).toBeCloseTo(0)
+  })
+
   it("returns zero balances when everyone is even", () => {
     const balances = calculateBalances([
       {
