@@ -1,3 +1,12 @@
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
+import CreateGroup from "@/components/CreateGroup"
+
 export default function App() {
-  return <h1>opensplit</h1>
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<CreateGroup />} />
+      </Routes>
+    </Router>
+  )
 }
