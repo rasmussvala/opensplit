@@ -107,9 +107,7 @@ describe("calculateBalances", () => {
         split_among: ["alice", "bob"],
       },
     ]
-    const settlements: Settlement[] = [
-      { from: "bob", to: "alice", amount: 50 },
-    ]
+    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 50 }]
 
     const balances = calculateBalances(expenses, settlements)
 
@@ -129,9 +127,7 @@ describe("calculateBalances", () => {
         split_among: ["alice", "bob"],
       },
     ]
-    const settlements: Settlement[] = [
-      { from: "bob", to: "alice", amount: 20 },
-    ]
+    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 20 }]
 
     const balances = calculateBalances(expenses, settlements)
 
@@ -166,9 +162,7 @@ describe("calculateBalances", () => {
   })
 
   it("handles settlements with no expenses", () => {
-    const settlements: Settlement[] = [
-      { from: "bob", to: "alice", amount: 30 },
-    ]
+    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 30 }]
 
     const balances = calculateBalances([], settlements)
 
@@ -187,9 +181,7 @@ describe("calculateBalances", () => {
         split_among: ["alice", "bob"],
       },
     ]
-    const settlements: Settlement[] = [
-      { from: "bob", to: "alice", amount: 60 },
-    ]
+    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 60 }]
 
     const balances = calculateBalances(expenses, settlements)
 

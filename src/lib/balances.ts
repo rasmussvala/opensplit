@@ -28,7 +28,8 @@ export function calculateBalances(
   }
 
   for (const settlement of settlements) {
-    balances[settlement.from] = (balances[settlement.from] ?? 0) + settlement.amount
+    balances[settlement.from] =
+      (balances[settlement.from] ?? 0) + settlement.amount
     balances[settlement.to] = (balances[settlement.to] ?? 0) - settlement.amount
   }
 
