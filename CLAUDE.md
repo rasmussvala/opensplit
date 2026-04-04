@@ -1,8 +1,8 @@
 # opensplit — Project Specification
 
 **Version:** 1.0 (Draft)  
-**Date:** 2026-04-03  
-**Status:** Pre-development
+**Date:** 2026-04-04  
+**Status:** In development
 
 ## Dev Workflow
 
@@ -67,13 +67,27 @@ A simple, open source, self-hostable bill-splitting web app. A privacy-friendly 
 
 No accounts in v1. Access is link-based only.
 
-- Anyone can create a group and receives a unique shareable link
-- Anyone with the link can view the group, add expenses, and mark settlements
-- Link contains a long unguessable token (UUID) for security
-- Group creator can revoke and regenerate the link
+- The fork owner (host/admin) creates groups via the root URL
+- Friends access groups via shareable invite links (`/groups/:invite_token`)
 - No login, no passwords, no sessions required
 
-Accounts may be considered for a future version to enable a "my groups" dashboard.
+### 6.0 Admin PIN
+
+Group creation is protected by a simple PIN set via the environment variable `VITE_ADMIN_PIN`. The CreateGroup page prompts for the PIN before showing the form. This is a client-side check — sufficient for v1 since the database is the admin's own Supabase instance. The PIN is stored in `localStorage` (`opensplit:admin_pin`) after the first successful entry so the admin doesn't have to re-enter it on every visit.
+
+Accounts may be considered for a future version to enable cross-instance identity.
+
+### 6.1 Member Identity (localStorage tokens)
+
+Members are identified via a `member_token` stored in the browser's `localStorage`. There are no user accounts.
+
+- When someone opens an invite link for the first time, they are prompted to enter a display name
+- A new `group_members` row is created with a server-generated `member_token` (UUID)
+- The `member_token` is stored in localStorage under the key `opensplit:member_token:<group_id>`
+- On return visits, the stored `member_token` identifies the member — no login needed
+- The admin/host goes through the same join flow when they first visit a group they created
+- If localStorage is cleared (or a different browser/device is used), the visitor appears as a new member and must re-join
+- The `member_token` is a secret separate from the member `id` — member IDs are visible in expenses and settlements, but the token is known only to the browser that created the membership
 
 ---
 
@@ -82,14 +96,15 @@ Accounts may be considered for a future version to enable a "my groups" dashboar
 ### 7.1 Groups
 - Create a group with a name and a currency code (e.g. USD, NOK, EUR)
 - Group creation only sets name and currency — no members are added at creation time
+- Only the fork owner (host/admin) creates groups — no technical restriction, just URL-based access control
 - Currency is set once at group creation and applies to all expenses in the group
 - All amounts displayed as currency code + amount (e.g. "USD 42.50")
 - No conversion between currencies — one group, one currency
 - After creation, navigate to the group page where the invite link is available
 - Members join by opening the shareable invite link (no email infrastructure needed)
 - Link contains a unique unguessable token (UUID)
-- Group creator can revoke and regenerate the invite link
-- View all your groups from a dashboard
+- Link revocation and regeneration is M6 scope
+- The home page shows a list of groups derived from localStorage member tokens — any group you have joined appears in the list. If browser storage is cleared, the list is lost (memberships still exist in the database; re-join via invite link)
 
 ### 7.2 Expenses
 - Add an expense: description, amount, who paid, split equally among selected members
@@ -104,6 +119,17 @@ Accounts may be considered for a future version to enable a "my groups" dashboar
 ### 7.4 Settlement
 - Mark a debt as settled (records a settlement event in history)
 - Settled amounts reflected immediately in balances
+
+### 7.5 Member Join Flow
+1. User opens `/groups/:invite_token`
+2. App looks up the group by `invite_token`
+3. App checks `localStorage` for a stored `member_token` for this group
+4. If a valid token is found and matches a `group_members` row — the user is identified and sees the group page
+5. If no token is found (or it doesn't match) — the user sees a "Join group" prompt asking for their display name
+6. On submit: a new `group_members` row is created, the returned `member_token` is stored in `localStorage`
+7. The user is now a member and sees the group page
+
+The admin/host goes through this same flow after creating a group.
 
 ---
 
@@ -124,54 +150,48 @@ This minimises the number of transactions needed to settle a group.
 
 ---
 
-## 9. Data Model (Draft)
+## 9. Data Model
 
-### Users
-| Field | Type |
-|---|---|
-| id | uuid |
-| email | string |
-| display_name | string |
-| created_at | timestamp |
+No `users` table in v1 — all identity is handled via `member_token` in `group_members` (see Section 6.1).
 
 ### Groups
 | Field | Type |
 |---|---|
-| id | uuid |
-| name | string |
-| currency | string (e.g. "USD", "NOK") |
-| created_by | uuid (user) |
-| invite_token | string (for link access) |
-| created_at | timestamp |
+| id | uuid (PK, auto-generated) |
+| name | text, not null |
+| currency | text, not null, default 'SEK' |
+| invite_token | text, not null, default random UUID |
+| created_at | timestamptz, not null, default now() |
 
 ### Group Members
 | Field | Type |
 |---|---|
-| group_id | uuid |
-| user_id | uuid (null if guest) |
-| guest_name | string (if guest) |
-| joined_at | timestamp |
+| id | uuid (PK, auto-generated) |
+| group_id | uuid, FK to groups(id), cascade delete |
+| guest_name | text, not null |
+| member_token | uuid, not null, default random UUID, unique |
+| joined_at | timestamptz, not null, default now() |
 
 ### Expenses
 | Field | Type |
 |---|---|
-| id | uuid |
-| group_id | uuid |
-| paid_by | uuid (member) |
-| amount | decimal |
-| description | string |
+| id | uuid (PK, auto-generated) |
+| group_id | uuid, FK to groups(id), cascade delete |
+| paid_by | uuid, FK to group_members(id) |
+| amount | numeric(12,2), not null, check > 0 |
+| description | text, not null |
 | split_among | uuid[] (member ids) |
-| created_at | timestamp |
+| created_at | timestamptz, not null, default now() |
 
 ### Settlements
 | Field | Type |
 |---|---|
-| id | uuid |
-| group_id | uuid |
-| from_member | uuid |
-| to_member | uuid |
-| amount | decimal |
-| settled_at | timestamp |
+| id | uuid (PK, auto-generated) |
+| group_id | uuid, FK to groups(id), cascade delete |
+| from_member | uuid, FK to group_members(id) |
+| to_member | uuid, FK to group_members(id) |
+| amount | numeric(12,2), not null, check > 0 |
+| settled_at | timestamptz, not null, default now() |
 
 ---
 
@@ -205,7 +225,11 @@ The fork owner becomes the de facto admin. Their friends access the app via thei
 ### GitHub Secrets Required
 
 - `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
+- `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`
+- `VITE_ADMIN_PIN`
+- `SUPABASE_ACCESS_TOKEN`
+- `SUPABASE_DB_PASSWORD`
+- `SUPABASE_PROJECT_ID`
 
 ---
 
@@ -254,15 +278,15 @@ End-to-end tests (e.g. Playwright) are explicitly skipped in v1 due to overhead.
 
 ## 13. Milestones
 
-| Milestone | Scope |
-|---|---|
-| M1 — Foundation | Repo setup, Supabase project, migration files, GitHub Actions deploy to Pages, Vitest configured, Tailwind + shadcn/ui installed |
-| M2 — Core | TDD: expense model, equal splits, balance calculation (unit tested) |
-| M3 — Simplification | TDD: debt simplification algorithm (unit tested), settlement flow |
-| M4 — UI | Component tests for key interactions, React UI wired to Supabase |
-| M5 — PWA | Manifest, service worker, offline shell |
-| M6 — Polish | Link revocation, mobile UI polish |
-| M7 — Release | README with setup guide, .env.example, Docker Hub publish, v1.0 tag |
+| Milestone | Scope | Status |
+|---|---|---|
+| M1 — Foundation | Repo setup, Supabase project, migration files, GitHub Actions deploy to Pages, Vitest configured, Tailwind + shadcn/ui installed | ✅ Done |
+| M2 — Core | TDD: expense model, equal splits, balance calculation (unit tested) | ✅ Done |
+| M3 — Simplification | TDD: debt simplification algorithm (unit tested), settlement flow | ✅ Done |
+| M4 — UI | Component tests for key interactions, React UI wired to Supabase | 🟡 In progress |
+| M5 — PWA | Manifest, service worker, offline shell | |
+| M6 — Polish | Link revocation, mobile UI polish | |
+| M7 — Release | README with setup guide, .env.example, Docker Hub publish, v1.0 tag | |
 
 ---
 

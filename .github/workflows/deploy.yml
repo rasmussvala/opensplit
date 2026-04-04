@@ -53,6 +53,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
+          VITE_ADMIN_PIN: ${{ secrets.VITE_ADMIN_PIN }}
           VITE_BASE_PATH: /opensplit/
 
       - uses: actions/configure-pages@v5
