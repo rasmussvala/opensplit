@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest"
 import { calculateBalances } from "./balances"
 
+interface Settlement {
+  from: string
+  to: string
+  amount: number
+}
+
 describe("calculateBalances", () => {
   it("returns empty balances when there are no expenses", () => {
     const balances = calculateBalances([])
@@ -90,6 +96,123 @@ describe("calculateBalances", () => {
     expect(balances).toEqual({
       alice: 0,
       bob: 0,
+    })
+  })
+
+  it("subtracts settlements from balances", () => {
+    const expenses = [
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob"],
+      },
+    ]
+    const settlements: Settlement[] = [
+      { from: "bob", to: "alice", amount: 50 },
+    ]
+
+    const balances = calculateBalances(expenses, settlements)
+
+    // alice: +50 from expense, -50 from settlement received = 0
+    // bob: -50 from expense, +50 from settlement paid = 0
+    expect(balances).toEqual({
+      alice: 0,
+      bob: 0,
+    })
+  })
+
+  it("handles partial settlement", () => {
+    const expenses = [
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob"],
+      },
+    ]
+    const settlements: Settlement[] = [
+      { from: "bob", to: "alice", amount: 20 },
+    ]
+
+    const balances = calculateBalances(expenses, settlements)
+
+    // alice: +50 - 20 = +30
+    // bob: -50 + 20 = -30
+    expect(balances).toEqual({
+      alice: 30,
+      bob: -30,
+    })
+  })
+
+  it("handles multiple settlements across different members", () => {
+    const expenses = [
+      {
+        paid_by: "alice",
+        amount: 60,
+        split_among: ["alice", "bob", "charlie"],
+      },
+    ]
+    const settlements: Settlement[] = [
+      { from: "bob", to: "alice", amount: 20 },
+      { from: "charlie", to: "alice", amount: 20 },
+    ]
+
+    const balances = calculateBalances(expenses, settlements)
+
+    expect(balances).toEqual({
+      alice: 0,
+      bob: 0,
+      charlie: 0,
+    })
+  })
+
+  it("handles settlements with no expenses", () => {
+    const settlements: Settlement[] = [
+      { from: "bob", to: "alice", amount: 30 },
+    ]
+
+    const balances = calculateBalances([], settlements)
+
+    // bob paid alice 30 with no expenses — bob is owed 30
+    expect(balances).toEqual({
+      bob: 30,
+      alice: -30,
+    })
+  })
+
+  it("handles overpayment via settlement", () => {
+    const expenses = [
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob"],
+      },
+    ]
+    const settlements: Settlement[] = [
+      { from: "bob", to: "alice", amount: 60 },
+    ]
+
+    const balances = calculateBalances(expenses, settlements)
+
+    // alice: +50 - 60 = -10 (now owes bob)
+    // bob: -50 + 60 = +10
+    expect(balances).toEqual({
+      alice: -10,
+      bob: 10,
+    })
+  })
+
+  it("defaults to no settlements when omitted", () => {
+    const balances = calculateBalances([
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob"],
+      },
+    ])
+
+    expect(balances).toEqual({
+      alice: 50,
+      bob: -50,
     })
   })
 })
