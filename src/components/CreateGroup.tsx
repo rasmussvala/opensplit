@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/components/AuthProvider"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 
@@ -7,6 +8,7 @@ const CURRENCIES = ["USD", "EUR", "GBP", "NOK", "SEK"]
 
 export default function CreateGroup() {
   const navigate = useNavigate()
+  const { userId } = useAuth()
   const [name, setName] = useState("")
   const [currency, setCurrency] = useState("USD")
 
@@ -16,7 +18,7 @@ export default function CreateGroup() {
 
     const { data: group, error: groupError } = await supabase
       .from("groups")
-      .insert({ name: name.trim(), currency })
+      .insert({ name: name.trim(), currency, created_by: userId })
       .select()
       .single()
 
