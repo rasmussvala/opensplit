@@ -10,6 +10,10 @@ vi.mock("@/lib/supabase", () => ({
   },
 }))
 
+vi.mock("@/components/AuthProvider", () => ({
+  useAuth: () => ({ userId: "test-user-id" }),
+}))
+
 const mockNavigate = vi.fn()
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom")
@@ -70,6 +74,7 @@ describe("CreateGroup", () => {
       expect(mockInsertGroup.insert).toHaveBeenCalledWith({
         name: "Trip to Oslo",
         currency: "USD",
+        created_by: "test-user-id",
       })
     })
 

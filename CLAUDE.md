@@ -65,29 +65,30 @@ A simple, open source, self-hostable bill-splitting web app. A privacy-friendly 
 
 ## 6. Authentication
 
-No accounts in v1. Access is link-based only.
+Anonymous auth via Supabase Auth. No user-facing accounts in v1.
 
+- Supabase anonymous sign-in (`signInAnonymously()`) creates a session automatically on first visit
 - The fork owner (host/admin) creates groups via the root URL
 - Friends access groups via shareable invite links (`/groups/:invite_token`)
-- No login, no passwords, no sessions required
+- No login, no passwords — identity is handled by the anonymous auth session
 
 ### 6.0 Admin PIN
 
 Group creation is protected by a simple PIN set via the environment variable `VITE_ADMIN_PIN`. The CreateGroup page prompts for the PIN before showing the form. This is a client-side check — sufficient for v1 since the database is the admin's own Supabase instance. The PIN is stored in `localStorage` (`opensplit:admin_pin`) after the first successful entry so the admin doesn't have to re-enter it on every visit.
 
-Accounts may be considered for a future version to enable cross-instance identity.
+Anonymous users can be upgraded to permanent accounts in a future version to enable cross-instance identity.
 
-### 6.1 Member Identity (localStorage tokens)
+### 6.1 Member Identity (Supabase Anonymous Auth)
 
-Members are identified via a `member_token` stored in the browser's `localStorage`. There are no user accounts.
+Members are identified via Supabase anonymous auth sessions. There are no user accounts.
 
-- When someone opens an invite link for the first time, they are prompted to enter a display name
-- A new `group_members` row is created with a server-generated `member_token` (UUID)
-- The `member_token` is stored in localStorage under the key `opensplit:member_token:<group_id>`
-- On return visits, the stored `member_token` identifies the member — no login needed
+- On first visit, `signInAnonymously()` creates an anonymous user in Supabase Auth
+- The session (JWT) is auto-persisted in `localStorage` by supabase-js
+- `group_members.user_id` references `auth.users(id)` — linking membership to the anonymous user
+- On return visits, the persisted session identifies the user — no login needed
 - The admin/host goes through the same join flow when they first visit a group they created
-- If localStorage is cleared (or a different browser/device is used), the visitor appears as a new member and must re-join
-- The `member_token` is a secret separate from the member `id` — member IDs are visible in expenses and settlements, but the token is known only to the browser that created the membership
+- If localStorage is cleared (or a different browser/device is used), a new anonymous user is created and the visitor must re-join groups
+- Row Level Security (RLS) policies use `auth.uid()` to scope all data access to group members
 
 ---
 
@@ -104,7 +105,7 @@ Members are identified via a `member_token` stored in the browser's `localStorag
 - Members join by opening the shareable invite link (no email infrastructure needed)
 - Link contains a unique unguessable token (UUID)
 - Link revocation and regeneration is M6 scope
-- The home page shows a list of groups derived from localStorage member tokens — any group you have joined appears in the list. If browser storage is cleared, the list is lost (memberships still exist in the database; re-join via invite link)
+- The home page queries groups where `user_id = auth.uid()` in `group_members`. If browser storage is cleared, a new anonymous session is created and the list is empty (memberships still exist in the database; re-join via invite link)
 
 ### 7.2 Expenses
 - Add an expense: description, amount, who paid, split equally among selected members
@@ -122,12 +123,13 @@ Members are identified via a `member_token` stored in the browser's `localStorag
 
 ### 7.5 Member Join Flow
 1. User opens `/groups/:invite_token`
-2. App looks up the group by `invite_token`
-3. App checks `localStorage` for a stored `member_token` for this group
-4. If a valid token is found and matches a `group_members` row — the user is identified and sees the group page
-5. If no token is found (or it doesn't match) — the user sees a "Join group" prompt asking for their display name
-6. On submit: a new `group_members` row is created, the returned `member_token` is stored in `localStorage`
-7. The user is now a member and sees the group page
+2. App ensures an anonymous auth session exists (via `ensureSession()`)
+3. App looks up the group by `invite_token`
+4. App checks if `auth.uid()` exists in `group_members` for this group
+5. If a membership row is found — the user sees the group page
+6. If no membership is found — the user sees a "Join group" prompt asking for their display name
+7. On submit: a new `group_members` row is created with `user_id = auth.uid()`
+8. The user is now a member and sees the group page
 
 The admin/host goes through this same flow after creating a group.
 
@@ -152,7 +154,7 @@ This minimises the number of transactions needed to settle a group.
 
 ## 9. Data Model
 
-No `users` table in v1 — all identity is handled via `member_token` in `group_members` (see Section 6.1).
+No custom users table in v1 — identity is handled via Supabase anonymous auth. `group_members.user_id` references `auth.users(id)` (see Section 6.1).
 
 ### Groups
 | Field | Type |
@@ -161,6 +163,7 @@ No `users` table in v1 — all identity is handled via `member_token` in `group_
 | name | text, not null |
 | currency | text, not null, default 'SEK' |
 | invite_token | text, not null, default random UUID |
+| created_by | uuid, FK to auth.users(id), not null |
 | created_at | timestamptz, not null, default now() |
 
 ### Group Members
@@ -169,8 +172,10 @@ No `users` table in v1 — all identity is handled via `member_token` in `group_
 | id | uuid (PK, auto-generated) |
 | group_id | uuid, FK to groups(id), cascade delete |
 | guest_name | text, not null |
-| member_token | uuid, not null, default random UUID, unique |
+| user_id | uuid, FK to auth.users(id), not null |
 | joined_at | timestamptz, not null, default now() |
+
+Constraint: `unique(group_id, user_id)` — one membership per user per group.
 
 ### Expenses
 | Field | Type |
@@ -205,7 +210,8 @@ Each user owns and hosts their own instance. There is no central server.
 2. Creates a free Supabase project
 3. Runs the migration files to set up the schema
 4. Adds Supabase credentials as GitHub repository secrets
-5. Pushes — GitHub Actions automatically deploys frontend to GitHub Pages
+5. Enables "Allow anonymous sign-ins" in Supabase Dashboard → Authentication → Settings
+6. Pushes — GitHub Actions automatically deploys frontend to GitHub Pages
 
 The fork owner becomes the de facto admin. Their friends access the app via their GitHub Pages URL and trust them as the host.
 
