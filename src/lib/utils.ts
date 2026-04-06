@@ -4,3 +4,7 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export function formatAmount(currency: string, amount: number): string {
+  return `${currency} ${Number(amount).toFixed(2)}`
+}

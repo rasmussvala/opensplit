@@ -1,18 +1,25 @@
 import { useCallback, useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
+import AddExpense from "@/components/AddExpense"
 import { useAuth } from "@/components/AuthProvider"
+import ExpenseList from "@/components/ExpenseList"
 import InviteLink from "@/components/InviteLink"
 import JoinGroup from "@/components/JoinGroup"
 import MemberList from "@/components/MemberList"
 import { Badge } from "@/components/ui/badge"
 import { supabase } from "@/lib/supabase"
-import type { DbGroup, DbGroupMember } from "@/lib/types"
+import type { DbExpense, DbGroup, DbGroupMember } from "@/lib/types"
 
 type PageState =
   | { status: "loading" }
   | { status: "not-found" }
   | { status: "join"; group: DbGroup }
-  | { status: "member"; group: DbGroup; members: DbGroupMember[] }
+  | {
+      status: "member"
+      group: DbGroup
+      members: DbGroupMember[]
+      expenses: DbExpense[]
+    }
 
 export default function GroupPage() {
   const { inviteToken } = useParams<{ inviteToken: string }>()
@@ -43,12 +50,17 @@ export default function GroupPage() {
       return
     }
 
-    const { data: members } = await supabase
-      .from("group_members")
-      .select()
-      .eq("group_id", group.id)
+    const [{ data: members }, { data: expenses }] = await Promise.all([
+      supabase.from("group_members").select().eq("group_id", group.id),
+      supabase.from("expenses").select().eq("group_id", group.id),
+    ])
 
-    setState({ status: "member", group, members: members ?? [] })
+    setState({
+      status: "member",
+      group,
+      members: members ?? [],
+      expenses: (expenses ?? []) as DbExpense[],
+    })
   }, [inviteToken, userId])
 
   useEffect(() => {
@@ -73,7 +85,7 @@ export default function GroupPage() {
     )
   }
 
-  const { group, members } = state
+  const { group, members, expenses } = state
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-4 p-6">
@@ -84,6 +96,13 @@ export default function GroupPage() {
 
       <InviteLink inviteToken={group.invite_token} />
       <MemberList members={members} />
+      <AddExpense groupId={group.id} members={members} onAdded={loadGroup} />
+      <ExpenseList
+        expenses={expenses}
+        members={members}
+        currency={group.currency}
+        onChanged={loadGroup}
+      />
     </div>
   )
 }

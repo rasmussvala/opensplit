@@ -172,13 +172,18 @@ describe("GroupPage", () => {
       group_members: {
         select: groupMembersSelectMock,
       },
+      expenses: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+      },
     })
 
     renderWithRoute("token-abc")
 
     await waitFor(() => {
       expect(screen.getByText("Trip to Oslo")).toBeInTheDocument()
-      expect(screen.getByText("Alice")).toBeInTheDocument()
+      expect(screen.getAllByText("Alice").length).toBeGreaterThan(0)
     })
   })
 })
