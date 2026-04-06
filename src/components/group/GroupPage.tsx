@@ -97,7 +97,7 @@ export default function GroupPage() {
         expenses={expenses}
         members={members}
         currency={group.currency}
-        onChanged={loadGroup}
+        inviteToken={inviteToken as string}
       />
 
       <Button

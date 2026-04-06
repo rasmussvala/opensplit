@@ -1,14 +1,8 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
-import { supabase } from "@/lib/supabase"
+import { render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
+import { describe, expect, it } from "vitest"
 import type { DbExpense, DbGroupMember } from "@/lib/types"
 import ExpenseList from "./ExpenseList"
-
-vi.mock("@/lib/supabase", () => ({
-  supabase: {
-    from: vi.fn(),
-  },
-}))
 
 const mockMembers: DbGroupMember[] = [
   {
@@ -48,20 +42,18 @@ const mockExpenses: DbExpense[] = [
   },
 ]
 
+function renderWithRouter(ui: React.ReactElement) {
+  return render(<MemoryRouter>{ui}</MemoryRouter>)
+}
+
 describe("ExpenseList", () => {
-  const onChanged = vi.fn()
-
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it("renders expense list with formatted amounts", () => {
-    render(
+    renderWithRouter(
       <ExpenseList
         expenses={mockExpenses}
         members={mockMembers}
         currency="USD"
-        onChanged={onChanged}
+        inviteToken="token-abc"
       />,
     )
 
@@ -72,27 +64,26 @@ describe("ExpenseList", () => {
   })
 
   it("shows who paid each expense", () => {
-    render(
+    renderWithRouter(
       <ExpenseList
         expenses={mockExpenses}
         members={mockMembers}
         currency="USD"
-        onChanged={onChanged}
+        inviteToken="token-abc"
       />,
     )
 
-    // "Paid by Alice" and "Paid by Bob"
     expect(screen.getByText(/paid by alice/i)).toBeInTheDocument()
     expect(screen.getByText(/paid by bob/i)).toBeInTheDocument()
   })
 
   it("shows split among members", () => {
-    render(
+    renderWithRouter(
       <ExpenseList
         expenses={[mockExpenses[0]]}
         members={mockMembers}
         currency="USD"
-        onChanged={onChanged}
+        inviteToken="token-abc"
       />,
     )
 
@@ -100,103 +91,32 @@ describe("ExpenseList", () => {
   })
 
   it("shows empty state when no expenses", () => {
-    render(
+    renderWithRouter(
       <ExpenseList
         expenses={[]}
         members={mockMembers}
         currency="USD"
-        onChanged={onChanged}
+        inviteToken="token-abc"
       />,
     )
 
     expect(screen.getByText(/no expenses yet/i)).toBeInTheDocument()
   })
 
-  it("deletes an expense and calls onChanged", async () => {
-    const mockDelete = vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ error: null }),
-    })
-    vi.mocked(supabase.from).mockReturnValue({
-      delete: mockDelete,
-    } as unknown as ReturnType<typeof supabase.from>)
-
-    render(
+  it("renders expense cards as links to edit route", () => {
+    renderWithRouter(
       <ExpenseList
         expenses={[mockExpenses[0]]}
         members={mockMembers}
         currency="USD"
-        onChanged={onChanged}
+        inviteToken="token-abc"
       />,
     )
 
-    fireEvent.click(screen.getByRole("button", { name: /delete/i }))
-
-    await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith("expenses")
-      expect(mockDelete).toHaveBeenCalled()
-    })
-
-    await waitFor(() => {
-      expect(onChanged).toHaveBeenCalled()
-    })
-  })
-
-  it("opens edit dialog with pre-filled values", () => {
-    render(
-      <ExpenseList
-        expenses={[mockExpenses[0]]}
-        members={mockMembers}
-        currency="USD"
-        onChanged={onChanged}
-      />,
+    const link = screen.getByRole("link")
+    expect(link).toHaveAttribute(
+      "href",
+      "/groups/token-abc/edit-expense/expense-1",
     )
-
-    fireEvent.click(screen.getByRole("button", { name: /edit/i }))
-
-    expect(screen.getByDisplayValue("Dinner")).toBeInTheDocument()
-    expect(screen.getByDisplayValue("120")).toBeInTheDocument()
-  })
-
-  it("saves edited expense and calls onChanged", async () => {
-    const mockUpdate = vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ error: null }),
-    })
-    vi.mocked(supabase.from).mockReturnValue({
-      update: mockUpdate,
-    } as unknown as ReturnType<typeof supabase.from>)
-
-    render(
-      <ExpenseList
-        expenses={[mockExpenses[0]]}
-        members={mockMembers}
-        currency="USD"
-        onChanged={onChanged}
-      />,
-    )
-
-    fireEvent.click(screen.getByRole("button", { name: /edit/i }))
-
-    fireEvent.change(screen.getByDisplayValue("Dinner"), {
-      target: { value: "Fancy Dinner" },
-    })
-    fireEvent.change(screen.getByDisplayValue("120"), {
-      target: { value: "150" },
-    })
-
-    fireEvent.click(screen.getByRole("button", { name: /save/i }))
-
-    await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith("expenses")
-      expect(mockUpdate).toHaveBeenCalledWith({
-        description: "Fancy Dinner",
-        amount: 150,
-        paid_by: "member-1",
-        split_among: ["member-1", "member-2"],
-      })
-    })
-
-    await waitFor(() => {
-      expect(onChanged).toHaveBeenCalled()
-    })
   })
 })

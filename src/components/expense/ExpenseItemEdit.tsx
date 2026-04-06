@@ -14,6 +14,7 @@ interface ExpenseItemEditProps {
   members: DbGroupMember[]
   onSave: (data: ExpenseEditData) => void
   onCancel: () => void
+  onDelete?: () => void
 }
 
 export default function ExpenseItemEdit({
@@ -21,6 +22,7 @@ export default function ExpenseItemEdit({
   members,
   onSave,
   onCancel,
+  onDelete,
 }: ExpenseItemEditProps) {
   const [description, setDescription] = useState(expense.description)
   const [amount, setAmount] = useState(String(Number(expense.amount)))
@@ -94,6 +96,11 @@ export default function ExpenseItemEdit({
         <Button size="sm" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
+        {onDelete && (
+          <Button size="sm" variant="destructive" onClick={onDelete}>
+            Delete
+          </Button>
+        )}
       </div>
     </div>
   )

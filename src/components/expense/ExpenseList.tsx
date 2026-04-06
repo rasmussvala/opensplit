@@ -1,52 +1,24 @@
-import { useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { Link } from "react-router-dom"
 import type { DbExpense, DbGroupMember } from "@/lib/types"
-import type { ExpenseEditData } from "./ExpenseItemEdit"
-import ExpenseItemEdit from "./ExpenseItemEdit"
 import ExpenseItemView from "./ExpenseItemView"
 
 interface ExpenseListProps {
   expenses: DbExpense[]
   members: DbGroupMember[]
   currency: string
-  onChanged: () => void
+  inviteToken: string
 }
 
 export default function ExpenseList({
   expenses,
   members,
   currency,
-  onChanged,
+  inviteToken,
 }: ExpenseListProps) {
-  const [editingId, setEditingId] = useState<string | null>(null)
-
   const memberNames = new Map(members.map((m) => [m.id, m.guest_name]))
 
   function getMemberName(id: string): string {
     return memberNames.get(id) ?? "Unknown"
-  }
-
-  async function saveEdit(expenseId: string, data: ExpenseEditData) {
-    const { error } = await supabase
-      .from("expenses")
-      .update({
-        description: data.description,
-        amount: data.amount,
-        paid_by: data.paidBy,
-        split_among: data.splitAmong,
-      })
-      .eq("id", expenseId)
-
-    if (error) return
-
-    setEditingId(null)
-    onChanged()
-  }
-
-  async function deleteExpense(id: string) {
-    const { error } = await supabase.from("expenses").delete().eq("id", id)
-    if (error) return
-    onChanged()
   }
 
   if (expenses.length === 0) {
@@ -58,27 +30,17 @@ export default function ExpenseList({
       <h2 className="font-semibold text-lg">Expenses</h2>
 
       {expenses.map((expense) => (
-        <div
+        <Link
           key={expense.id}
-          className="flex flex-col gap-2 rounded-lg border p-3"
+          to={`/groups/${inviteToken}/edit-expense/${expense.id}`}
+          className="flex flex-col gap-1 rounded-lg border p-3 transition-colors hover:bg-muted"
         >
-          {editingId === expense.id ? (
-            <ExpenseItemEdit
-              expense={expense}
-              members={members}
-              onSave={(data) => saveEdit(expense.id, data)}
-              onCancel={() => setEditingId(null)}
-            />
-          ) : (
-            <ExpenseItemView
-              expense={expense}
-              currency={currency}
-              getMemberName={getMemberName}
-              onEdit={() => setEditingId(expense.id)}
-              onDelete={() => deleteExpense(expense.id)}
-            />
-          )}
-        </div>
+          <ExpenseItemView
+            expense={expense}
+            currency={currency}
+            getMemberName={getMemberName}
+          />
+        </Link>
       ))}
     </div>
   )
