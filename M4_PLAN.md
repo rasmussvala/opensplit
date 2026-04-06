@@ -13,7 +13,7 @@ The business logic (balance calculation, debt simplification) is fully implement
 **Goal:** Users can open an invite link, join a group, and see the group page.
 
 ### Files to create/modify:
-- `src/lib/types.ts` — shared DB row types (Group, GroupMember, DbExpense, DbSettlement)
+- `src/lib/types.ts` — shared DB row types (DbGroup, DbGroupMember, DbExpense, DbSettlement)
 - `src/components/JoinGroup.test.tsx` → `src/components/JoinGroup.tsx` — display name form
 - `src/components/GroupPage.test.tsx` → `src/components/GroupPage.tsx` — orchestrator with state machine (loading → not-found / join / member)
 - `src/App.tsx` — add `/groups/:inviteToken` route **outside** AdminRoute
