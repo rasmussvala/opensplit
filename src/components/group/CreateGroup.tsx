@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "@/components/AuthProvider"
+import { useAuth } from "@/components/auth/AuthProvider"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 

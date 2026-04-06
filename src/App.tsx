@@ -1,8 +1,8 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
-import AdminRoute from "@/components/AdminRoute"
-import { AuthProvider } from "@/components/AuthProvider"
-import CreateGroup from "@/components/CreateGroup"
-import GroupPage from "@/components/GroupPage"
+import AdminRoute from "@/components/auth/AdminRoute"
+import { AuthProvider } from "@/components/auth/AuthProvider"
+import CreateGroup from "@/components/group/CreateGroup"
+import GroupPage from "@/components/group/GroupPage"
 
 export default function App() {
   return (

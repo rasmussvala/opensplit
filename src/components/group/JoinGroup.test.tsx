@@ -9,7 +9,7 @@ vi.mock("@/lib/supabase", () => ({
   },
 }))
 
-vi.mock("@/components/AuthProvider", () => ({
+vi.mock("@/components/auth/AuthProvider", () => ({
   useAuth: () => ({ userId: "test-user-id" }),
 }))
 
