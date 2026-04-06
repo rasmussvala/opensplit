@@ -17,7 +17,7 @@ export default function InviteLink({ inviteToken }: InviteLinkProps) {
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 items-center">
       <input
         type="text"
         readOnly
