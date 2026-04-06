@@ -8,22 +8,22 @@ The business logic (balance calculation, debt simplification) is fully implement
 
 ---
 
-## Phase 1: Route + Join Flow
+## Phase 1: Route + Join Flow ✅
 
 **Goal:** Users can open an invite link, join a group, and see the group page.
 
-### Files to create/modify:
+### What was built:
 - `src/lib/types.ts` — shared DB row types (DbGroup, DbGroupMember, DbExpense, DbSettlement)
-- `src/components/JoinGroup.test.tsx` → `src/components/JoinGroup.tsx` — display name form
-- `src/components/GroupPage.test.tsx` → `src/components/GroupPage.tsx` — orchestrator with state machine (loading → not-found / join / member)
-- `src/App.tsx` — add `/groups/:inviteToken` route **outside** AdminRoute
+- `src/components/group/JoinGroup.tsx` — display name form
+- `src/components/group/GroupPage.tsx` — orchestrator with state machine (loading → not-found / join / member)
+- `src/App.tsx` — `/groups/:inviteToken` route outside AdminRoute
 
 ### GroupPage state machine:
 1. Read `inviteToken` from `useParams()`
 2. Query `groups` by `invite_token` (RLS: open to all authenticated)
 3. If not found → show error
 4. Query `group_members` filtered by `group_id` + `user_id` (non-members get empty result, not error)
-5. If member found → show group view
+5. If member found → show group view (fetches members + expenses in parallel)
 6. If no member → show `<JoinGroup />` form
 
 ### JoinGroup component:
@@ -31,77 +31,78 @@ The business logic (balance calculation, debt simplification) is fully implement
 - On submit: `supabase.from("group_members").insert({ group_id, guest_name, user_id })`
 - Calls `onJoined()` callback → GroupPage re-fetches and transitions to member view
 
-### Route change in App.tsx:
-```tsx
-<Route element={<AdminRoute />}>
-  <Route path="/" element={<CreateGroup />} />
-</Route>
-<Route path="/groups/:inviteToken" element={<GroupPage />} />
-```
-
-### Manual test:
-- Create a group → redirected to `/groups/:inviteToken`
-- See the join form → enter name → join → see group page
-
 ---
 
-## Phase 2: Member List + Invite Link
+## Phase 2: Member List + Invite Link ✅
 
 **Goal:** Members see who's in the group and can share the invite link.
 
-### Files to create:
-- `src/components/InviteLink.test.tsx` → `src/components/InviteLink.tsx` — shows URL + copy button
-- `src/components/MemberList.test.tsx` → `src/components/MemberList.tsx` — renders guest_name list
+### What was built:
+- `src/components/group/InviteLink.tsx` — shows URL + copy button
+- `src/components/group/MemberList.tsx` — renders guest_name list
 
-### Wire into GroupPage member view:
-- Group name as heading + currency badge
+### Wired into GroupPage member view:
+- Group name as heading
 - `<InviteLink inviteToken={group.invite_token} />`
 - `<MemberList members={members} />`
 
-### InviteLink URL construction:
-```ts
-window.location.origin + import.meta.env.BASE_URL + "groups/" + inviteToken
-```
-
-### Manual test:
-- Join a group → see member list with your name
-- Copy invite link → open in incognito → join as second member → see both names
-
 ---
 
-## Phase 3: Expenses
+## Phase 3: Expenses ✅
 
 **Goal:** Members can add, edit, and delete expenses.
 
-### Files to create:
-- `src/components/AddExpense.test.tsx` → `src/components/AddExpense.tsx`
-- `src/components/ExpenseList.test.tsx` → `src/components/ExpenseList.tsx`
+### What was built:
 
-### shadcn components to install:
-`npx shadcn@latest add input card dialog checkbox select badge`
+**Deviation from original plan:** Instead of inline editing via Dialog, expenses use separate page routes for better mobile UX.
 
-### AddExpense form fields:
-- Description (text input)
-- Amount (number input)
-- Who paid (select from members — uses `group_members.id`)
-- Split among (checkboxes per member, all checked by default — uses `group_members.id`)
-- **Split percentage display**: Next to each checked member, show the calculated percentage (1 decimal max). E.g. 2 members checked → "50%" each, 3 members → "33.3%" each. Updates live as members are toggled. Formula: `(100 / checkedCount).toFixed(1)` with trailing `.0` stripped.
+#### File structure (reorganized into `expense/` subfolder):
+- `src/components/expense/AddExpense.tsx` — the expense form (description, amount, paid by, split among)
+- `src/components/expense/AddExpensePage.tsx` — page wrapper at `/groups/:inviteToken/add-expense`
+- `src/components/expense/EditExpensePage.tsx` — page wrapper at `/groups/:inviteToken/edit-expense/:expenseId` (handles loading, save, delete)
+- `src/components/expense/ExpenseItemEdit.tsx` — reusable edit form (used by EditExpensePage)
+- `src/components/expense/ExpenseItemView.tsx` — read-only expense display (description, amount, date, paid by, split among)
+- `src/components/expense/ExpenseList.tsx` — list of expenses linking to edit pages
 
-### ExpenseList:
-- Each expense: description, formatted amount (`{currency} {amount.toFixed(2)}`), paid by name, split among names
-- Edit → Dialog with pre-filled form → `supabase.from("expenses").update(...)`
-- Delete → `supabase.from("expenses").delete(...)`
+#### Routes added to App.tsx:
+```tsx
+<Route path="/groups/:inviteToken/add-expense" element={<AddExpensePage />} />
+<Route path="/groups/:inviteToken/edit-expense/:expenseId" element={<EditExpensePage />} />
+```
 
-### Data note:
+#### UI pattern:
+- GroupPage shows a floating "+" FAB button to navigate to AddExpensePage
+- Each expense in the list is a `<Link>` to its EditExpensePage
+- EditExpensePage has Save, Cancel, and Delete buttons
+- Back arrow navigation to group page
+
+#### Data notes:
 - `paid_by` and `split_among` use `group_members.id` (not `user_id`)
-- `amount` from Supabase may come as string for `numeric(12,2)` — wrap with `Number()`
-- Add `formatAmount(currency, amount)` helper to `src/lib/utils.ts`
+- `amount` from Supabase may come as string for `numeric(12,2)` — wrapped with `Number()`
+- `formatAmount(currency, amount)` helper in `src/lib/utils.ts`
 
-### Manual test:
-- Add an expense → see it in the list with correct formatting
-- Edit the expense → verify changes
-- Delete the expense → verify removal
-- Check percentage display updates as members are toggled
+#### Not implemented from original plan:
+- Split percentage display next to checkboxes (plan said "50%" each, "33.3%" etc.)
+- shadcn form components — expense forms use native HTML `<input>`, `<select>`, `<input type="checkbox">` instead of shadcn `Input`, `Select`, `Checkbox`
+
+### Tests:
+- `src/components/expense/AddExpense.test.tsx`
+- `src/components/expense/ExpenseList.test.tsx`
+
+---
+
+## Additional work outside original plan
+
+### Admin Page (commit `56c1c79`)
+- `src/components/admin/AdminPage.tsx` — replaces `CreateGroup` as the root route, shows both CreateGroup form and a list of existing groups
+- `src/components/admin/GroupList.tsx` — fetches all groups with member counts, renders as cards linking to group pages
+
+### File reorganization (commit `5e035d9`)
+All components moved into subfolders:
+- `src/components/group/` — GroupPage, JoinGroup, CreateGroup, InviteLink, MemberList
+- `src/components/expense/` — AddExpense, ExpenseList, ExpenseItemView, ExpenseItemEdit, AddExpensePage, EditExpensePage
+- `src/components/admin/` — AdminPage, GroupList
+- `src/components/auth/` — AuthProvider, AdminRoute
 
 ---
 
@@ -110,7 +111,12 @@ window.location.origin + import.meta.env.BASE_URL + "groups/" + inviteToken
 **Goal:** Members see who owes whom and can mark debts as settled.
 
 ### Files to create:
-- `src/components/BalanceSummary.test.tsx` → `src/components/BalanceSummary.tsx`
+- `src/components/balance/BalanceSummary.test.tsx` → `src/components/balance/BalanceSummary.tsx`
+
+### Changes to GroupPage:
+- Fetch settlements alongside members and expenses
+- Add `DbSettlement[]` to the `member` state
+- Pass settlements to BalanceSummary
 
 ### Processing pipeline (client-side, reusing existing libs):
 1. Map DB expenses → `Expense` interface from `balances.ts`
@@ -168,29 +174,38 @@ Clean up on unmount.
 ## Architecture Decisions
 
 - **GroupPage owns all state.** Fetches group, members, expenses, settlements. Passes down as props. Child components get data + callbacks, never fetch independently.
-- **No data layer abstraction.** Direct Supabase calls, consistent with existing `CreateGroup.tsx` pattern.
+  - **Exception:** AddExpensePage and EditExpensePage are separate routes that fetch their own data (group membership verification + members list).
+- **No data layer abstraction.** Direct Supabase calls, consistent with existing pattern.
 - **TDD throughout.** Test file first (red), then implementation (green), then `npm run check:fix`.
 - **Test mocking pattern** follows `CreateGroup.test.tsx`: mock `supabase.from`, mock `useAuth`, mock `useParams`, use `MemoryRouter`.
 
 ## Existing code to reuse
 - `calculateBalances()` from `src/lib/balances.ts`
 - `simplifyDebts()` from `src/lib/simplify.ts`
-- `useAuth()` from `src/components/AuthProvider.tsx`
+- `useAuth()` from `src/components/auth/AuthProvider.tsx`
 - `supabase` client from `src/lib/supabase.ts`
-- `Button` from `src/components/ui/button.tsx`
-- Test mock pattern from `src/components/CreateGroup.test.tsx`
+- `formatAmount()` from `src/lib/utils.ts`
+- `Button`, `Badge`, `Card` from `src/components/ui/`
+- Test mock pattern from `src/components/group/CreateGroup.test.tsx`
 
 ## Commit Strategy
 
 One commit per phase. Each commit is self-contained (tests pass, Biome clean, builds).
 
-| Commit | Message |
-|--------|---------|
-| 1 | `phase 1: add group page with join flow` |
-| 2 | `phase 2: add member list and invite link sharing` |
-| 3 | `phase 3: add expense creation, editing, and deletion` |
-| 4 | `phase 4: add balance summary and settlement flow` |
-| 5 | `phase 5: add real-time updates via Supabase Realtime` |
+| Commit | Message | Status |
+|--------|---------|--------|
+| 1 | `phase 1: add group page with join flow` | ✅ |
+| 2 | `phase 2: add member list and invite link sharing` | ✅ |
+| 3 | `phase 3: add expense creation, editing, and deletion` | ✅ |
+| 3a | `refactor: move files to folders` | ✅ |
+| 3b | `refactor: create ExpenseItems` | ✅ |
+| 3c | `add seed data for local dev` | ✅ |
+| 3d | `fix some styling` | ✅ |
+| 3e | `add admin page with group management` | ✅ |
+| 3f | `polish: better ui in group` | ✅ |
+| 3g | `add expense page` | ✅ |
+| 4 | `phase 4: add balance summary and settlement flow` | |
+| 5 | `phase 5: add real-time updates via Supabase Realtime` | |
 
 ## Verification
 
