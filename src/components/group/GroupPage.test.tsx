@@ -183,7 +183,10 @@ describe("GroupPage", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Trip to Oslo")).toBeInTheDocument()
-      expect(screen.getAllByText("Alice").length).toBeGreaterThan(0)
     })
+
+    expect(
+      screen.getByRole("link", { name: /add expense/i }),
+    ).toBeInTheDocument()
   })
 })

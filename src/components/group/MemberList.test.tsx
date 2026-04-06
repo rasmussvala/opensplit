@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import type { DbGroupMember } from "@/lib/types"
 import MemberList from "./MemberList"
@@ -21,24 +21,38 @@ const members: DbGroupMember[] = [
 ]
 
 describe("MemberList", () => {
-  it("renders all member names", () => {
-    render(<MemberList members={members} />)
-
-    expect(screen.getByText("Alice")).toBeInTheDocument()
-    expect(screen.getByText("Bob")).toBeInTheDocument()
-  })
-
-  it("shows a heading", () => {
+  it("shows a heading with member count", () => {
     render(<MemberList members={members} />)
 
     expect(
       screen.getByRole("heading", { name: /members/i }),
     ).toBeInTheDocument()
+    expect(screen.getByText(/2/)).toBeInTheDocument()
   })
 
-  it("shows member count", () => {
+  it("is collapsed by default", () => {
     render(<MemberList members={members} />)
 
-    expect(screen.getByText(/2/)).toBeInTheDocument()
+    expect(screen.queryByText("Alice")).not.toBeInTheDocument()
+    expect(screen.queryByText("Bob")).not.toBeInTheDocument()
+  })
+
+  it("expands to show members when clicked", () => {
+    render(<MemberList members={members} />)
+
+    fireEvent.click(screen.getByRole("button"))
+
+    expect(screen.getByText("Alice")).toBeInTheDocument()
+    expect(screen.getByText("Bob")).toBeInTheDocument()
+  })
+
+  it("collapses again when clicked twice", () => {
+    render(<MemberList members={members} />)
+
+    const toggle = screen.getByRole("button")
+    fireEvent.click(toggle)
+    fireEvent.click(toggle)
+
+    expect(screen.queryByText("Alice")).not.toBeInTheDocument()
   })
 })

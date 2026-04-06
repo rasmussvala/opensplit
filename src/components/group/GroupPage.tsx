@@ -1,12 +1,12 @@
+import { Plus } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import ExpenseList from "@/components//expense/ExpenseList"
+import { Link, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
-import AddExpense from "@/components/expense/AddExpense"
+import ExpenseList from "@/components/expense/ExpenseList"
 import InviteLink from "@/components/group/InviteLink"
 import JoinGroup from "@/components/group/JoinGroup"
 import MemberList from "@/components/group/MemberList"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import type { DbExpense, DbGroup, DbGroupMember } from "@/lib/types"
 
@@ -89,20 +89,27 @@ export default function GroupPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-4 p-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{group.name}</h1>
-        <Badge variant="secondary">{group.currency}</Badge>
-      </div>
-
+      <h1 className="text-2xl font-bold">{group.name}</h1>
       <InviteLink inviteToken={group.invite_token} />
       <MemberList members={members} />
-      <AddExpense groupId={group.id} members={members} onAdded={loadGroup} />
+
       <ExpenseList
         expenses={expenses}
         members={members}
         currency={group.currency}
         onChanged={loadGroup}
       />
+
+      <Button
+        asChild
+        size="icon"
+        className="fixed right-6 bottom-6 h-14 w-14 rounded-full shadow-lg"
+      >
+        <Link to={`/groups/${inviteToken}/add-expense`}>
+          <Plus className="h-6 w-6" />
+          <span className="sr-only">Add expense</span>
+        </Link>
+      </Button>
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
 import AdminPage from "@/components/admin/AdminPage"
 import AdminRoute from "@/components/auth/AdminRoute"
 import { AuthProvider } from "@/components/auth/AuthProvider"
+import AddExpensePage from "@/components/expense/AddExpensePage"
 import GroupPage from "@/components/group/GroupPage"
 
 export default function App() {
@@ -13,6 +14,10 @@ export default function App() {
             <Route path="/" element={<AdminPage />} />
           </Route>
           <Route path="/groups/:inviteToken" element={<GroupPage />} />
+          <Route
+            path="/groups/:inviteToken/add-expense"
+            element={<AddExpensePage />}
+          />
         </Routes>
       </Router>
     </AuthProvider>
