@@ -8,8 +8,7 @@ interface InviteLinkProps {
 export default function InviteLink({ inviteToken }: InviteLinkProps) {
   const [copied, setCopied] = useState(false)
 
-  const url =
-    window.location.origin + import.meta.env.BASE_URL + "groups/" + inviteToken
+  const url = `${window.location.origin}${import.meta.env.BASE_URL}groups/${inviteToken}`
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url)
