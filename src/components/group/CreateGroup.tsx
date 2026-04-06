@@ -28,10 +28,7 @@ export default function CreateGroup() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mx-auto flex max-w-sm flex-col gap-4 p-6"
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold">Create a group</h1>
 
       <div className="flex flex-col gap-1">
