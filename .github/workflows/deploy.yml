@@ -48,6 +48,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The build script copies index.html to 404.html so GitHub Pages
+      # serves the app for all routes (client-side router handles them).
+      # See https://github.com/orgs/community/discussions/64096
       - name: Build
         run: npm run build
         env:
