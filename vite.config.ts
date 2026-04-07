@@ -30,8 +30,8 @@ export default defineConfig({
         theme_color: "#ffffff",
         background_color: "#ffffff",
         display: "standalone",
-        scope: "/",
-        start_url: "/",
+        scope: "/opensplit/",
+        start_url: "/opensplit/",
         icons: [
           {
             src: "icons/android/android-icon-192x192.png",
