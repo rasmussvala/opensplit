@@ -33,5 +33,9 @@ export function calculateBalances(
     balances[settlement.to] = (balances[settlement.to] ?? 0) - settlement.amount
   }
 
+  for (const key of Object.keys(balances)) {
+    balances[key] = Math.round(balances[key] * 100) / 100
+  }
+
   return balances
 }
