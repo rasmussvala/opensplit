@@ -36,5 +36,5 @@ export function simplifyDebts(balances: Record<string, number>): Transaction[] {
     if (creditors[j].amount === 0) j++
   }
 
-  return transactions
+  return transactions.filter((t) => Math.round(t.amount * 100) > 0)
 }

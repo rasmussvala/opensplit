@@ -86,6 +86,16 @@ describe("simplifyDebts", () => {
     }
   })
 
+  it("filters out near-zero transactions from floating-point rounding", () => {
+    // Balances that sum to zero but produce tiny residuals
+    const balances = { alice: 33.34, bob: -16.67, charlie: -16.67 }
+    const transactions = simplifyDebts(balances)
+
+    for (const t of transactions) {
+      expect(t.amount).toBeGreaterThanOrEqual(0.01)
+    }
+  })
+
   it("all transactions sum to zero (no money created or lost)", () => {
     const balances = { alice: 40, bob: -10, charlie: -15, dave: 5, eve: -20 }
     const transactions = simplifyDebts(balances)

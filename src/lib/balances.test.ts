@@ -64,13 +64,13 @@ describe("calculateBalances", () => {
       },
     ])
 
-    // 100 / 3 = 33.333...
+    // 100 / 3 = 33.333... → rounded to 33.33
     // alice: +100 - 33.33 = +66.67
     // bob: -33.33
     // charlie: -33.33
-    // Sum should be 0 (no money created or lost)
+    // Sum may be off by 1 cent due to rounding (100 can't split 3 ways evenly)
     const sum = Object.values(balances).reduce((a, b) => a + b, 0)
-    expect(sum).toBeCloseTo(0)
+    expect(Math.round(Math.abs(sum) * 100) / 100).toBeLessThanOrEqual(0.01)
   })
 
   it("returns zero balances when everyone is even", () => {
@@ -185,6 +185,22 @@ describe("calculateBalances", () => {
       alice: -10,
       bob: 10,
     })
+  })
+
+  it("rounds balances to 2 decimal places to avoid floating-point dust", () => {
+    const balances = calculateBalances([
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob", "charlie"],
+      },
+    ])
+
+    // 100/3 = 33.333... → each balance should be rounded to 2 decimals
+    for (const balance of Object.values(balances)) {
+      const decimals = balance.toString().split(".")[1]?.length ?? 0
+      expect(decimals).toBeLessThanOrEqual(2)
+    }
   })
 
   it("defaults to no settlements when omitted", () => {
