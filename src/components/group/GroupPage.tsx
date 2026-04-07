@@ -2,13 +2,19 @@ import { Plus } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
+import BalanceSummary from "@/components/balance/BalanceSummary"
 import ExpenseList from "@/components/expense/ExpenseList"
 import InviteLink from "@/components/group/InviteLink"
 import JoinGroup from "@/components/group/JoinGroup"
 import MemberList from "@/components/group/MemberList"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
-import type { DbExpense, DbGroup, DbGroupMember } from "@/lib/types"
+import type {
+  DbExpense,
+  DbGroup,
+  DbGroupMember,
+  DbSettlement,
+} from "@/lib/types"
 
 type PageState =
   | { status: "loading" }
@@ -19,6 +25,7 @@ type PageState =
       group: DbGroup
       members: DbGroupMember[]
       expenses: DbExpense[]
+      settlements: DbSettlement[]
     }
 
 export default function GroupPage() {
@@ -50,16 +57,19 @@ export default function GroupPage() {
       return
     }
 
-    const [{ data: members }, { data: expenses }] = await Promise.all([
-      supabase.from("group_members").select().eq("group_id", group.id),
-      supabase.from("expenses").select().eq("group_id", group.id),
-    ])
+    const [{ data: members }, { data: expenses }, { data: settlements }] =
+      await Promise.all([
+        supabase.from("group_members").select().eq("group_id", group.id),
+        supabase.from("expenses").select().eq("group_id", group.id),
+        supabase.from("settlements").select().eq("group_id", group.id),
+      ])
 
     setState({
       status: "member",
       group,
       members: members ?? [],
       expenses: (expenses ?? []) as DbExpense[],
+      settlements: (settlements ?? []) as DbSettlement[],
     })
   }, [inviteToken, userId])
 
@@ -85,13 +95,31 @@ export default function GroupPage() {
     )
   }
 
-  const { group, members, expenses } = state
+  const { group, members, expenses, settlements } = state
+
+  async function handleSettle(from: string, to: string, amount: number) {
+    await supabase.from("settlements").insert({
+      group_id: group.id,
+      from_member: from,
+      to_member: to,
+      amount,
+    })
+    await loadGroup()
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-4 p-6">
       <h1 className="text-2xl font-bold">{group.name}</h1>
       <InviteLink inviteToken={group.invite_token} />
       <MemberList members={members} />
+
+      <BalanceSummary
+        expenses={expenses}
+        settlements={settlements}
+        members={members}
+        currency={group.currency}
+        onSettle={handleSettle}
+      />
 
       <ExpenseList
         expenses={expenses}

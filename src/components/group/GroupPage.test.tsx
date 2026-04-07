@@ -177,6 +177,11 @@ describe("GroupPage", () => {
           eq: vi.fn().mockResolvedValue({ data: [], error: null }),
         }),
       },
+      settlements: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+      },
     })
 
     renderWithRoute("token-abc")
@@ -188,5 +193,70 @@ describe("GroupPage", () => {
     expect(
       screen.getByRole("link", { name: /add expense/i }),
     ).toBeInTheDocument()
+  })
+
+  it("shows all settled up when no expenses", async () => {
+    const mockGroup = {
+      id: "group-1",
+      name: "Trip to Oslo",
+      currency: "USD",
+      invite_token: "token-abc",
+    }
+    const mockMember = {
+      id: "member-1",
+      group_id: "group-1",
+      guest_name: "Alice",
+      user_id: "test-user-id",
+    }
+    const mockMembers = [mockMember]
+
+    const groupMembersSelectMock = vi.fn()
+    let groupMembersCallCount = 0
+    groupMembersSelectMock.mockImplementation(() => {
+      groupMembersCallCount++
+      if (groupMembersCallCount === 1) {
+        return {
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi
+                .fn()
+                .mockResolvedValue({ data: mockMember, error: null }),
+            }),
+          }),
+        }
+      }
+      return {
+        eq: vi.fn().mockResolvedValue({ data: mockMembers, error: null }),
+      }
+    })
+
+    mockSupabaseFrom({
+      groups: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: mockGroup, error: null }),
+          }),
+        }),
+      },
+      group_members: {
+        select: groupMembersSelectMock,
+      },
+      expenses: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+      },
+      settlements: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+      },
+    })
+
+    renderWithRoute("token-abc")
+
+    await waitFor(() => {
+      expect(screen.getByText(/all settled up/i)).toBeInTheDocument()
+    })
   })
 })
