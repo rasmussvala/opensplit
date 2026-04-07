@@ -6,8 +6,11 @@ import { defineConfig } from "vite"
 import { VitePWA } from "vite-plugin-pwa"
 
 // https://vite.dev/config/
+const rawBasePath = process.env.VITE_BASE_PATH ?? "/"
+const basePath = rawBasePath.endsWith("/") ? rawBasePath : `${rawBasePath}/`
+
 export default defineConfig({
-  base: process.env.VITE_BASE_PATH ?? "/",
+  base: basePath,
   plugins: [
     react(),
     tailwindcss(),
@@ -26,8 +29,8 @@ export default defineConfig({
         theme_color: "#ffffff",
         background_color: "#ffffff",
         display: "standalone",
-        scope: "/",
-        start_url: "/",
+        scope: basePath,
+        start_url: basePath,
         icons: [
           {
             src: "icons/android/android-icon-192x192.png",
