@@ -200,7 +200,7 @@ describe("BalanceSummary", () => {
   })
 
   it("disables settle button while settling", async () => {
-    let resolveSettle: () => void
+    let resolveSettle!: () => void
     const onSettle = vi.fn(
       () =>
         new Promise<void>((resolve) => {
@@ -228,7 +228,7 @@ describe("BalanceSummary", () => {
       expect(settleButton).toBeDisabled()
     })
 
-    resolveSettle!()
+    resolveSettle()
 
     await waitFor(() => {
       expect(settleButton).not.toBeDisabled()
