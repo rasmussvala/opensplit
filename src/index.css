@@ -3,7 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
 
-@custom-variant dark (&:is(.dark *));
+/* Dark mode disabled — @custom-variant dark (&:is(.dark *)); */
 
 :root {
   --text: #6b6375;
@@ -24,7 +24,7 @@
 
   font: 18px / 145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -97,6 +97,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Dark mode disabled
 @media (prefers-color-scheme: dark) {
   :root {
     --text: #9ca3af;
@@ -116,6 +117,7 @@
     filter: invert(1) brightness(2);
   }
 }
+*/
 
 #root {
   width: 1126px;
@@ -219,6 +221,7 @@ code {
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Dark mode disabled
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -252,6 +255,7 @@ code {
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+*/
 
 @layer base {
   * {
