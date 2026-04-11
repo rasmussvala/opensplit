@@ -341,32 +341,17 @@ describe("GroupPage", () => {
     expect(channel.on).toHaveBeenCalledTimes(3)
     expect(channel.on).toHaveBeenCalledWith(
       "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "expenses",
-        filter: "group_id=eq.group-1",
-      },
+      { event: "*", schema: "public", table: "expenses" },
       expect.any(Function),
     )
     expect(channel.on).toHaveBeenCalledWith(
       "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "settlements",
-        filter: "group_id=eq.group-1",
-      },
+      { event: "*", schema: "public", table: "settlements" },
       expect.any(Function),
     )
     expect(channel.on).toHaveBeenCalledWith(
       "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "group_members",
-        filter: "group_id=eq.group-1",
-      },
+      { event: "*", schema: "public", table: "group_members" },
       expect.any(Function),
     )
     expect(channel.subscribe).toHaveBeenCalledOnce()
