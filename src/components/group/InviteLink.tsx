@@ -1,3 +1,4 @@
+import { Link2 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 
@@ -10,23 +11,16 @@ export default function InviteLink({ inviteToken }: InviteLinkProps) {
 
   const url = `${window.location.origin}${import.meta.env.BASE_URL}groups/${inviteToken}`
 
-  async function handleCopy() {
+  async function handleShare() {
     await navigator.clipboard.writeText(url)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   return (
-    <div className="flex gap-2 items-center">
-      <input
-        type="text"
-        readOnly
-        value={url}
-        className="flex-1 rounded border bg-muted px-3 py-2 text-sm"
-      />
-      <Button variant="outline" size="sm" onClick={handleCopy}>
-        {copied ? "Copied!" : "Copy"}
-      </Button>
-    </div>
+    <Button variant="outline" size="sm" onClick={handleShare}>
+      <Link2 className="h-4 w-4" data-icon="inline-start" />
+      {copied ? "Copied!" : "Share link"}
+    </Button>
   )
 }

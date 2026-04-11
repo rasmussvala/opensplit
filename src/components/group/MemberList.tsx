@@ -1,35 +1,47 @@
-import { ChevronDown } from "lucide-react"
-import { useState } from "react"
 import type { DbGroupMember } from "@/lib/types"
 
 interface MemberListProps {
   members: DbGroupMember[]
 }
 
-export default function MemberList({ members }: MemberListProps) {
-  const [open, setOpen] = useState(false)
+const AVATAR_COLORS = [
+  "bg-rose-400 dark:bg-rose-500",
+  "bg-amber-400 dark:bg-amber-500",
+  "bg-emerald-400 dark:bg-emerald-500",
+  "bg-sky-400 dark:bg-sky-500",
+  "bg-violet-400 dark:bg-violet-500",
+  "bg-pink-400 dark:bg-pink-500",
+  "bg-teal-400 dark:bg-teal-500",
+  "bg-orange-400 dark:bg-orange-500",
+  "bg-indigo-400 dark:bg-indigo-500",
+  "bg-lime-400 dark:bg-lime-500",
+]
 
+function hashIndex(id: string, length: number): number {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) | 0
+  }
+  return Math.abs(hash) % length
+}
+
+export default function MemberList({ members }: MemberListProps) {
   return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between"
-      >
-        <h2 className="text-lg font-semibold">Members ({members.length})</h2>
-        <ChevronDown
-          className={`h-5 w-5 transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-      {open && (
-        <ul className="mt-1 space-y-1">
-          {members.map((m) => (
-            <li key={m.id} className="text-sm">
-              {m.guest_name}
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="flex items-center gap-2 overflow-x-auto">
+      {members.map((m) => {
+        const colorClass = AVATAR_COLORS[hashIndex(m.id, AVATAR_COLORS.length)]
+        const initial = m.guest_name.charAt(0).toUpperCase()
+        return (
+          <div key={m.id} className="flex shrink-0 items-center gap-1.5">
+            <div
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ${colorClass}`}
+            >
+              {initial}
+            </div>
+            <span className="text-sm">{m.guest_name}</span>
+          </div>
+        )
+      })}
     </div>
   )
 }

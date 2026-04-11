@@ -15,6 +15,7 @@ import type {
   DbGroupMember,
   DbSettlement,
 } from "@/lib/types"
+import { formatAmount } from "@/lib/utils"
 
 type PageState =
   | { status: "loading" }
@@ -136,6 +137,8 @@ export default function GroupPage() {
 
   const { group, members, expenses, settlements } = state
 
+  const totalSpent = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
+
   async function handleSettle(from: string, to: string, amount: number) {
     await supabase.from("settlements").insert({
       group_id: group.id,
@@ -148,9 +151,16 @@ export default function GroupPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-4 p-6">
-      <h1 className="text-2xl font-bold">{group.name}</h1>
-      <InviteLink inviteToken={group.invite_token} />
-      <MemberList members={members} />
+      <div className="flex flex-col gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">{group.name}</h1>
+          <span className="text-sm text-muted-foreground">
+            {formatAmount(group.currency, totalSpent)} total
+          </span>
+        </div>
+        <MemberList members={members} />
+        <InviteLink inviteToken={group.invite_token} />
+      </div>
 
       <BalanceSummary
         expenses={expenses}
