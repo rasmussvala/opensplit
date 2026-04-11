@@ -9,17 +9,18 @@ describe("InviteLink", () => {
     })
   })
 
-  it("displays the invite URL", () => {
+  it("renders a share link button", () => {
     render(<InviteLink inviteToken="abc-123" />)
 
-    const input = screen.getByRole("textbox") as HTMLInputElement
-    expect(input.value).toContain("groups/abc-123")
+    expect(
+      screen.getByRole("button", { name: /share link/i }),
+    ).toBeInTheDocument()
   })
 
   it("copies the invite URL on button click", async () => {
     render(<InviteLink inviteToken="abc-123" />)
 
-    fireEvent.click(screen.getByRole("button", { name: /copy/i }))
+    fireEvent.click(screen.getByRole("button", { name: /share link/i }))
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       expect.stringContaining("groups/abc-123"),
@@ -29,7 +30,7 @@ describe("InviteLink", () => {
   it("shows copied feedback after click", async () => {
     render(<InviteLink inviteToken="abc-123" />)
 
-    fireEvent.click(screen.getByRole("button", { name: /copy/i }))
+    fireEvent.click(screen.getByRole("button", { name: /share link/i }))
 
     expect(await screen.findByText(/copied/i)).toBeInTheDocument()
   })
