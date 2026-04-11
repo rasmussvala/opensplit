@@ -77,6 +77,62 @@ export default function GroupPage() {
     loadGroup()
   }, [loadGroup])
 
+  const groupId = state.status === "member" ? state.group.id : null
+
+  useEffect(() => {
+    if (!groupId) return
+
+    let timeout: ReturnType<typeof setTimeout>
+
+    const channel = supabase
+      .channel(`group-${groupId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "expenses",
+          filter: `group_id=eq.${groupId}`,
+        },
+        () => {
+          clearTimeout(timeout)
+          timeout = setTimeout(loadGroup, 300)
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "settlements",
+          filter: `group_id=eq.${groupId}`,
+        },
+        () => {
+          clearTimeout(timeout)
+          timeout = setTimeout(loadGroup, 300)
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "group_members",
+          filter: `group_id=eq.${groupId}`,
+        },
+        () => {
+          clearTimeout(timeout)
+          timeout = setTimeout(loadGroup, 300)
+        },
+      )
+      .subscribe()
+
+    return () => {
+      clearTimeout(timeout)
+      supabase.removeChannel(channel)
+    }
+  }, [groupId, loadGroup])
+
   if (state.status === "loading") {
     return <p className="p-6 text-center">Loading…</p>
   }

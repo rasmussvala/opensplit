@@ -7,6 +7,8 @@ import GroupPage from "./GroupPage"
 vi.mock("@/lib/supabase", () => ({
   supabase: {
     from: vi.fn(),
+    channel: vi.fn(),
+    removeChannel: vi.fn(),
   },
 }))
 
@@ -22,6 +24,18 @@ function renderWithRoute(inviteToken: string) {
       </Routes>
     </MemoryRouter>,
   )
+}
+
+function createMockChannel() {
+  const channel = {
+    on: vi.fn().mockReturnThis(),
+    subscribe: vi.fn().mockReturnThis(),
+  }
+  vi.mocked(supabase.channel).mockReturnValue(
+    channel as unknown as ReturnType<typeof supabase.channel>,
+  )
+  vi.mocked(supabase.removeChannel).mockResolvedValue("ok" as never)
+  return channel
 }
 
 function mockSupabaseFrom(responses: Record<string, unknown>) {
@@ -46,6 +60,7 @@ function mockSupabaseFrom(responses: Record<string, unknown>) {
 describe("GroupPage", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    createMockChannel()
   })
 
   it("shows loading state initially", () => {
@@ -258,5 +273,207 @@ describe("GroupPage", () => {
     await waitFor(() => {
       expect(screen.getByText(/all settled up/i)).toBeInTheDocument()
     })
+  })
+
+  it("subscribes to realtime changes when user is a member", async () => {
+    const mockGroup = {
+      id: "group-1",
+      name: "Trip to Oslo",
+      currency: "USD",
+      invite_token: "token-abc",
+    }
+    const mockMember = {
+      id: "member-1",
+      group_id: "group-1",
+      guest_name: "Alice",
+      user_id: "test-user-id",
+    }
+
+    const groupMembersSelectMock = vi.fn()
+    let groupMembersCallCount = 0
+    groupMembersSelectMock.mockImplementation(() => {
+      groupMembersCallCount++
+      if (groupMembersCallCount === 1) {
+        return {
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi
+                .fn()
+                .mockResolvedValue({ data: mockMember, error: null }),
+            }),
+          }),
+        }
+      }
+      return {
+        eq: vi.fn().mockResolvedValue({ data: [mockMember], error: null }),
+      }
+    })
+
+    mockSupabaseFrom({
+      groups: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: mockGroup, error: null }),
+          }),
+        }),
+      },
+      group_members: { select: groupMembersSelectMock },
+      expenses: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+      },
+      settlements: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+      },
+    })
+
+    const channel = createMockChannel()
+    renderWithRoute("token-abc")
+
+    await waitFor(() => {
+      expect(screen.getByText("Trip to Oslo")).toBeInTheDocument()
+    })
+
+    expect(supabase.channel).toHaveBeenCalledWith("group-group-1")
+    expect(channel.on).toHaveBeenCalledTimes(3)
+    expect(channel.on).toHaveBeenCalledWith(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "expenses",
+        filter: "group_id=eq.group-1",
+      },
+      expect.any(Function),
+    )
+    expect(channel.on).toHaveBeenCalledWith(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "settlements",
+        filter: "group_id=eq.group-1",
+      },
+      expect.any(Function),
+    )
+    expect(channel.on).toHaveBeenCalledWith(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "group_members",
+        filter: "group_id=eq.group-1",
+      },
+      expect.any(Function),
+    )
+    expect(channel.subscribe).toHaveBeenCalledOnce()
+  })
+
+  it("cleans up realtime subscription on unmount", async () => {
+    const mockGroup = {
+      id: "group-1",
+      name: "Trip to Oslo",
+      currency: "USD",
+      invite_token: "token-abc",
+    }
+    const mockMember = {
+      id: "member-1",
+      group_id: "group-1",
+      guest_name: "Alice",
+      user_id: "test-user-id",
+    }
+
+    const groupMembersSelectMock = vi.fn()
+    let groupMembersCallCount = 0
+    groupMembersSelectMock.mockImplementation(() => {
+      groupMembersCallCount++
+      if (groupMembersCallCount === 1) {
+        return {
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi
+                .fn()
+                .mockResolvedValue({ data: mockMember, error: null }),
+            }),
+          }),
+        }
+      }
+      return {
+        eq: vi.fn().mockResolvedValue({ data: [mockMember], error: null }),
+      }
+    })
+
+    mockSupabaseFrom({
+      groups: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: mockGroup, error: null }),
+          }),
+        }),
+      },
+      group_members: { select: groupMembersSelectMock },
+      expenses: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+      },
+      settlements: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+        }),
+      },
+    })
+
+    const channel = createMockChannel()
+    const { unmount } = renderWithRoute("token-abc")
+
+    await waitFor(() => {
+      expect(screen.getByText("Trip to Oslo")).toBeInTheDocument()
+    })
+
+    unmount()
+
+    expect(supabase.removeChannel).toHaveBeenCalledWith(channel)
+  })
+
+  it("does not subscribe to realtime when not a member", async () => {
+    const mockGroup = {
+      id: "group-1",
+      name: "Trip to Oslo",
+      currency: "USD",
+      invite_token: "token-abc",
+    }
+
+    mockSupabaseFrom({
+      groups: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: mockGroup, error: null }),
+          }),
+        }),
+      },
+      group_members: {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              maybeSingle: vi
+                .fn()
+                .mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
+        }),
+      },
+    })
+
+    renderWithRoute("token-abc")
+
+    await waitFor(() => {
+      expect(screen.getByText(/join trip to oslo/i)).toBeInTheDocument()
+    })
+
+    expect(supabase.channel).not.toHaveBeenCalled()
   })
 })
