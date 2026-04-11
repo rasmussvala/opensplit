@@ -4,9 +4,8 @@ import { Link, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
 import BalanceSummary from "@/components/balance/BalanceSummary"
 import ExpenseList from "@/components/expense/ExpenseList"
-import InviteLink from "@/components/group/InviteLink"
+import GroupHeader from "@/components/group/GroupHeader"
 import JoinGroup from "@/components/group/JoinGroup"
-import MemberList from "@/components/group/MemberList"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import type {
@@ -15,7 +14,6 @@ import type {
   DbGroupMember,
   DbSettlement,
 } from "@/lib/types"
-import { formatAmount } from "@/lib/utils"
 
 type PageState =
   | { status: "loading" }
@@ -151,16 +149,7 @@ export default function GroupPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-4 p-2">
-      <div className="flex flex-col gap-3">
-        <div>
-          <h1 className="text-2xl font-bold mb-0!">{group.name}</h1>
-          <span className="text-sm text-muted-foreground">
-            {formatAmount(group.currency, totalSpent)}
-          </span>
-        </div>
-        <MemberList members={members} />
-        <InviteLink inviteToken={group.invite_token} />
-      </div>
+      <GroupHeader group={group} members={members} totalSpent={totalSpent} />
 
       <BalanceSummary
         expenses={expenses}
