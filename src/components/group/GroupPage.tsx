@@ -84,46 +84,29 @@ export default function GroupPage() {
 
     let timeout: ReturnType<typeof setTimeout>
 
+    // No group_id filter: Supabase Realtime cannot filter DELETE events,
+    // so we listen to all changes and rely on loadGroup's queries to scope data.
+    const refetch = () => {
+      clearTimeout(timeout)
+      timeout = setTimeout(loadGroup, 300)
+    }
+
     const channel = supabase
       .channel(`group-${groupId}`)
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "expenses",
-          filter: `group_id=eq.${groupId}`,
-        },
-        () => {
-          clearTimeout(timeout)
-          timeout = setTimeout(loadGroup, 300)
-        },
+        { event: "*", schema: "public", table: "expenses" },
+        refetch,
       )
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "settlements",
-          filter: `group_id=eq.${groupId}`,
-        },
-        () => {
-          clearTimeout(timeout)
-          timeout = setTimeout(loadGroup, 300)
-        },
+        { event: "*", schema: "public", table: "settlements" },
+        refetch,
       )
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "group_members",
-          filter: `group_id=eq.${groupId}`,
-        },
-        () => {
-          clearTimeout(timeout)
-          timeout = setTimeout(loadGroup, 300)
-        },
+        { event: "*", schema: "public", table: "group_members" },
+        refetch,
       )
       .subscribe()
 
