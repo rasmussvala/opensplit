@@ -27,7 +27,7 @@ function hashIndex(id: string, length: number): number {
 
 export default function MemberList({ members }: MemberListProps) {
   return (
-    <div className="flex items-center gap-2 overflow-x-auto">
+    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
       {members.map((m) => {
         const colorClass = AVATAR_COLORS[hashIndex(m.id, AVATAR_COLORS.length)]
         const initial = m.guest_name.charAt(0).toUpperCase()
