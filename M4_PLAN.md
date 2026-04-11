@@ -106,17 +106,18 @@ All components moved into subfolders:
 
 ---
 
-## Phase 4: Balances + Settlement
+## Phase 4: Balances + Settlement ✅
 
 **Goal:** Members see who owes whom and can mark debts as settled.
 
-### Files to create:
-- `src/components/balance/BalanceSummary.test.tsx` → `src/components/balance/BalanceSummary.tsx`
+### What was built:
+- `src/components/balance/BalanceSummary.tsx` — balance display + settlement flow
+- `src/components/balance/BalanceSummary.test.tsx` — component tests
 
 ### Changes to GroupPage:
-- Fetch settlements alongside members and expenses
-- Add `DbSettlement[]` to the `member` state
-- Pass settlements to BalanceSummary
+- Fetches settlements alongside members and expenses
+- `DbSettlement[]` added to state
+- Settlements passed to BalanceSummary
 
 ### Processing pipeline (client-side, reusing existing libs):
 1. Map DB expenses → `Expense` interface from `balances.ts`
@@ -133,11 +134,9 @@ All components moved into subfolders:
 ### Member name resolution:
 Build `Map<string, string>` of `member.id → member.guest_name` for display.
 
-### Manual test:
-- Add expenses between members → see correct balances
-- See simplified "who owes whom" transactions
-- Settle a debt → balances update to reflect settlement
-- Settle all debts → see "All settled up"
+### Follow-up fixes:
+- `cb9a04c` — eliminate zero-amount debts from floating-point rounding
+- `687182b` — resolve biome non-null assertion warning in test
 
 ---
 
@@ -192,20 +191,22 @@ Clean up on unmount.
 
 One commit per phase. Each commit is self-contained (tests pass, Biome clean, builds).
 
-| Commit | Message | Status |
-|--------|---------|--------|
-| 1 | `phase 1: add group page with join flow` | ✅ |
-| 2 | `phase 2: add member list and invite link sharing` | ✅ |
-| 3 | `phase 3: add expense creation, editing, and deletion` | ✅ |
-| 3a | `refactor: move files to folders` | ✅ |
-| 3b | `refactor: create ExpenseItems` | ✅ |
-| 3c | `add seed data for local dev` | ✅ |
-| 3d | `fix some styling` | ✅ |
-| 3e | `add admin page with group management` | ✅ |
-| 3f | `polish: better ui in group` | ✅ |
-| 3g | `add expense page` | ✅ |
-| 4 | `phase 4: add balance summary and settlement flow` | |
-| 5 | `phase 5: add real-time updates via Supabase Realtime` | |
+| Commit | Message                                                                | Status |
+|--------|------------------------------------------------------------------------|--------|
+| 1      | `phase 1: add group page with join flow`                               | ✅      |
+| 2      | `phase 2: add member list and invite link sharing`                     | ✅      |
+| 3      | `phase 3: add expense creation, editing, and deletion`                 | ✅      |
+| 3a     | `refactor: move files to folders`                                      | ✅      |
+| 3b     | `refactor: create ExpenseItems`                                        | ✅      |
+| 3c     | `add seed data for local dev`                                          | ✅      |
+| 3d     | `fix some styling`                                                     | ✅      |
+| 3e     | `add admin page with group management`                                 | ✅      |
+| 3f     | `polish: better ui in group`                                           | ✅      |
+| 3g     | `add expense page`                                                     | ✅      |
+| 4      | `phase 4: add balance summary and settlement flow`                     | ✅      |
+| 4a     | `fix: eliminate zero-amount debts from floating-point rounding`        | ✅      |
+| 4b     | `fix: resolve biome non-null assertion warning in BalanceSummary test` | ✅      |
+| 5      | `phase 5: add real-time updates via Supabase Realtime`                 |        |
 
 ## Verification
 
