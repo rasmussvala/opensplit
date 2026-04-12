@@ -9,7 +9,7 @@ import pkg from "./package.json"
 export default defineConfig({
   base: "/opensplit/",
   define: {
-    __APP_VERSION__: JSON.stringify(pkg.version),
+    "import.meta.env.VITE_APP_VERSION": JSON.stringify(pkg.version),
   },
   plugins: [react(), tailwindcss()],
   resolve: {
