@@ -1,5 +1,6 @@
 import { ArrowRight, Check } from "lucide-react"
 import { useState } from "react"
+import MemberAvatar from "@/components/group/MemberAvatar"
 import { Button } from "@/components/ui/button"
 import type { Transaction } from "@/lib/simplify"
 import { formatAmount } from "@/lib/utils"
@@ -9,31 +10,6 @@ interface SettlementListProps {
   memberNames: Map<string, string>
   currency: string
   onSettle: (from: string, to: string, amount: number) => Promise<void>
-}
-
-const AVATAR_COLORS = [
-  "bg-rose-400 dark:bg-rose-500",
-  "bg-amber-400 dark:bg-amber-500",
-  "bg-emerald-400 dark:bg-emerald-500",
-  "bg-sky-400 dark:bg-sky-500",
-  "bg-violet-400 dark:bg-violet-500",
-  "bg-pink-400 dark:bg-pink-500",
-  "bg-teal-400 dark:bg-teal-500",
-  "bg-orange-400 dark:bg-orange-500",
-  "bg-indigo-400 dark:bg-indigo-500",
-  "bg-lime-400 dark:bg-lime-500",
-]
-
-function colorFor(id: string): string {
-  let hash = 0
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 31 + id.charCodeAt(i)) | 0
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
-}
-
-function initialOf(name: string): string {
-  return name.charAt(0).toUpperCase() || "?"
 }
 
 export default function SettlementList({
@@ -71,25 +47,20 @@ export default function SettlementList({
               className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 transition-colors hover:border-border hover:bg-card/70"
             >
               {/* Paired avatars with a directional flow arrow */}
-              <div className="flex shrink-0 items-center">
-                <div
-                  aria-hidden="true"
-                  className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white shadow-sm ring-2 ring-background ${colorFor(t.from)}`}
-                >
-                  {initialOf(fromName)}
-                </div>
-                <div
-                  aria-hidden="true"
-                  className="relative z-1 -mx-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform duration-200 group-hover:translate-x-0.5"
-                >
+              <div aria-hidden="true" className="flex shrink-0 items-center">
+                <MemberAvatar
+                  id={t.from}
+                  name={fromName}
+                  className="h-9 w-9 shadow-sm ring-2 ring-background"
+                />
+                <div className="relative z-1 -mx-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform duration-200 group-hover:translate-x-0.5">
                   <ArrowRight className="h-3 w-3" />
                 </div>
-                <div
-                  aria-hidden="true"
-                  className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white shadow-sm ring-2 ring-background ${colorFor(t.to)}`}
-                >
-                  {initialOf(toName)}
-                </div>
+                <MemberAvatar
+                  id={t.to}
+                  name={toName}
+                  className="h-9 w-9 shadow-sm ring-2 ring-background"
+                />
               </div>
 
               {/* Names label + amount */}
