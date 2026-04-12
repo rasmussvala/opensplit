@@ -2,37 +2,47 @@ import { Check, Trash2 } from "lucide-react"
 import { useState } from "react"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Button } from "@/components/ui/button"
-import type { DbExpense, DbGroupMember } from "@/lib/types"
+import type { DbGroupMember } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-export interface ExpenseEditData {
+export interface ExpenseFormData {
   description: string
   amount: number
   paidBy: string
   splitAmong: string[]
 }
 
-interface ExpenseItemEditProps {
-  expense: DbExpense
+interface ExpenseFormProps {
   members: DbGroupMember[]
   currency: string
-  onSave: (data: ExpenseEditData) => void
-  onCancel: () => void
+  initialDescription?: string
+  initialAmount?: string
+  initialPaidBy?: string
+  initialSplitAmong?: string[]
+  submitLabel: string
+  onSubmit: (data: ExpenseFormData) => void | Promise<void>
+  onCancel?: () => void
   onDelete?: () => void
 }
 
-export default function ExpenseItemEdit({
-  expense,
+export default function ExpenseForm({
   members,
   currency,
-  onSave,
+  initialDescription = "",
+  initialAmount = "",
+  initialPaidBy,
+  initialSplitAmong,
+  submitLabel,
+  onSubmit,
   onCancel,
   onDelete,
-}: ExpenseItemEditProps) {
-  const [description, setDescription] = useState(expense.description)
-  const [amount, setAmount] = useState(String(Number(expense.amount)))
-  const [paidBy, setPaidBy] = useState(expense.paid_by)
-  const [splitAmong, setSplitAmong] = useState([...expense.split_among])
+}: ExpenseFormProps) {
+  const [description, setDescription] = useState(initialDescription)
+  const [amount, setAmount] = useState(initialAmount)
+  const [paidBy, setPaidBy] = useState(initialPaidBy ?? members[0]?.id ?? "")
+  const [splitAmong, setSplitAmong] = useState<string[]>(
+    initialSplitAmong ?? members.map((m) => m.id),
+  )
 
   const parsedAmount = Number(amount) || 0
 
@@ -44,9 +54,10 @@ export default function ExpenseItemEdit({
     )
   }
 
-  function handleSave() {
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
     if (!description.trim() || !parsedAmount || splitAmong.length === 0) return
-    onSave({
+    onSubmit({
       description: description.trim(),
       amount: parsedAmount,
       paidBy,
@@ -55,21 +66,21 @@ export default function ExpenseItemEdit({
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       {/* Hero amount card */}
       <div className="rounded-xl border border-border/70 bg-card/40 p-4">
         <label
-          htmlFor="expense-edit-amount"
+          htmlFor="expense-amount"
           className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]"
         >
-          Total
+          Amount
         </label>
         <div className="mt-1.5 flex items-baseline gap-2">
           <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
             {currency}
           </span>
           <input
-            id="expense-edit-amount"
+            id="expense-amount"
             type="number"
             min="0.01"
             step="0.01"
@@ -84,13 +95,13 @@ export default function ExpenseItemEdit({
       {/* Description */}
       <div className="flex flex-col gap-1.5">
         <label
-          htmlFor="expense-edit-description"
+          htmlFor="expense-description"
           className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]"
         >
           Description
         </label>
         <input
-          id="expense-edit-description"
+          id="expense-description"
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -111,6 +122,7 @@ export default function ExpenseItemEdit({
               <button
                 key={m.id}
                 type="button"
+                aria-label={`Paid by ${m.guest_name}`}
                 aria-pressed={selected}
                 onClick={() => setPaidBy(m.id)}
                 className={cn(
@@ -185,14 +197,17 @@ export default function ExpenseItemEdit({
 
       {/* Actions */}
       <div className="flex items-center gap-2 pt-1">
-        <Button onClick={handleSave} className="flex-1">
-          Save
+        <Button type="submit" className="flex-1">
+          {submitLabel}
         </Button>
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        )}
         {onDelete && (
           <Button
+            type="button"
             variant="destructive"
             size="icon"
             aria-label="Delete"
@@ -202,6 +217,6 @@ export default function ExpenseItemEdit({
           </Button>
         )}
       </div>
-    </div>
+    </form>
   )
 }

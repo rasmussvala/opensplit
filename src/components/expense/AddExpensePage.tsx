@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
 import AddExpense from "@/components/expense/AddExpense"
-import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import type { DbGroup, DbGroupMember } from "@/lib/types"
 
@@ -63,19 +62,25 @@ export default function AddExpensePage() {
   }
 
   const { group, members } = state
+  const groupUrl = `/groups/${inviteToken}`
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-4 p-6">
-      <Button asChild variant="ghost" size="sm" className="w-fit p-0">
-        <Link to={`/groups/${inviteToken}`}>
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Link>
-      </Button>
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5 p-6">
+      <Link
+        to={groupUrl}
+        className="group inline-flex w-fit items-center gap-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-[0.14em] transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+        Back
+      </Link>
+
+      <h2 className="font-semibold text-[22px] tracking-tight">New expense</h2>
+
       <AddExpense
         groupId={group.id}
         members={members}
-        onAdded={() => navigate(`/groups/${inviteToken}`)}
+        currency={group.currency}
+        onAdded={() => navigate(groupUrl)}
       />
     </div>
   )
