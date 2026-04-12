@@ -97,7 +97,7 @@ describe("BalanceSummary", () => {
     renderBalanceSummary({ expenses })
 
     const aliceBalance = screen.getByTestId("balance-member-1")
-    expect(aliceBalance).toHaveClass("text-green-600")
+    expect(aliceBalance).toHaveClass("text-green-400")
   })
 
   it("shows negative balance in red", () => {
@@ -116,7 +116,7 @@ describe("BalanceSummary", () => {
     renderBalanceSummary({ expenses })
 
     const bobBalance = screen.getByTestId("balance-member-2")
-    expect(bobBalance).toHaveClass("text-red-600")
+    expect(bobBalance).toHaveClass("text-red-400")
   })
 
   it("shows formatted balance amounts", () => {
