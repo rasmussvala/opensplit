@@ -15,3 +15,7 @@ export function formatAmount(currency: string, amount: number): string {
     .replace(/,/g, "\u2009") // thin space as thousand separator
   return `${currency} ${formatted}`
 }
+
+export function useAppVersion() {
+  return import.meta.env.VITE_APP_VERSION ?? "dev"
+}
