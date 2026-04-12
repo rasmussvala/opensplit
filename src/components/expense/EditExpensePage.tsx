@@ -2,8 +2,9 @@ import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
-import type { ExpenseEditData } from "@/components/expense/ExpenseItemEdit"
-import ExpenseItemEdit from "@/components/expense/ExpenseItemEdit"
+import ExpenseForm, {
+  type ExpenseFormData,
+} from "@/components/expense/ExpenseForm"
 import { supabase } from "@/lib/supabase"
 import type { DbExpense, DbGroupMember } from "@/lib/types"
 
@@ -78,7 +79,7 @@ export default function EditExpensePage() {
     load()
   }, [load])
 
-  async function handleSave(data: ExpenseEditData) {
+  async function handleSave(data: ExpenseFormData) {
     if (state.status !== "ready") return
 
     const { error } = await supabase
@@ -144,11 +145,15 @@ export default function EditExpensePage() {
         </h2>
       </div>
 
-      <ExpenseItemEdit
-        expense={expense}
+      <ExpenseForm
         members={members}
         currency={currency}
-        onSave={handleSave}
+        initialDescription={expense.description}
+        initialAmount={String(Number(expense.amount))}
+        initialPaidBy={expense.paid_by}
+        initialSplitAmong={expense.split_among}
+        submitLabel="Save"
+        onSubmit={handleSave}
         onCancel={() => navigate(groupUrl)}
         onDelete={handleDelete}
       />

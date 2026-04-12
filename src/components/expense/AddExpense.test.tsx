@@ -34,51 +34,70 @@ const mockMembers: DbGroupMember[] = [
   },
 ]
 
-describe("AddExpense", () => {
-  const onAdded = vi.fn()
+function renderAddExpense(onAdded = vi.fn()) {
+  render(
+    <AddExpense
+      groupId="group-1"
+      members={mockMembers}
+      currency="USD"
+      onAdded={onAdded}
+    />,
+  )
+  return { onAdded }
+}
 
+describe("AddExpense", () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   it("renders form with all fields", () => {
-    render(
-      <AddExpense groupId="group-1" members={mockMembers} onAdded={onAdded} />,
-    )
+    renderAddExpense()
 
     expect(screen.getByLabelText(/description/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/amount/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/who paid/i)).toBeInTheDocument()
-    expect(screen.getAllByText("Alice").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("Bob").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("Charlie").length).toBeGreaterThan(0)
+    expect(screen.getByText(/^paid by$/i)).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: /paid by alice/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: /paid by bob/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: /paid by charlie/i }),
+    ).toBeInTheDocument()
     expect(
       screen.getByRole("button", { name: /add expense/i }),
     ).toBeInTheDocument()
   })
 
-  it("shows split percentages for all checked members", () => {
-    render(
-      <AddExpense groupId="group-1" members={mockMembers} onAdded={onAdded} />,
-    )
+  it("defaults to first member as payer", () => {
+    renderAddExpense()
 
-    // All 3 members checked by default → 33.3% each
-    const percentages = screen.getAllByText("33.3%")
-    expect(percentages).toHaveLength(3)
+    expect(
+      screen.getByRole("button", { name: /paid by alice/i }),
+    ).toHaveAttribute("aria-pressed", "true")
+    expect(
+      screen.getByRole("button", { name: /paid by bob/i }),
+    ).toHaveAttribute("aria-pressed", "false")
   })
 
-  it("updates percentages when a member is unchecked", () => {
-    render(
-      <AddExpense groupId="group-1" members={mockMembers} onAdded={onAdded} />,
-    )
+  it("checks all members for split by default", () => {
+    renderAddExpense()
 
-    // Uncheck Charlie → 2 members → 50% each
+    for (const m of mockMembers) {
+      expect(screen.getByRole("checkbox", { name: m.guest_name })).toBeChecked()
+    }
+  })
+
+  it("toggles split membership when a member is unchecked", () => {
+    renderAddExpense()
+
     fireEvent.click(screen.getByRole("checkbox", { name: /charlie/i }))
 
-    const percentages = screen.getAllByText("50%")
-    expect(percentages).toHaveLength(2)
-
-    expect(screen.queryByText("33.3%")).not.toBeInTheDocument()
+    expect(screen.getByRole("checkbox", { name: /charlie/i })).not.toBeChecked()
+    expect(screen.getByRole("checkbox", { name: /alice/i })).toBeChecked()
+    expect(screen.getByRole("checkbox", { name: /bob/i })).toBeChecked()
   })
 
   it("submits expense to supabase and calls onAdded", async () => {
@@ -87,9 +106,7 @@ describe("AddExpense", () => {
       insert: mockInsert,
     } as unknown as ReturnType<typeof supabase.from>)
 
-    render(
-      <AddExpense groupId="group-1" members={mockMembers} onAdded={onAdded} />,
-    )
+    const { onAdded } = renderAddExpense()
 
     fireEvent.change(screen.getByLabelText(/description/i), {
       target: { value: "Dinner" },
@@ -97,12 +114,7 @@ describe("AddExpense", () => {
     fireEvent.change(screen.getByLabelText(/amount/i), {
       target: { value: "90" },
     })
-
-    // Select "Bob" as payer via the native select
-    fireEvent.change(screen.getByLabelText(/who paid/i), {
-      target: { value: "member-2" },
-    })
-
+    fireEvent.click(screen.getByRole("button", { name: /paid by bob/i }))
     fireEvent.click(screen.getByRole("button", { name: /add expense/i }))
 
     await waitFor(() => {
@@ -122,9 +134,7 @@ describe("AddExpense", () => {
   })
 
   it("does not submit if description is empty", () => {
-    render(
-      <AddExpense groupId="group-1" members={mockMembers} onAdded={onAdded} />,
-    )
+    renderAddExpense()
 
     fireEvent.change(screen.getByLabelText(/amount/i), {
       target: { value: "50" },
@@ -136,9 +146,7 @@ describe("AddExpense", () => {
   })
 
   it("does not submit if amount is zero", () => {
-    render(
-      <AddExpense groupId="group-1" members={mockMembers} onAdded={onAdded} />,
-    )
+    renderAddExpense()
 
     fireEvent.change(screen.getByLabelText(/description/i), {
       target: { value: "Dinner" },
@@ -150,9 +158,7 @@ describe("AddExpense", () => {
   })
 
   it("does not submit if no members are selected for split", () => {
-    render(
-      <AddExpense groupId="group-1" members={mockMembers} onAdded={onAdded} />,
-    )
+    renderAddExpense()
 
     fireEvent.change(screen.getByLabelText(/description/i), {
       target: { value: "Dinner" },
@@ -161,7 +167,6 @@ describe("AddExpense", () => {
       target: { value: "50" },
     })
 
-    // Uncheck all members
     fireEvent.click(screen.getByRole("checkbox", { name: /alice/i }))
     fireEvent.click(screen.getByRole("checkbox", { name: /bob/i }))
     fireEvent.click(screen.getByRole("checkbox", { name: /charlie/i }))
@@ -177,9 +182,7 @@ describe("AddExpense", () => {
       insert: mockInsert,
     } as unknown as ReturnType<typeof supabase.from>)
 
-    render(
-      <AddExpense groupId="group-1" members={mockMembers} onAdded={onAdded} />,
-    )
+    const { onAdded } = renderAddExpense()
 
     fireEvent.change(screen.getByLabelText(/description/i), {
       target: { value: "Dinner" },
