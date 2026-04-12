@@ -28,74 +28,65 @@ export default function ExpenseItemView({
 
   const splitIds = expense.split_among
   const splitCount = splitIds.length
-  const perPersonValue = splitCount > 0 ? amountValue / splitCount : 0
-  const perPersonText = formatAmount(currency, perPersonValue)
-  const [, ...perPersonParts] = perPersonText.split(" ")
-  const perPersonNumber = perPersonParts.join(" ")
-
   const visibleAvatars = splitIds.slice(0, MAX_STACK_AVATARS)
   const extraAvatars = Math.max(0, splitCount - MAX_STACK_AVATARS)
   const splitNamesText = splitIds.map(getMemberName).join(", ")
 
   return (
-    <div className="flex gap-3">
-      <MemberAvatar
-        id={expense.paid_by}
-        name={payerName}
-        className="h-10 w-10 shadow-sm ring-2 ring-background"
-      />
+    <div className="flex flex-col gap-1.5 leading-tight">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="truncate font-medium text-[15px] text-foreground">
+          {expense.description}
+        </span>
+        <span
+          aria-hidden="true"
+          className="flex shrink-0 items-baseline gap-1 font-semibold text-[15px] text-foreground tabular-nums"
+        >
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+            {currencyCode}
+          </span>
+          <span>{amountNumber}</span>
+        </span>
+      </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5 leading-tight">
-        <div className="flex items-baseline justify-between gap-3">
-          <span className="truncate font-medium text-[15px] text-foreground">
-            {expense.description}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="shrink-0 text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
+            {dateLabel}
           </span>
           <span
             aria-hidden="true"
-            className="flex shrink-0 items-baseline gap-1 font-semibold text-[15px] text-foreground tabular-nums"
+            className="text-[10px] text-muted-foreground/40"
           >
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-              {currencyCode}
-            </span>
-            <span>{amountNumber}</span>
+            ·
           </span>
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="shrink-0 text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
-              {dateLabel}
-            </span>
-            <span
-              aria-hidden="true"
-              className="text-[10px] text-muted-foreground/40"
-            >
-              ·
-            </span>
-            <div aria-hidden="true" className="flex items-center -space-x-1">
-              {visibleAvatars.map((id) => (
-                <MemberAvatar
-                  key={id}
-                  id={id}
-                  name={getMemberName(id)}
-                  className="h-5 w-5 text-[9px] shadow-sm ring-2 ring-background"
-                />
-              ))}
-              {extraAvatars > 0 && (
-                <div className="relative flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[9px] font-semibold text-muted-foreground ring-2 ring-background">
-                  +{extraAvatars}
-                </div>
-              )}
-            </div>
+          <div aria-hidden="true" className="flex items-center -space-x-1">
+            {visibleAvatars.map((id) => (
+              <MemberAvatar
+                key={id}
+                id={id}
+                name={getMemberName(id)}
+                className="h-5 w-5 text-[9px] shadow-sm ring-2 ring-background"
+              />
+            ))}
+            {extraAvatars > 0 && (
+              <div className="relative flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[9px] font-semibold text-muted-foreground ring-2 ring-background">
+                +{extraAvatars}
+              </div>
+            )}
           </div>
-          <span
-            aria-hidden="true"
-            className="flex shrink-0 items-baseline gap-1 text-[10px] font-medium text-muted-foreground tabular-nums"
-          >
-            <span className="tabular-nums">{perPersonNumber}</span>
-            <span className="uppercase tracking-[0.14em] opacity-60">
-              / person
-            </span>
+        </div>
+        <div aria-hidden="true" className="flex shrink-0 items-center gap-1.5">
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
+            Paid by
+          </span>
+          <MemberAvatar
+            id={expense.paid_by}
+            name={payerName}
+            className="h-5 w-5 text-[9px] shadow-sm ring-2 ring-background"
+          />
+          <span className="truncate text-[11px] font-medium text-foreground">
+            {payerName}
           </span>
         </div>
       </div>
