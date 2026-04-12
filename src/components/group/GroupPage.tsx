@@ -1,12 +1,14 @@
 import { Plus } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useParams, useSearchParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
 import BalanceSummary from "@/components/balance/BalanceSummary"
 import ExpenseList from "@/components/expense/ExpenseList"
 import GroupHeader from "@/components/group/GroupHeader"
 import JoinGroup from "@/components/group/JoinGroup"
+import PaymentsList from "@/components/payments/PaymentsList"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { supabase } from "@/lib/supabase"
 import type {
   DbExpense,
@@ -14,6 +16,13 @@ import type {
   DbGroupMember,
   DbSettlement,
 } from "@/lib/types"
+
+type TabValue = "expenses" | "balance" | "payments"
+
+function parseTab(value: string | null): TabValue {
+  if (value === "balance" || value === "payments") return value
+  return "expenses"
+}
 
 type PageState =
   | { status: "loading" }
@@ -31,6 +40,21 @@ export default function GroupPage() {
   const { inviteToken } = useParams<{ inviteToken: string }>()
   const { userId } = useAuth()
   const [state, setState] = useState<PageState>({ status: "loading" })
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tab = parseTab(searchParams.get("tab"))
+
+  function handleTabChange(next: string) {
+    const validated = parseTab(next)
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev)
+        if (validated === "expenses") params.delete("tab")
+        else params.set("tab", validated)
+        return params
+      },
+      { replace: true },
+    )
+  }
 
   const loadGroup = useCallback(async () => {
     const { data: group, error: groupError } = await supabase
@@ -148,23 +172,45 @@ export default function GroupPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-4 p-2">
-      <GroupHeader group={group} members={members} totalSpent={totalSpent} />
+    <Tabs
+      value={tab}
+      onValueChange={handleTabChange}
+      className="mx-auto flex w-full max-w-sm flex-col gap-4 p-2"
+    >
+      <GroupHeader group={group} members={members} totalSpent={totalSpent}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="expenses">Expenses</TabsTrigger>
+          <TabsTrigger value="balance">Balance</TabsTrigger>
+          <TabsTrigger value="payments">Payments</TabsTrigger>
+        </TabsList>
+      </GroupHeader>
 
-      <BalanceSummary
-        expenses={expenses}
-        settlements={settlements}
-        members={members}
-        currency={group.currency}
-        onSettle={handleSettle}
-      />
+      <TabsContent value="expenses">
+        <ExpenseList
+          expenses={expenses}
+          members={members}
+          currency={group.currency}
+          inviteToken={inviteToken as string}
+        />
+      </TabsContent>
 
-      <ExpenseList
-        expenses={expenses}
-        members={members}
-        currency={group.currency}
-        inviteToken={inviteToken as string}
-      />
+      <TabsContent value="balance">
+        <BalanceSummary
+          expenses={expenses}
+          settlements={settlements}
+          members={members}
+          currency={group.currency}
+          onSettle={handleSettle}
+        />
+      </TabsContent>
+
+      <TabsContent value="payments">
+        <PaymentsList
+          settlements={settlements}
+          members={members}
+          currency={group.currency}
+        />
+      </TabsContent>
 
       <Button
         asChild
@@ -176,6 +222,6 @@ export default function GroupPage() {
           <span className="sr-only">Add expense</span>
         </Link>
       </Button>
-    </div>
+    </Tabs>
   )
 }

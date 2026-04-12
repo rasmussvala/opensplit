@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import InviteLink from "@/components/group/InviteLink"
 import MemberList from "@/components/group/MemberList"
 import type { DbGroup, DbGroupMember } from "@/lib/types"
@@ -7,12 +8,14 @@ interface GroupHeaderProps {
   group: DbGroup
   members: DbGroupMember[]
   totalSpent: number
+  children?: ReactNode
 }
 
 export default function GroupHeader({
   group,
   members,
   totalSpent,
+  children,
 }: GroupHeaderProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -24,6 +27,7 @@ export default function GroupHeader({
       </div>
       <MemberList members={members} />
       <InviteLink inviteToken={group.invite_token} />
+      {children}
     </div>
   )
 }
