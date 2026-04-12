@@ -5,25 +5,29 @@ import { AuthProvider } from "@/components/auth/AuthProvider"
 import AddExpensePage from "@/components/expense/AddExpensePage"
 import EditExpensePage from "@/components/expense/EditExpensePage"
 import GroupPage from "@/components/group/GroupPage"
+import AppFooter from "@/components/layout/AppFooter"
 
 export default function App() {
   return (
     <AuthProvider>
       <Router basename={import.meta.env.BASE_URL}>
-        <Routes>
-          <Route element={<AdminRoute />}>
-            <Route path="/" element={<AdminPage />} />
-          </Route>
-          <Route path="/groups/:inviteToken" element={<GroupPage />} />
-          <Route
-            path="/groups/:inviteToken/add-expense"
-            element={<AddExpensePage />}
-          />
-          <Route
-            path="/groups/:inviteToken/edit-expense/:expenseId"
-            element={<EditExpensePage />}
-          />
-        </Routes>
+        <main className="flex-1">
+          <Routes>
+            <Route element={<AdminRoute />}>
+              <Route path="/" element={<AdminPage />} />
+            </Route>
+            <Route path="/groups/:inviteToken" element={<GroupPage />} />
+            <Route
+              path="/groups/:inviteToken/add-expense"
+              element={<AddExpensePage />}
+            />
+            <Route
+              path="/groups/:inviteToken/edit-expense/:expenseId"
+              element={<EditExpensePage />}
+            />
+          </Routes>
+        </main>
+        <AppFooter />
       </Router>
     </AuthProvider>
   )
