@@ -22,26 +22,34 @@ export default function ExpenseList({
   }
 
   if (expenses.length === 0) {
-    return <p className="text-muted-foreground text-sm">No expenses yet</p>
+    return (
+      <div>
+        <h2 className="mb-2 font-semibold text-sm">Expenses</h2>
+        <p className="rounded-xl border border-border/70 border-dashed bg-card/20 p-4 text-center text-muted-foreground text-sm">
+          No expenses yet
+        </p>
+      </div>
+    )
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <h2 className="font-semibold text-lg">Expenses</h2>
-
-      {expenses.map((expense) => (
-        <Link
-          key={expense.id}
-          to={`/groups/${inviteToken}/edit-expense/${expense.id}`}
-          className="flex flex-col gap-1 rounded-lg border p-3 transition-colors hover:bg-muted"
-        >
-          <ExpenseItemView
-            expense={expense}
-            currency={currency}
-            getMemberName={getMemberName}
-          />
-        </Link>
-      ))}
+    <div>
+      <h2 className="mb-2 font-semibold text-sm">Expenses</h2>
+      <div className="flex flex-col gap-2">
+        {expenses.map((expense) => (
+          <Link
+            key={expense.id}
+            to={`/groups/${inviteToken}/edit-expense/${expense.id}`}
+            className="group relative block overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 transition-colors hover:border-border hover:bg-card/70"
+          >
+            <ExpenseItemView
+              expense={expense}
+              currency={currency}
+              getMemberName={getMemberName}
+            />
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }

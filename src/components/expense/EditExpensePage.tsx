@@ -4,7 +4,6 @@ import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
 import type { ExpenseEditData } from "@/components/expense/ExpenseItemEdit"
 import ExpenseItemEdit from "@/components/expense/ExpenseItemEdit"
-import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import type { DbExpense, DbGroupMember } from "@/lib/types"
 
@@ -15,6 +14,7 @@ type PageState =
       status: "ready"
       expense: DbExpense
       members: DbGroupMember[]
+      currency: string
     }
 
 export default function EditExpensePage() {
@@ -70,6 +70,7 @@ export default function EditExpensePage() {
       status: "ready",
       expense: expense as DbExpense,
       members: members ?? [],
+      currency: group.currency,
     })
   }, [inviteToken, expenseId, userId])
 
@@ -114,20 +115,39 @@ export default function EditExpensePage() {
     return <p className="p-6 text-center">Expense not found</p>
   }
 
-  const { expense, members } = state
+  const { expense, members, currency } = state
+  const createdAt = new Date(expense.created_at)
+  const dateLabel = createdAt
+    .toLocaleDateString("en", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+    .toUpperCase()
 
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-col gap-4 p-6">
-      <Button asChild variant="ghost" size="sm" className="w-fit p-0">
-        <Link to={groupUrl}>
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </Link>
-      </Button>
-      <h2 className="font-semibold text-lg">Edit expense</h2>
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5 p-6">
+      <Link
+        to={groupUrl}
+        className="group inline-flex w-fit items-center gap-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-[0.14em] transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+        Back
+      </Link>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
+          {dateLabel}
+        </span>
+        <h2 className="font-semibold text-[22px] tracking-tight">
+          Edit expense
+        </h2>
+      </div>
+
       <ExpenseItemEdit
         expense={expense}
         members={members}
+        currency={currency}
         onSave={handleSave}
         onCancel={() => navigate(groupUrl)}
         onDelete={handleDelete}
