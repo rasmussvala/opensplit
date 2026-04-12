@@ -1,7 +1,7 @@
 import { calculateBalances } from "@/lib/balances"
 import { simplifyDebts } from "@/lib/simplify"
 import type { DbExpense, DbGroupMember, DbSettlement } from "@/lib/types"
-import { formatAmount } from "@/lib/utils"
+import BalanceList from "./BalanceList"
 import SettlementList from "./SettlementList"
 
 interface BalanceSummaryProps {
@@ -44,28 +44,13 @@ export default function BalanceSummary({
     )
   }
 
-  const nonZeroBalances = Object.entries(balances).filter(
-    ([, value]) => Math.abs(value) >= 0.01,
-  )
-
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h2 className="mb-2 font-semibold text-sm">Balances</h2>
-        <div className="flex flex-col gap-1">
-          {nonZeroBalances.map(([memberId, balance]) => (
-            <div
-              key={memberId}
-              data-testid={`balance-${memberId}`}
-              className={balance > 0 ? "text-green-400" : "text-red-400"}
-            >
-              {memberNames.get(memberId) ?? memberId}: {balance > 0 ? "+" : "-"}
-              {formatAmount(currency, Math.abs(balance))}
-            </div>
-          ))}
-        </div>
-      </div>
-
+      <BalanceList
+        balances={balances}
+        memberNames={memberNames}
+        currency={currency}
+      />
       <SettlementList
         transactions={transactions}
         memberNames={memberNames}
