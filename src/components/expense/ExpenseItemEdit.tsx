@@ -3,7 +3,7 @@ import { useState } from "react"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Button } from "@/components/ui/button"
 import type { DbExpense, DbGroupMember } from "@/lib/types"
-import { cn, formatAmount } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 export interface ExpenseEditData {
   description: string
@@ -35,12 +35,6 @@ export default function ExpenseItemEdit({
   const [splitAmong, setSplitAmong] = useState([...expense.split_among])
 
   const parsedAmount = Number(amount) || 0
-  const splitCount = splitAmong.length
-  const perPersonValue = splitCount > 0 ? parsedAmount / splitCount : 0
-  const perPersonText =
-    splitCount > 0 && parsedAmount > 0
-      ? formatAmount(currency, perPersonValue)
-      : null
 
   function toggleMember(memberId: string) {
     setSplitAmong((prev) =>
@@ -143,21 +137,9 @@ export default function ExpenseItemEdit({
 
       {/* Split among — tappable list */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-baseline justify-between gap-3">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
-            Split among
-          </span>
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em] tabular-nums">
-            {perPersonText ? (
-              <>
-                <span className="text-foreground">{perPersonText}</span>
-                <span className="ml-1 opacity-60">/ person</span>
-              </>
-            ) : (
-              <span className="opacity-60">Select members</span>
-            )}
-          </span>
-        </div>
+        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
+          Split among
+        </span>
         <div className="flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card/40">
           {members.map((m, i) => {
             const checked = splitAmong.includes(m.id)
