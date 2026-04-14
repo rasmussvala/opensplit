@@ -284,15 +284,15 @@ End-to-end tests (e.g. Playwright) are explicitly skipped in v1 due to overhead.
 
 ## 13. Milestones
 
-| Milestone | Scope | Status |
-|---|---|---|
-| M1 — Foundation | Repo setup, Supabase project, migration files, GitHub Actions deploy to Pages, Vitest configured, Tailwind + shadcn/ui installed | ✅ Done |
-| M2 — Core | TDD: expense model, equal splits, balance calculation (unit tested) | ✅ Done |
-| M3 — Simplification | TDD: debt simplification algorithm (unit tested), settlement flow | ✅ Done |
-| M4 — UI | Component tests for key interactions, React UI wired to Supabase | 🟡 In progress |
-| M5 — PWA | Manifest, service worker, offline shell | |
-| M6 — Polish | Link revocation, mobile UI polish | |
-| M7 — Release | README with setup guide, .env.example, Docker Hub publish, v1.0 tag | |
+| Milestone           | Scope                                                                                                                            | Status         |
+|---------------------|----------------------------------------------------------------------------------------------------------------------------------|----------------|
+| M1 — Foundation     | Repo setup, Supabase project, migration files, GitHub Actions deploy to Pages, Vitest configured, Tailwind + shadcn/ui installed | ✅ Done         |
+| M2 — Core           | TDD: expense model, equal splits, balance calculation (unit tested)                                                              | ✅ Done         |
+| M3 — Simplification | TDD: debt simplification algorithm (unit tested), settlement flow                                                                | ✅ Done         |
+| M4 — UI             | Component tests for key interactions, React UI wired to Supabase                                                                 | ✅ Done         |
+| M5 — PWA            | Manifest, service worker, offline shell                                                                                          | 🟡 In progress |
+| M6 — Polish         | Link revocation, mobile UI polish                                                                                                |                |
+| M7 — Release        | README with setup guide, .env.example, Docker Hub publish, v1.0 tag                                                              |                |
 
 ---
 
