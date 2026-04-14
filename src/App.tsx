@@ -6,6 +6,7 @@ import AddExpensePage from "@/components/expense/AddExpensePage"
 import EditExpensePage from "@/components/expense/EditExpensePage"
 import GroupPage from "@/components/group/GroupPage"
 import AppFooter from "@/components/layout/AppFooter"
+import EditSettlementPage from "@/components/payments/EditSettlementPage"
 
 export default function App() {
   return (
@@ -24,6 +25,10 @@ export default function App() {
             <Route
               path="/groups/:inviteToken/edit-expense/:expenseId"
               element={<EditExpensePage />}
+            />
+            <Route
+              path="/groups/:inviteToken/settlements/:settlementId"
+              element={<EditSettlementPage />}
             />
           </Routes>
         </main>

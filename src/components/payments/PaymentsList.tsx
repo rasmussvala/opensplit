@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react"
+import { Link } from "react-router-dom"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import type { DbGroupMember, DbSettlement } from "@/lib/types"
 import { formatAmount } from "@/lib/utils"
@@ -7,12 +8,14 @@ interface PaymentsListProps {
   settlements: DbSettlement[]
   members: DbGroupMember[]
   currency: string
+  inviteToken: string
 }
 
 export default function PaymentsList({
   settlements,
   members,
   currency,
+  inviteToken,
 }: PaymentsListProps) {
   const memberNames = new Map(members.map((m) => [m.id, m.guest_name]))
 
@@ -49,8 +52,9 @@ export default function PaymentsList({
             .toUpperCase()
 
           return (
-            <div
+            <Link
               key={settlement.id}
+              to={`/groups/${inviteToken}/settlements/${settlement.id}`}
               className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 transition-colors hover:border-border hover:bg-card/70"
             >
               <div aria-hidden="true" className="flex shrink-0 items-center">
@@ -69,19 +73,16 @@ export default function PaymentsList({
                 />
               </div>
 
-              <div className="flex min-w-0 flex-1 flex-col leading-tight">
-                <span
-                  aria-hidden="true"
-                  className="truncate text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]"
-                >
+              <div
+                aria-hidden="true"
+                className="flex min-w-0 flex-1 flex-col leading-tight"
+              >
+                <span className="truncate text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
                   {fromName}
                   <span className="mx-1 opacity-40">→</span>
                   {toName}
                 </span>
-                <span
-                  aria-hidden="true"
-                  className="mt-1 flex items-center justify-between gap-2"
-                >
+                <span className="mt-1 flex items-center justify-between gap-2">
                   <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
                     {dateLabel}
                   </span>
@@ -101,7 +102,7 @@ export default function PaymentsList({
               <span className="sr-only">
                 {fromName} paid {toName} {amountText} on {dateLabel}
               </span>
-            </div>
+            </Link>
           )
         })}
       </div>
