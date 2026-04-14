@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
 import type { DbGroupMember, DbSettlement } from "@/lib/types"
 import PaymentsList from "./PaymentsList"
@@ -32,14 +33,20 @@ function renderPaymentsList(
     settlements?: DbSettlement[]
     members?: DbGroupMember[]
     currency?: string
+    inviteToken?: string
   } = {},
 ) {
   const props = {
     settlements: overrides.settlements ?? [],
     members: overrides.members ?? mockMembers,
     currency: overrides.currency ?? "USD",
+    inviteToken: overrides.inviteToken ?? "token-abc",
   }
-  return render(<PaymentsList {...props} />)
+  return render(
+    <MemoryRouter>
+      <PaymentsList {...props} />
+    </MemoryRouter>,
+  )
 }
 
 describe("PaymentsList", () => {
@@ -124,5 +131,39 @@ describe("PaymentsList", () => {
     expect(
       screen.getByText(/bob paid alice USD 50\.00 on MAR 4/i),
     ).toBeInTheDocument()
+  })
+
+  it("renders each settlement as a link to its edit page", () => {
+    const settlements: DbSettlement[] = [
+      {
+        id: "settlement-1",
+        group_id: "group-1",
+        from_member: "member-2",
+        to_member: "member-1",
+        amount: 50,
+        settled_at: "2026-03-04T12:00:00Z",
+      },
+      {
+        id: "settlement-2",
+        group_id: "group-1",
+        from_member: "member-3",
+        to_member: "member-1",
+        amount: 30,
+        settled_at: "2026-03-05T12:00:00Z",
+      },
+    ]
+
+    renderPaymentsList({ settlements, inviteToken: "token-abc" })
+
+    const links = screen.getAllByRole("link")
+    expect(links).toHaveLength(2)
+    expect(links[0]).toHaveAttribute(
+      "href",
+      "/groups/token-abc/settlements/settlement-2",
+    )
+    expect(links[1]).toHaveAttribute(
+      "href",
+      "/groups/token-abc/settlements/settlement-1",
+    )
   })
 })

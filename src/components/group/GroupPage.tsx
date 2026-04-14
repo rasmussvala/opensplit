@@ -209,6 +209,7 @@ export default function GroupPage() {
           settlements={settlements}
           members={members}
           currency={group.currency}
+          inviteToken={inviteToken as string}
         />
       </TabsContent>
 
