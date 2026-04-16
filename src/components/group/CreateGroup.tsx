@@ -4,13 +4,13 @@ import { useAuth } from "@/components/auth/AuthProvider"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 
-const CURRENCIES = ["USD", "EUR", "GBP", "NOK", "SEK"]
+const CURRENCIES = ["SEK", "EUR", "USD", "GBP", "NOK"]
 
 export default function CreateGroup() {
   const navigate = useNavigate()
   const { userId } = useAuth()
   const [name, setName] = useState("")
-  const [currency, setCurrency] = useState("USD")
+  const [currency, setCurrency] = useState("SEK")
 
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault()
