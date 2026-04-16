@@ -12,6 +12,7 @@ import BackLink from "@/components/ui/back-link"
 import { Button } from "@/components/ui/button"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { saveLastGroup } from "@/lib/shared-storage"
 import { supabase } from "@/lib/supabase"
 import { isSwishCurrency } from "@/lib/swish"
 import type {
@@ -20,6 +21,7 @@ import type {
   DbGroupMember,
   DbSettlement,
 } from "@/lib/types"
+import { useGroupManifest } from "@/lib/useGroupManifest"
 
 type TabValue = "expenses" | "balances" | "payments"
 
@@ -103,6 +105,18 @@ export default function GroupPage() {
   useEffect(() => {
     loadGroup()
   }, [loadGroup])
+
+  const groupName =
+    state.status === "member" || state.status === "join"
+      ? state.group.name
+      : null
+  useGroupManifest(groupName ?? "opensplit", inviteToken as string)
+
+  useEffect(() => {
+    if (state.status === "member") {
+      saveLastGroup(inviteToken as string)
+    }
+  }, [state.status, inviteToken])
 
   const groupId = state.status === "member" ? state.group.id : null
 
