@@ -9,6 +9,7 @@ import JoinGroup from "@/components/group/JoinGroup"
 import PaymentsList from "@/components/payments/PaymentsList"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { saveLastGroup } from "@/lib/shared-storage"
 import { supabase } from "@/lib/supabase"
 import type {
   DbExpense,
@@ -16,6 +17,7 @@ import type {
   DbGroupMember,
   DbSettlement,
 } from "@/lib/types"
+import { useGroupManifest } from "@/lib/useGroupManifest"
 
 type TabValue = "expenses" | "balance" | "payments"
 
@@ -99,6 +101,18 @@ export default function GroupPage() {
   useEffect(() => {
     loadGroup()
   }, [loadGroup])
+
+  const groupName =
+    state.status === "member" || state.status === "join"
+      ? state.group.name
+      : null
+  useGroupManifest(groupName ?? "opensplit", inviteToken as string)
+
+  useEffect(() => {
+    if (state.status === "member") {
+      saveLastGroup(inviteToken as string)
+    }
+  }, [state.status, inviteToken])
 
   const groupId = state.status === "member" ? state.group.id : null
 
