@@ -73,7 +73,7 @@ describe("CreateGroup", () => {
       expect(supabase.from).toHaveBeenCalledWith("groups")
       expect(mockInsertGroup.insert).toHaveBeenCalledWith({
         name: "Trip to Oslo",
-        currency: "USD",
+        currency: "SEK",
         created_by: "test-user-id",
       })
     })
