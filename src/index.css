@@ -33,7 +33,7 @@
   -moz-osx-font-smoothing: grayscale;
 
   @media (max-width: 1024px) {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   --background: oklch(1 0 0);

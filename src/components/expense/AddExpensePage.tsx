@@ -65,7 +65,7 @@ export default function AddExpensePage() {
   const groupUrl = `/groups/${inviteToken}`
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-5 p-6">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-2 py-6">
       <Link
         to={groupUrl}
         className="group inline-flex w-fit items-center gap-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-[0.14em] transition-colors hover:text-foreground"
