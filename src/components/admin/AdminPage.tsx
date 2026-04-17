@@ -1,4 +1,4 @@
-import CreateGroup from "@/components/group/CreateGroup"
+import CreateGroup from "@/components/admin/CreateGroup"
 import GroupList from "./GroupList"
 
 export default function AdminPage() {
