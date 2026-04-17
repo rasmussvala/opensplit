@@ -8,17 +8,37 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg: #0d0c0b;
+    --fg: #e8e4dc;
+    --fg-muted: #a69f94;
+    --fg-faint: #807a71;
+    --fg-dim: #605b53;
+    --card-border: #2c2a26;
+    --accent: #e8c866;
+  }
+  html[data-theme="light"] {
+    --bg: #f4efe6;
+    --fg: #1f1b14;
+    --fg-muted: #54504a;
+    --fg-faint: #756d62;
+    --fg-dim: #8f857a;
+    --card-border: rgba(30, 25, 18, 0.14);
+    --accent: #b57c12;
+  }
+
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
     min-height: 100vh;
-    background: #0d0c0b;
-    color: #e8e4dc;
+    background: var(--bg);
+    color: var(--fg);
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     padding: 48px 24px;
     line-height: 1.6;
+    transition: background 0.2s ease, color 0.2s ease;
   }
-  .wrap { max-width: 1100px; margin: 0 auto; }
+  .wrap { max-width: 1100px; margin: 0 auto; position: relative; }
   h1 {
     font-family: "Fraunces", serif;
     font-variation-settings: "opsz" 144, "wght" 400;
@@ -28,12 +48,12 @@
     line-height: 1;
     margin: 0 0 8px;
   }
-  h1 em { font-style: italic; color: #e8c866; }
+  h1 em { font-style: italic; color: var(--accent); }
   .sub {
     font-size: 11px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #807a71;
+    color: var(--fg-faint);
     margin-bottom: 48px;
   }
   .grid {
@@ -131,9 +151,46 @@
   .carbon h2 { font-family: "Instrument Serif", serif; font-weight: 400; }
   .carbon h2 em { font-style: italic; color: oklch(0.73 0.18 45); }
   .carbon .open { color: oklch(0.73 0.18 45); }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 28px; right: 28px;
+    z-index: 10;
+    display: inline-flex;
+    padding: 3px;
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+  }
+  .theme-toggle button {
+    background: none;
+    border: 0;
+    padding: 6px 12px;
+    border-radius: 999px;
+    color: var(--fg-muted);
+    cursor: pointer;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    transition: all 0.2s ease;
+  }
+  .theme-toggle button.active {
+    background: var(--fg);
+    color: var(--bg);
+  }
 </style>
 </head>
 <body>
+<div class="theme-toggle" role="group" aria-label="Theme">
+  <button type="button" data-theme="dark">Dark</button>
+  <button type="button" data-theme="light">Light</button>
+</div>
 <div class="wrap">
   <h1>Pick a <em>direction</em></h1>
   <div class="sub">opensplit · group page redesign · three prototypes</div>
@@ -200,5 +257,27 @@
     </a>
   </div>
 </div>
+<script>
+  (function () {
+    var root = document.documentElement;
+    var saved = localStorage.getItem("opensplit-theme") || "dark";
+    root.dataset.theme = saved;
+    var buttons = document.querySelectorAll(".theme-toggle button");
+    function sync(theme) {
+      buttons.forEach(function (b) {
+        b.classList.toggle("active", b.dataset.theme === theme);
+      });
+    }
+    sync(saved);
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () {
+        root.dataset.theme = b.dataset.theme;
+        localStorage.setItem("opensplit-theme", b.dataset.theme);
+        sync(b.dataset.theme);
+      });
+    });
+  })();
+</script>
+
 </body>
 </html>

@@ -33,6 +33,27 @@
     --font-mono: "JetBrains Mono", ui-monospace, monospace;
   }
 
+  html[data-theme="light"] {
+    --bg: oklch(0.96 0.022 85);
+    --bg-deep: oklch(0.91 0.028 82);
+    --fg: oklch(0.24 0.028 55);
+    --fg-muted: oklch(0.46 0.022 60);
+    --fg-faint: oklch(0.60 0.020 65);
+    --card: oklch(0.985 0.014 85);
+    --card-hover: oklch(0.96 0.018 85);
+    --border: oklch(0.82 0.028 75);
+    --border-soft: oklch(0.84 0.026 75 / 0.8);
+    --primary: oklch(0.58 0.16 60);
+    --primary-deep: oklch(0.48 0.17 55);
+    --primary-ink: oklch(0.98 0.012 85);
+    --destructive: oklch(0.54 0.20 28);
+
+    --avatar-sage:  oklch(0.58 0.09 150);
+    --avatar-rust:  oklch(0.52 0.16 48);
+    --avatar-moss:  oklch(0.50 0.10 130);
+    --avatar-auber: oklch(0.44 0.12 335);
+  }
+
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
 
@@ -447,9 +468,94 @@
     border-radius: 3px;
   }
   @media (max-width: 900px) { .legend { display: none; } }
+
+  /* Light-mode tweaks that don't flow through variables */
+  html[data-theme="light"] body::before {
+    mix-blend-mode: multiply;
+    opacity: 0.35;
+  }
+  html[data-theme="light"] .phone {
+    background: linear-gradient(180deg,
+      oklch(0.99 0.014 85) 0%,
+      oklch(0.955 0.02 85) 100%);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.7),
+      0 30px 60px -20px oklch(0.35 0.05 55 / 0.28),
+      0 0 0 1px oklch(0.80 0.026 75);
+  }
+  html[data-theme="light"] body {
+    background:
+      radial-gradient(at 20% 0%, oklch(0.92 0.08 80 / 0.55), transparent 55%),
+      radial-gradient(at 85% 100%, oklch(0.86 0.10 35 / 0.45), transparent 50%),
+      var(--bg);
+  }
+  html[data-theme="light"] .expense {
+    background: linear-gradient(180deg,
+      oklch(0.99 0.012 70 / 0.85) 0%,
+      oklch(0.965 0.016 70 / 0.85) 100%);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.9),
+      0 4px 14px -10px oklch(0.30 0.05 55 / 0.18);
+  }
+  html[data-theme="light"] .avatar {
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.25),
+      0 1px 2px oklch(0.30 0.05 55 / 0.2);
+  }
+  html[data-theme="light"] .avatar.sm {
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.2),
+      0 0 0 2px var(--card);
+  }
+  html[data-theme="light"] .fab {
+    box-shadow:
+      0 0 0 1px oklch(0.58 0.14 60),
+      inset 0 1px 0 oklch(1 0 0 / 0.5),
+      inset 0 -3px 6px oklch(0.50 0.14 55 / 0.35),
+      0 14px 28px -8px oklch(0.70 0.16 60 / 0.5),
+      0 4px 10px -4px oklch(0.35 0.05 55 / 0.25);
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 28px; right: 28px;
+    z-index: 10;
+    display: inline-flex;
+    padding: 3px;
+    background: oklch(from var(--card) l c h / 0.85);
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+  }
+  .theme-toggle button {
+    background: none;
+    border: 0;
+    padding: 6px 12px;
+    border-radius: 999px;
+    color: var(--fg-muted);
+    cursor: pointer;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    transition: all 0.2s ease;
+  }
+  .theme-toggle button.active {
+    background: var(--fg);
+    color: var(--bg);
+  }
 </style>
 </head>
 <body>
+
+<div class="theme-toggle" role="group" aria-label="Theme">
+  <button type="button" data-theme="dark">Dark</button>
+  <button type="button" data-theme="light">Light</button>
+</div>
 
 <aside class="legend">
   <h2>Ledger <em>—</em> warm editorial</h2>
@@ -581,6 +687,28 @@
     <span class="v">V 0.0.0 · RASMUS</span>
   </div>
 </div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var saved = localStorage.getItem("opensplit-theme") || "dark";
+    root.dataset.theme = saved;
+    var buttons = document.querySelectorAll(".theme-toggle button");
+    function sync(theme) {
+      buttons.forEach(function (b) {
+        b.classList.toggle("active", b.dataset.theme === theme);
+      });
+    }
+    sync(saved);
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () {
+        root.dataset.theme = b.dataset.theme;
+        localStorage.setItem("opensplit-theme", b.dataset.theme);
+        sync(b.dataset.theme);
+      });
+    });
+  })();
+</script>
 
 </body>
 </html>
