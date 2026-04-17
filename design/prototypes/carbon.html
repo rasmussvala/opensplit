@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>opensplit — Carbon (refined minimal)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: oklch(0.14 0.005 40);
+    --bg-deep: oklch(0.10 0.005 40);
+    --fg: oklch(0.97 0 0);
+    --fg-muted: oklch(0.62 0.005 40);
+    --fg-faint: oklch(0.45 0.005 40);
+    --card: oklch(0.18 0.006 40);
+    --card-hi: oklch(0.21 0.006 40);
+    --border: oklch(0.26 0.006 40);
+    --border-soft: oklch(0.22 0.006 40 / 0.7);
+    --primary: oklch(0.73 0.18 45);
+    --primary-deep: oklch(0.62 0.19 40);
+    --primary-ink: oklch(0.15 0.05 40);
+    --destructive: oklch(0.65 0.20 20);
+
+    --avatar-slate:  oklch(0.55 0.04 240);
+    --avatar-rust:   oklch(0.60 0.16 40);
+    --avatar-moss:   oklch(0.58 0.10 140);
+    --avatar-plum:   oklch(0.50 0.10 340);
+
+    --font-display: "Instrument Serif", "Didot", Georgia, serif;
+    --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px 80px;
+    position: relative;
+  }
+
+  /* Very subtle grid overlay */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, oklch(1 0 0 / 0.015) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(1 0 0 / 0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+  }
+
+  .phone {
+    width: 390px;
+    max-width: 100%;
+    position: relative;
+    z-index: 1;
+    border-radius: 24px;
+    background: var(--bg);
+    box-shadow:
+      0 40px 80px -20px oklch(0 0 0 / 0.7),
+      0 0 0 1px var(--border);
+    overflow: hidden;
+  }
+
+  .statusbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 6px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    color: var(--fg);
+  }
+  .statusbar .right { display: inline-flex; gap: 6px; align-items: center; opacity: 0.9; font-size: 13px; }
+
+  .page {
+    padding: 28px 24px 160px;
+  }
+
+  /* HERO */
+  .hero {
+    margin-top: 36px;
+    margin-bottom: 36px;
+    display: grid;
+    gap: 16px;
+  }
+  .hero .kicker {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero .kicker::before {
+    content: "";
+    width: 20px; height: 1px;
+    background: var(--fg-faint);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--fg);
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--primary);
+  }
+  .hero .total-block {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .hero .total .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .hero .total .value {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .hero .total .value .code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+  }
+  .hero .total .value .num {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 32px;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .hero .count {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+    text-align: right;
+  }
+  .hero .count strong {
+    font-weight: 500;
+    color: var(--fg);
+    font-size: 14px;
+    display: block;
+    letter-spacing: 0;
+  }
+
+  /* MEMBERS */
+  .members {
+    margin: 28px -4px 24px;
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    padding: 0 4px 4px;
+    scrollbar-width: none;
+  }
+  .members::-webkit-scrollbar { display: none; }
+  .member {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 11px;
+    color: oklch(0.98 0 0);
+    letter-spacing: 0.02em;
+  }
+  .avatar.slate { background: var(--avatar-slate); }
+  .avatar.rust  { background: var(--avatar-rust); }
+  .avatar.moss  { background: var(--avatar-moss); }
+  .avatar.plum  { background: var(--avatar-plum); }
+  .avatar.sm {
+    width: 20px; height: 20px;
+    font-size: 9px;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+  .member .name {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--fg);
+    font-weight: 400;
+  }
+
+  /* SHARE */
+  .share {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 18px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-transform: uppercase;
+  }
+  .share:hover { border-color: var(--primary); color: var(--primary); }
+  .share .label { display: inline-flex; align-items: center; gap: 10px; }
+  .share .arrow { transition: transform 0.25s ease; }
+  .share:hover .arrow { transform: translateX(4px); color: var(--primary); }
+
+  /* TABS */
+  .tabs {
+    margin-top: 28px;
+    display: flex;
+    gap: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    background: none;
+    border: 0;
+    padding: 12px 0 16px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--fg-muted);
+    cursor: pointer;
+    position: relative;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+  }
+  .tab.active { color: var(--fg); }
+  .tab.active::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 1px;
+    background: var(--primary);
+  }
+
+  /* SECTION HEADING */
+  .section-head-block {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 32px 0 20px;
+  }
+  .section-head {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 28px;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    margin: 0;
+    line-height: 1;
+  }
+  .section-count {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+  }
+
+  /* EXPENSE CARD */
+  .expense {
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+    padding: 18px 0 18px;
+    display: grid;
+    gap: 10px;
+    position: relative;
+  }
+  .expense:first-of-type { padding-top: 0; border-top: 0; }
+
+  .expense-row-1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .expense .title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 20px;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .expense .amount {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .expense .amount .code {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+  }
+  .expense .amount .num {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  .expense-row-2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .expense .date {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+  }
+  .expense .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .expense .sep { color: var(--fg-faint); opacity: 0.4; }
+  .avatar-stack {
+    display: inline-flex;
+  }
+  .avatar-stack .avatar { margin-right: -6px; }
+  .avatar-stack .avatar:last-child { margin-right: 0; }
+  .expense .right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .expense .paid-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+  }
+  .expense .paid-name {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--fg);
+  }
+
+  /* FAB */
+  .fab {
+    position: absolute;
+    right: 22px;
+    bottom: 54px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--primary-ink);
+    border: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow:
+      0 0 0 6px oklch(0.73 0.18 45 / 0.12),
+      0 12px 28px -8px oklch(0.73 0.18 45 / 0.5),
+      inset 0 1px 0 oklch(1 0 0 / 0.25);
+    transition: all 0.2s ease;
+  }
+  .fab:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 0 8px oklch(0.73 0.18 45 / 0.14), 0 16px 36px -8px oklch(0.73 0.18 45 / 0.6), inset 0 1px 0 oklch(1 0 0 / 0.25); }
+  .fab svg { stroke-width: 2; }
+
+  /* FOOTER */
+  .footer {
+    position: absolute;
+    bottom: 22px;
+    left: 0; right: 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--fg-faint);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1.8;
+  }
+  .footer em {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    color: var(--fg-muted);
+    text-transform: none;
+    font-weight: 400;
+  }
+
+  /* Legend */
+  .legend {
+    position: fixed;
+    top: 40px; left: 40px;
+    max-width: 260px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--fg-muted);
+    line-height: 1.6;
+    z-index: 2;
+  }
+  .legend h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    margin: 0 0 4px;
+    line-height: 1;
+  }
+  .legend h2 em { font-style: italic; color: var(--primary); }
+  .legend p { margin: 8px 0; }
+  .legend .fonts { margin-top: 14px; }
+  .legend .fonts div { margin: 4px 0; }
+  .legend code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg);
+    background: oklch(1 0 0 / 0.04);
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+  @media (max-width: 900px) { .legend { display: none; } }
+</style>
+</head>
+<body>
+
+<aside class="legend">
+  <h2>Carbon<em>.</em></h2>
+  <p>Refined minimal. Near-black warm base, high-contrast typography, a single electric-tangerine accent.</p>
+  <div class="fonts">
+    <div>Display · <code>Instrument Serif</code></div>
+    <div>Body · <code>IBM Plex Sans</code></div>
+    <div>Numerals · <code>IBM Plex Mono</code></div>
+  </div>
+  <p style="margin-top: 14px; opacity: 0.6;">
+    Expenses stacked as editorial entries with hairline dividers rather than cards. Quiet confidence over noise.
+  </p>
+</aside>
+
+<div class="phone">
+  <div class="statusbar">
+    <span>21:48</span>
+    <span class="right">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="0.5"/><rect x="4" y="5" width="3" height="6" rx="0.5"/><rect x="8" y="3" width="3" height="8" rx="0.5"/><rect x="12" y="1" width="3" height="10" rx="0.5" opacity="0.3"/></svg>
+      <svg width="16" height="11" viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 9.5 C5 6.5 5 4 8 2 C11 4 11 6.5 8 9.5 Z" fill="currentColor"/></svg>
+      <svg width="26" height="11" viewBox="0 0 26 11"><rect x="0.5" y="0.5" width="22" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/><rect x="2" y="2" width="14" height="7" rx="1" fill="#e8c866"/><rect x="23" y="3.5" width="1.5" height="4" rx="0.5" fill="currentColor" opacity="0.5"/></svg>
+    </span>
+  </div>
+
+  <div class="page">
+    <div class="hero">
+      <span class="kicker">Group · 04/2026</span>
+      <h1>Trip to <em>Oslo</em></h1>
+      <div class="total-block">
+        <div class="total">
+          <span class="label">Total</span>
+          <span class="value"><span class="code">SEK</span><span class="num">1,100.00</span></span>
+        </div>
+        <div class="count">
+          Members
+          <strong>04</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="members">
+      <div class="member"><span class="avatar slate">A</span><span class="name">Alice</span></div>
+      <div class="member"><span class="avatar rust">J</span><span class="name">John</span></div>
+      <div class="member"><span class="avatar moss">D</span><span class="name">David</span></div>
+      <div class="member"><span class="avatar plum">R</span><span class="name">Rasmus</span></div>
+    </div>
+
+    <button class="share" type="button">
+      <span class="label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Invite link
+      </span>
+      <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+
+    <div class="tabs">
+      <button class="tab active">Expenses</button>
+      <button class="tab">Balance</button>
+      <button class="tab">Payments</button>
+    </div>
+
+    <div class="section-head-block">
+      <h2 class="section-head">Expenses</h2>
+      <span class="section-count">03 entries</span>
+    </div>
+
+    <div class="expense">
+      <div class="expense-row-1">
+        <span class="title">Dinner</span>
+        <span class="amount"><span class="code">SEK</span><span class="num">600.00</span></span>
+      </div>
+      <div class="expense-row-2">
+        <div class="left">
+          <span class="date">Apr 11</span>
+          <span class="sep">/</span>
+          <div class="avatar-stack">
+            <span class="avatar sm slate">A</span>
+            <span class="avatar sm rust">J</span>
+            <span class="avatar sm moss">D</span>
+          </div>
+        </div>
+        <div class="right">
+          <span class="paid-label">By</span>
+          <span class="avatar sm slate">A</span>
+          <span class="paid-name">Alice</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="expense">
+      <div class="expense-row-1">
+        <span class="title">Lunch</span>
+        <span class="amount"><span class="code">SEK</span><span class="num">200.00</span></span>
+      </div>
+      <div class="expense-row-2">
+        <div class="left">
+          <span class="date">Apr 11</span>
+          <span class="sep">/</span>
+          <div class="avatar-stack">
+            <span class="avatar sm slate">A</span>
+            <span class="avatar sm rust">J</span>
+          </div>
+        </div>
+        <div class="right">
+          <span class="paid-label">By</span>
+          <span class="avatar sm rust">J</span>
+          <span class="paid-name">John</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="expense">
+      <div class="expense-row-1">
+        <span class="title">Movie Ticket</span>
+        <span class="amount"><span class="code">SEK</span><span class="num">300.00</span></span>
+      </div>
+      <div class="expense-row-2">
+        <div class="left">
+          <span class="date">Apr 11</span>
+          <span class="sep">/</span>
+          <div class="avatar-stack">
+            <span class="avatar sm rust">J</span>
+            <span class="avatar sm moss">D</span>
+          </div>
+        </div>
+        <div class="right">
+          <span class="paid-label">By</span>
+          <span class="avatar sm slate">A</span>
+          <span class="paid-name">Alice</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" aria-label="Add expense">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+
+  <div class="footer">
+    <em>Made with care</em><br/>
+    V 0.0.0 · RASMUS
+  </div>
+</div>
+
+</body>
+</html>
