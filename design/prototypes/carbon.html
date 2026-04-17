@@ -33,6 +33,27 @@
     --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   }
 
+  html[data-theme="light"] {
+    --bg: oklch(0.97 0.004 55);
+    --bg-deep: oklch(0.93 0.005 55);
+    --fg: oklch(0.18 0.008 45);
+    --fg-muted: oklch(0.44 0.006 45);
+    --fg-faint: oklch(0.62 0.005 45);
+    --card: oklch(0.95 0.005 45);
+    --card-hi: oklch(0.92 0.006 45);
+    --border: oklch(0.80 0.006 45);
+    --border-soft: oklch(0.85 0.006 45 / 0.8);
+    --primary: oklch(0.56 0.19 42);
+    --primary-deep: oklch(0.46 0.20 38);
+    --primary-ink: oklch(0.98 0.006 55);
+    --destructive: oklch(0.54 0.21 22);
+
+    --avatar-slate: oklch(0.50 0.05 240);
+    --avatar-rust:  oklch(0.52 0.17 40);
+    --avatar-moss:  oklch(0.50 0.10 140);
+    --avatar-plum:  oklch(0.44 0.11 340);
+  }
+
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
 
@@ -482,9 +503,78 @@
     border-radius: 2px;
   }
   @media (max-width: 900px) { .legend { display: none; } }
+
+  /* Light-mode overrides */
+  html[data-theme="light"] body::before {
+    background-image:
+      linear-gradient(to right, oklch(0 0 0 / 0.025) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(0 0 0 / 0.025) 1px, transparent 1px);
+  }
+  html[data-theme="light"] .phone {
+    box-shadow:
+      0 30px 60px -20px oklch(0.20 0.01 45 / 0.18),
+      0 0 0 1px var(--border);
+  }
+  html[data-theme="light"] .avatar.sm {
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+  html[data-theme="light"] .fab {
+    box-shadow:
+      0 0 0 6px oklch(0.56 0.19 42 / 0.14),
+      0 12px 28px -8px oklch(0.56 0.19 42 / 0.45),
+      inset 0 1px 0 oklch(1 0 0 / 0.35);
+  }
+  html[data-theme="light"] .fab:hover {
+    box-shadow:
+      0 0 0 8px oklch(0.56 0.19 42 / 0.16),
+      0 16px 36px -8px oklch(0.56 0.19 42 / 0.55),
+      inset 0 1px 0 oklch(1 0 0 / 0.35);
+  }
+  html[data-theme="light"] .legend code,
+  html[data-theme="light"] code {
+    background: oklch(0 0 0 / 0.05);
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 28px; right: 28px;
+    z-index: 10;
+    display: inline-flex;
+    padding: 3px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .theme-toggle button {
+    background: none;
+    border: 0;
+    padding: 6px 12px;
+    border-radius: 2px;
+    color: var(--fg-muted);
+    cursor: pointer;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    transition: all 0.2s ease;
+  }
+  .theme-toggle button.active {
+    background: var(--fg);
+    color: var(--bg);
+  }
 </style>
 </head>
 <body>
+
+<div class="theme-toggle" role="group" aria-label="Theme">
+  <button type="button" data-theme="dark">Dark</button>
+  <button type="button" data-theme="light">Light</button>
+</div>
 
 <aside class="legend">
   <h2>Carbon<em>.</em></h2>
@@ -628,6 +718,28 @@
     V 0.0.0 · RASMUS
   </div>
 </div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var saved = localStorage.getItem("opensplit-theme") || "dark";
+    root.dataset.theme = saved;
+    var buttons = document.querySelectorAll(".theme-toggle button");
+    function sync(theme) {
+      buttons.forEach(function (b) {
+        b.classList.toggle("active", b.dataset.theme === theme);
+      });
+    }
+    sync(saved);
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () {
+        root.dataset.theme = b.dataset.theme;
+        localStorage.setItem("opensplit-theme", b.dataset.theme);
+        sync(b.dataset.theme);
+      });
+    });
+  })();
+</script>
 
 </body>
 </html>
