@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>opensplit — redesign prototypes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: #0d0c0b;
+    color: #e8e4dc;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    padding: 48px 24px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  h1 {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "opsz" 144, "wght" 400;
+    font-size: 56px;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+    line-height: 1;
+    margin: 0 0 8px;
+  }
+  h1 em { font-style: italic; color: #e8c866; }
+  .sub {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #807a71;
+    margin-bottom: 48px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  a.card {
+    display: block;
+    padding: 28px;
+    border-radius: 18px;
+    text-decoration: none;
+    color: inherit;
+    background: #1a1917;
+    border: 1px solid #2c2a26;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  a.card:hover { transform: translateY(-2px); border-color: #403c34; }
+  a.card .letter {
+    position: absolute;
+    top: 12px; right: 16px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: #605b53;
+    text-transform: uppercase;
+  }
+  a.card .swatch {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+  a.card .swatch span {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  a.card h2 {
+    font-size: 36px;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    font-weight: 400;
+  }
+  a.card .tagline {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: #807a71;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  a.card p {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: #a69f94;
+    margin: 0 0 16px;
+    line-height: 1.7;
+  }
+  a.card .fonts {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    color: #8a847a;
+    line-height: 1.8;
+    border-top: 1px solid #2c2a26;
+    padding-top: 14px;
+  }
+  a.card .open {
+    margin-top: 18px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Ledger card */
+  .ledger { background: oklch(0.16 0.012 55); border-color: oklch(0.28 0.012 60); }
+  .ledger h2 { font-family: "Fraunces", serif; font-variation-settings: "opsz" 144, "wght" 440; }
+  .ledger h2 em { font-style: italic; color: oklch(0.82 0.14 78); font-variation-settings: "opsz" 144, "wght" 400; }
+  .ledger .open { color: oklch(0.82 0.14 78); }
+
+  /* Riso card */
+  .riso { background: oklch(0.17 0.02 330); border-color: oklch(0.35 0.04 330); }
+  .riso h2 { font-family: "Bricolage Grotesque", sans-serif; font-variation-settings: "opsz" 96, "wght" 700; letter-spacing: -0.03em; }
+  .riso h2 em { color: oklch(0.85 0.18 155); font-style: italic; }
+  .riso .open { color: oklch(0.85 0.18 155); }
+
+  /* Carbon card */
+  .carbon { background: oklch(0.14 0.005 40); border-color: oklch(0.26 0.006 40); }
+  .carbon h2 { font-family: "Instrument Serif", serif; font-weight: 400; }
+  .carbon h2 em { font-style: italic; color: oklch(0.73 0.18 45); }
+  .carbon .open { color: oklch(0.73 0.18 45); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pick a <em>direction</em></h1>
+  <div class="sub">opensplit · group page redesign · three prototypes</div>
+
+  <div class="grid">
+    <a class="card ledger" href="ledger.html">
+      <span class="letter">A</span>
+      <div class="swatch">
+        <span style="background: oklch(0.82 0.14 78)"></span>
+        <span style="background: oklch(0.66 0.18 24)"></span>
+        <span style="background: oklch(0.70 0.07 150)"></span>
+        <span style="background: oklch(0.58 0.16 50)"></span>
+        <span style="background: oklch(0.52 0.10 335)"></span>
+      </div>
+      <h2>Ledger <em>—</em></h2>
+      <div class="tagline">warm editorial</div>
+      <p>Warm ink backdrop, cream type, amber accent. A trip journal rather than a dashboard.</p>
+      <div class="fonts">
+        Display · Fraunces<br>
+        Body · Geist<br>
+        Numerals · JetBrains Mono
+      </div>
+      <div class="open">Open prototype →</div>
+    </a>
+
+    <a class="card riso" href="riso.html">
+      <span class="letter">B</span>
+      <div class="swatch">
+        <span style="background: oklch(0.85 0.18 155)"></span>
+        <span style="background: oklch(0.58 0.20 250)"></span>
+        <span style="background: oklch(0.72 0.19 50)"></span>
+        <span style="background: oklch(0.85 0.20 120)"></span>
+        <span style="background: oklch(0.72 0.15 310)"></span>
+      </div>
+      <h2>Riso <em>/</em></h2>
+      <div class="tagline">playful risograph</div>
+      <p>Plum-dark, electric-mint punch, grain overlay, offset hard shadows. Loud but controlled.</p>
+      <div class="fonts">
+        Display · Bricolage Grotesque<br>
+        Body · Manrope<br>
+        Numerals · Space Mono
+      </div>
+      <div class="open">Open prototype →</div>
+    </a>
+
+    <a class="card carbon" href="carbon.html">
+      <span class="letter">C</span>
+      <div class="swatch">
+        <span style="background: oklch(0.73 0.18 45)"></span>
+        <span style="background: oklch(0.55 0.04 240)"></span>
+        <span style="background: oklch(0.60 0.16 40)"></span>
+        <span style="background: oklch(0.58 0.10 140)"></span>
+        <span style="background: oklch(0.50 0.10 340)"></span>
+      </div>
+      <h2>Carbon<em>.</em></h2>
+      <div class="tagline">refined minimal</div>
+      <p>Near-black warm base, italic serif display, single tangerine accent. Hairlines, not cards.</p>
+      <div class="fonts">
+        Display · Instrument Serif<br>
+        Body · IBM Plex Sans<br>
+        Numerals · IBM Plex Mono
+      </div>
+      <div class="open">Open prototype →</div>
+    </a>
+  </div>
+</div>
+</body>
+</html>
