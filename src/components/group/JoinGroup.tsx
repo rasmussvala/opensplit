@@ -49,7 +49,7 @@ export default function JoinGroup({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Alice"
-          className="rounded border px-3 py-2 text-sm"
+          className="rounded border px-3 py-2 text-base md:text-sm"
         />
       </div>
 

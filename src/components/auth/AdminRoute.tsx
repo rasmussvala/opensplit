@@ -44,7 +44,7 @@ export default function AdminRoute() {
             type="password"
             value={pin}
             onChange={(e) => setPin(e.target.value)}
-            className="rounded border px-3 py-2 text-sm"
+            className="rounded border px-3 py-2 text-base md:text-sm"
           />
           {pinError && <p className="text-sm text-red-600">Incorrect PIN</p>}
         </div>

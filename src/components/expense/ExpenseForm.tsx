@@ -106,7 +106,7 @@ export default function ExpenseForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="What was it for?"
-          className="flex h-10 w-full rounded-lg border border-border/70 bg-card/40 px-3 text-sm shadow-xs outline-none transition-colors placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
+          className="flex h-10 w-full rounded-lg border border-border/70 bg-card/40 px-3 text-base shadow-xs outline-none transition-colors placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 md:text-sm"
         />
       </div>
 
