@@ -2,7 +2,7 @@ import MemberAvatar from "@/components/group/MemberAvatar"
 import type { DbExpense } from "@/lib/types"
 import { formatAmount } from "@/lib/utils"
 
-interface ExpenseItemViewProps {
+interface ExpenseItemProps {
   expense: DbExpense
   currency: string
   getMemberName: (id: string) => string
@@ -10,11 +10,11 @@ interface ExpenseItemViewProps {
 
 const MAX_STACK_AVATARS = 4
 
-export default function ExpenseItemView({
+export default function ExpenseItem({
   expense,
   currency,
   getMemberName,
-}: ExpenseItemViewProps) {
+}: ExpenseItemProps) {
   const createdAt = new Date(expense.created_at)
   const dateLabel = createdAt
     .toLocaleDateString("en", { month: "short", day: "numeric" })

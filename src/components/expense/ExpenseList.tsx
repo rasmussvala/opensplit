@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import type { DbExpense, DbGroupMember } from "@/lib/types"
-import ExpenseItemView from "./ExpenseItemView"
+import ExpenseItem from "./ExpenseItem"
 
 interface ExpenseListProps {
   expenses: DbExpense[]
@@ -42,7 +42,7 @@ export default function ExpenseList({
             to={`/groups/${inviteToken}/edit-expense/${expense.id}`}
             className="group relative block overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 transition-colors hover:border-border hover:bg-card/70"
           >
-            <ExpenseItemView
+            <ExpenseItem
               expense={expense}
               currency={currency}
               getMemberName={getMemberName}
