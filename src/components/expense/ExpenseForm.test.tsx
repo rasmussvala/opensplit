@@ -1,14 +1,7 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { supabase } from "@/lib/supabase"
 import type { DbGroupMember } from "@/lib/types"
-import AddExpense from "./AddExpense"
-
-vi.mock("@/lib/supabase", () => ({
-  supabase: {
-    from: vi.fn(),
-  },
-}))
+import ExpenseForm from "./ExpenseForm"
 
 const mockMembers: DbGroupMember[] = [
   {
@@ -34,25 +27,25 @@ const mockMembers: DbGroupMember[] = [
   },
 ]
 
-function renderAddExpense(onAdded = vi.fn()) {
+function renderForm(onSubmit = vi.fn()) {
   render(
-    <AddExpense
-      groupId="group-1"
+    <ExpenseForm
       members={mockMembers}
       currency="USD"
-      onAdded={onAdded}
+      submitLabel="Add expense"
+      onSubmit={onSubmit}
     />,
   )
-  return { onAdded }
+  return { onSubmit }
 }
 
-describe("AddExpense", () => {
+describe("ExpenseForm", () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   it("renders form with all fields", () => {
-    renderAddExpense()
+    renderForm()
 
     expect(screen.getByLabelText(/description/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/amount/i)).toBeInTheDocument()
@@ -72,7 +65,7 @@ describe("AddExpense", () => {
   })
 
   it("defaults to first member as payer", () => {
-    renderAddExpense()
+    renderForm()
 
     expect(
       screen.getByRole("button", { name: /paid by alice/i }),
@@ -83,7 +76,7 @@ describe("AddExpense", () => {
   })
 
   it("checks all members for split by default", () => {
-    renderAddExpense()
+    renderForm()
 
     for (const m of mockMembers) {
       expect(screen.getByRole("checkbox", { name: m.guest_name })).toBeChecked()
@@ -91,7 +84,7 @@ describe("AddExpense", () => {
   })
 
   it("toggles split membership when a member is unchecked", () => {
-    renderAddExpense()
+    renderForm()
 
     fireEvent.click(screen.getByRole("checkbox", { name: /charlie/i }))
 
@@ -100,13 +93,8 @@ describe("AddExpense", () => {
     expect(screen.getByRole("checkbox", { name: /bob/i })).toBeChecked()
   })
 
-  it("submits expense to supabase and calls onAdded", async () => {
-    const mockInsert = vi.fn().mockResolvedValue({ error: null })
-    vi.mocked(supabase.from).mockReturnValue({
-      insert: mockInsert,
-    } as unknown as ReturnType<typeof supabase.from>)
-
-    const { onAdded } = renderAddExpense()
+  it("calls onSubmit with form data", () => {
+    const { onSubmit } = renderForm()
 
     fireEvent.change(screen.getByLabelText(/description/i), {
       target: { value: "Dinner" },
@@ -117,24 +105,16 @@ describe("AddExpense", () => {
     fireEvent.click(screen.getByRole("button", { name: /paid by bob/i }))
     fireEvent.click(screen.getByRole("button", { name: /add expense/i }))
 
-    await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith("expenses")
-      expect(mockInsert).toHaveBeenCalledWith({
-        group_id: "group-1",
-        description: "Dinner",
-        amount: 90,
-        paid_by: "member-2",
-        split_among: ["member-1", "member-2", "member-3"],
-      })
-    })
-
-    await waitFor(() => {
-      expect(onAdded).toHaveBeenCalled()
+    expect(onSubmit).toHaveBeenCalledWith({
+      description: "Dinner",
+      amount: 90,
+      paidBy: "member-2",
+      splitAmong: ["member-1", "member-2", "member-3"],
     })
   })
 
   it("does not submit if description is empty", () => {
-    renderAddExpense()
+    const { onSubmit } = renderForm()
 
     fireEvent.change(screen.getByLabelText(/amount/i), {
       target: { value: "50" },
@@ -142,11 +122,11 @@ describe("AddExpense", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /add expense/i }))
 
-    expect(supabase.from).not.toHaveBeenCalled()
+    expect(onSubmit).not.toHaveBeenCalled()
   })
 
   it("does not submit if amount is zero", () => {
-    renderAddExpense()
+    const { onSubmit } = renderForm()
 
     fireEvent.change(screen.getByLabelText(/description/i), {
       target: { value: "Dinner" },
@@ -154,11 +134,11 @@ describe("AddExpense", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /add expense/i }))
 
-    expect(supabase.from).not.toHaveBeenCalled()
+    expect(onSubmit).not.toHaveBeenCalled()
   })
 
   it("does not submit if no members are selected for split", () => {
-    renderAddExpense()
+    const { onSubmit } = renderForm()
 
     fireEvent.change(screen.getByLabelText(/description/i), {
       target: { value: "Dinner" },
@@ -173,31 +153,6 @@ describe("AddExpense", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /add expense/i }))
 
-    expect(supabase.from).not.toHaveBeenCalled()
-  })
-
-  it("resets form after successful submission", async () => {
-    const mockInsert = vi.fn().mockResolvedValue({ error: null })
-    vi.mocked(supabase.from).mockReturnValue({
-      insert: mockInsert,
-    } as unknown as ReturnType<typeof supabase.from>)
-
-    const { onAdded } = renderAddExpense()
-
-    fireEvent.change(screen.getByLabelText(/description/i), {
-      target: { value: "Dinner" },
-    })
-    fireEvent.change(screen.getByLabelText(/amount/i), {
-      target: { value: "90" },
-    })
-
-    fireEvent.click(screen.getByRole("button", { name: /add expense/i }))
-
-    await waitFor(() => {
-      expect(onAdded).toHaveBeenCalled()
-    })
-
-    expect(screen.getByLabelText(/description/i)).toHaveValue("")
-    expect(screen.getByLabelText(/amount/i)).toHaveValue(null)
+    expect(onSubmit).not.toHaveBeenCalled()
   })
 })

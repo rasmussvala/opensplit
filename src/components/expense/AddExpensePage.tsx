@@ -2,7 +2,9 @@ import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
-import AddExpense from "@/components/expense/AddExpense"
+import ExpenseForm, {
+  type ExpenseFormData,
+} from "@/components/expense/ExpenseForm"
 import { supabase } from "@/lib/supabase"
 import type { DbGroup, DbGroupMember } from "@/lib/types"
 
@@ -64,6 +66,20 @@ export default function AddExpensePage() {
   const { group, members } = state
   const groupUrl = `/groups/${inviteToken}`
 
+  async function handleSubmit(data: ExpenseFormData) {
+    const { error } = await supabase.from("expenses").insert({
+      group_id: group.id,
+      description: data.description,
+      amount: data.amount,
+      paid_by: data.paidBy,
+      split_among: data.splitAmong,
+    })
+
+    if (error) return
+
+    navigate(groupUrl)
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-2 py-6">
       <Link
@@ -76,11 +92,11 @@ export default function AddExpensePage() {
 
       <h2 className="font-semibold text-[22px] tracking-tight">New expense</h2>
 
-      <AddExpense
-        groupId={group.id}
+      <ExpenseForm
         members={members}
         currency={group.currency}
-        onAdded={() => navigate(groupUrl)}
+        submitLabel="Add expense"
+        onSubmit={handleSubmit}
       />
     </div>
   )
