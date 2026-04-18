@@ -81,7 +81,7 @@ describe("BalanceSummary", () => {
     expect(screen.getByText(/all settled up/i)).toBeInTheDocument()
   })
 
-  it("shows positive balance in green", () => {
+  it("shows positive balance in the positive theme color", () => {
     const expenses: DbExpense[] = [
       {
         id: "expense-1",
@@ -97,10 +97,10 @@ describe("BalanceSummary", () => {
     renderBalanceSummary({ expenses })
 
     const aliceBalance = screen.getByTestId("balance-member-1")
-    expect(aliceBalance).toHaveClass("text-green-400")
+    expect(aliceBalance).toHaveClass("text-positive")
   })
 
-  it("shows negative balance in red", () => {
+  it("shows negative balance in the destructive theme color", () => {
     const expenses: DbExpense[] = [
       {
         id: "expense-1",
@@ -116,7 +116,7 @@ describe("BalanceSummary", () => {
     renderBalanceSummary({ expenses })
 
     const bobBalance = screen.getByTestId("balance-member-2")
-    expect(bobBalance).toHaveClass("text-red-400")
+    expect(bobBalance).toHaveClass("text-destructive")
   })
 
   it("shows formatted balance amounts", () => {
