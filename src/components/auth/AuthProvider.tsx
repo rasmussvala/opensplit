@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { createContext, useContext, useEffect, useState } from "react"
+import { LoadingState } from "@/components/ui/loading-state"
 import { ensureSession } from "@/lib/auth"
 
 interface AuthContextValue {
@@ -24,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   if (!userId) {
-    return <div>Loading…</div>
+    return <LoadingState centered className="min-h-[100svh]" />
   }
 
   return (

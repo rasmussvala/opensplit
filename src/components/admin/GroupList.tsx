@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { LoadingState } from "@/components/ui/loading-state"
 import { supabase } from "@/lib/supabase"
 import type { DbGroup } from "@/lib/types"
 
@@ -33,7 +34,7 @@ export default function GroupList() {
     fetchGroups()
   }, [])
 
-  if (loading) return <p>Loading...</p>
+  if (loading) return <LoadingState className="px-0" />
 
   if (groups.length === 0)
     return <p className="text-muted-foreground">No groups yet</p>

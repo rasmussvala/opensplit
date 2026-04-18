@@ -8,6 +8,7 @@ import GroupHeader from "@/components/group/GroupHeader"
 import JoinGroup from "@/components/group/JoinGroup"
 import PaymentsList from "@/components/payments/PaymentsList"
 import { Button } from "@/components/ui/button"
+import { LoadingState } from "@/components/ui/loading-state"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { supabase } from "@/lib/supabase"
 import type {
@@ -140,7 +141,7 @@ export default function GroupPage() {
   }, [groupId, loadGroup])
 
   if (state.status === "loading") {
-    return <p className="p-6 text-center">Loading…</p>
+    return <LoadingState centered />
   }
 
   if (state.status === "not-found") {

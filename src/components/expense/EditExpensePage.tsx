@@ -5,6 +5,7 @@ import { useAuth } from "@/components/auth/AuthProvider"
 import ExpenseForm, {
   type ExpenseFormData,
 } from "@/components/expense/ExpenseForm"
+import { LoadingState } from "@/components/ui/loading-state"
 import { supabase } from "@/lib/supabase"
 import type { DbExpense, DbGroupMember } from "@/lib/types"
 
@@ -109,7 +110,7 @@ export default function EditExpensePage() {
   }
 
   if (state.status === "loading") {
-    return <p className="p-6 text-center">Loading...</p>
+    return <LoadingState centered />
   }
 
   if (state.status === "not-found") {

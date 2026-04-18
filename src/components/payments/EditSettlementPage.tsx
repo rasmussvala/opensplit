@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Button } from "@/components/ui/button"
+import { LoadingState } from "@/components/ui/loading-state"
 import { supabase } from "@/lib/supabase"
 import type { DbGroupMember, DbSettlement } from "@/lib/types"
 import { formatAmount } from "@/lib/utils"
@@ -92,7 +93,7 @@ export default function EditSettlementPage() {
   }
 
   if (state.status === "loading") {
-    return <p className="p-6 text-center">Loading...</p>
+    return <LoadingState centered />
   }
 
   if (state.status === "not-found") {
