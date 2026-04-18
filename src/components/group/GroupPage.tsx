@@ -17,10 +17,10 @@ import type {
   DbSettlement,
 } from "@/lib/types"
 
-type TabValue = "expenses" | "balance" | "payments"
+type TabValue = "expenses" | "balances" | "payments"
 
 function parseTab(value: string | null): TabValue {
-  if (value === "balance" || value === "payments") return value
+  if (value === "balances" || value === "payments") return value
   return "expenses"
 }
 
@@ -180,7 +180,7 @@ export default function GroupPage() {
       <GroupHeader group={group} members={members} totalSpent={totalSpent}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="balance">Balance</TabsTrigger>
+          <TabsTrigger value="balances">Balances</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
         </TabsList>
       </GroupHeader>
@@ -194,7 +194,7 @@ export default function GroupPage() {
         />
       </TabsContent>
 
-      <TabsContent value="balance">
+      <TabsContent value="balances">
         <BalanceSummary
           expenses={expenses}
           settlements={settlements}

@@ -268,7 +268,7 @@ describe("GroupPage", () => {
       },
     })
 
-    renderWithRoute("token-abc?tab=balance")
+    renderWithRoute("token-abc?tab=balances")
 
     await waitFor(() => {
       expect(screen.getByText(/all settled up/i)).toBeInTheDocument()
