@@ -1,16 +1,16 @@
 import { cn } from "@/lib/utils"
 
 const AVATAR_COLORS = [
-  "bg-rose-400 dark:bg-rose-500",
-  "bg-amber-400 dark:bg-amber-500",
-  "bg-emerald-400 dark:bg-emerald-500",
-  "bg-sky-400 dark:bg-sky-500",
-  "bg-violet-400 dark:bg-violet-500",
-  "bg-pink-400 dark:bg-pink-500",
-  "bg-teal-400 dark:bg-teal-500",
-  "bg-orange-400 dark:bg-orange-500",
-  "bg-indigo-400 dark:bg-indigo-500",
-  "bg-lime-400 dark:bg-lime-500",
+  "bg-avatar-01",
+  "bg-avatar-02",
+  "bg-avatar-03",
+  "bg-avatar-04",
+  "bg-avatar-05",
+  "bg-avatar-06",
+  "bg-avatar-07",
+  "bg-avatar-08",
+  "bg-avatar-09",
+  "bg-avatar-10",
 ]
 
 function colorFor(id: string): string {
