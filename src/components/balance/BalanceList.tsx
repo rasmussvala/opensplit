@@ -54,8 +54,8 @@ export default function BalanceList({
               data-testid={`balance-${row.memberId}`}
               className={
                 isCredit
-                  ? "relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 text-green-400"
-                  : "relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 text-red-400"
+                  ? "relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 text-positive"
+                  : "relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 text-destructive"
               }
             >
               <MemberAvatar
@@ -73,8 +73,8 @@ export default function BalanceList({
                   <div
                     className={
                       isCredit
-                        ? "absolute inset-y-0 left-0 rounded-full bg-emerald-400/80"
-                        : "absolute inset-y-0 left-0 rounded-full bg-rose-400/80"
+                        ? "absolute inset-y-0 left-0 rounded-full bg-positive/80"
+                        : "absolute inset-y-0 left-0 rounded-full bg-destructive/80"
                     }
                     style={{ width: `${widthPct}%` }}
                   />
