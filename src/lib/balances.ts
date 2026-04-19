@@ -1,4 +1,5 @@
 import type { SplitOverrides } from "./types"
+import { round2 } from "./utils"
 
 export interface Expense {
   paid_by: string
@@ -11,10 +12,6 @@ export interface Settlement {
   from: string
   to: string
   amount: number
-}
-
-function round2(value: number): number {
-  return Math.round(value * 100) / 100
 }
 
 export function computeShares(expense: Expense): Record<string, number> {

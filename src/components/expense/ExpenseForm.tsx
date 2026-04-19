@@ -8,7 +8,7 @@ import type {
   SplitOverrideMode,
   SplitOverrides,
 } from "@/lib/types"
-import { cn, formatAmount } from "@/lib/utils"
+import { cn, formatAmount, formatAmountNumber, round2 } from "@/lib/utils"
 
 export interface ExpenseFormData {
   description: string
@@ -33,10 +33,6 @@ interface ExpenseFormProps {
 }
 
 const INPUT_PATTERN = /^\d*\.?\d{0,2}$/
-
-function round2(value: number): number {
-  return Math.round(value * 100) / 100
-}
 
 function formatRaw(value: number): string {
   if (!Number.isFinite(value)) return ""
@@ -288,10 +284,7 @@ export default function ExpenseForm({
             const isOverride = m.id in overrides
             const shareNumber =
               checked && shareValue !== undefined
-                ? formatAmount(currency, shareValue)
-                    .split(" ")
-                    .slice(1)
-                    .join(" ")
+                ? formatAmountNumber(shareValue)
                 : null
 
             let inputValue = ""
