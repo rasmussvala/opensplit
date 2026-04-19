@@ -1,0 +1,13 @@
+{
+  "name": "opensplit",
+  "short_name": "opensplit",
+  "icons": [
+    {
+      "src": "/opensplit/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/opensplit/",
+  "display": "standalone"
+}
