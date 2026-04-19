@@ -2,8 +2,9 @@ import { Check, Trash2 } from "lucide-react"
 import { useState } from "react"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Button } from "@/components/ui/button"
+import { computeShares } from "@/lib/balances"
 import type { DbGroupMember } from "@/lib/types"
-import { cn } from "@/lib/utils"
+import { cn, formatAmount } from "@/lib/utils"
 
 export interface ExpenseFormData {
   description: string
@@ -45,6 +46,16 @@ export default function ExpenseForm({
   )
 
   const parsedAmount = Number(amount) || 0
+
+  const shares =
+    parsedAmount > 0 && splitAmong.length > 0
+      ? computeShares({
+          paid_by: paidBy,
+          amount: parsedAmount,
+          split_among: splitAmong,
+          split_overrides: null,
+        })
+      : {}
 
   function toggleMember(memberId: string) {
     setSplitAmong((prev) =>
@@ -155,6 +166,14 @@ export default function ExpenseForm({
         <div className="flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card/40">
           {members.map((m, i) => {
             const checked = splitAmong.includes(m.id)
+            const shareValue = shares[m.id]
+            const shareNumber =
+              checked && shareValue !== undefined
+                ? formatAmount(currency, shareValue)
+                    .split(" ")
+                    .slice(1)
+                    .join(" ")
+                : null
             return (
               <label
                 key={m.id}
@@ -175,9 +194,17 @@ export default function ExpenseForm({
                   name={m.guest_name}
                   className="h-7 w-7 text-[11px] shadow-sm ring-2 ring-background"
                 />
-                <span className="flex-1 text-sm font-medium">
-                  {m.guest_name}
-                </span>
+                <div className="flex min-w-0 flex-1 flex-col leading-tight">
+                  <span className="text-sm font-medium">{m.guest_name}</span>
+                  {shareNumber && (
+                    <span
+                      data-testid={`share-${m.id}`}
+                      className="text-[11px] text-muted-foreground tabular-nums"
+                    >
+                      {shareNumber} {currency}
+                    </span>
+                  )}
+                </div>
                 <div
                   aria-hidden="true"
                   className={cn(
