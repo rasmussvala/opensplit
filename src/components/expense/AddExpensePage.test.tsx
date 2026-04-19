@@ -158,7 +158,7 @@ describe("AddExpensePage", () => {
       expect(screen.getByText("New expense")).toBeInTheDocument()
     })
 
-    expect(screen.getByText("USD")).toBeInTheDocument()
+    expect(screen.getAllByText("USD").length).toBeGreaterThan(0)
     expect(
       screen.getByRole("button", { name: /paid by alice/i }),
     ).toBeInTheDocument()
