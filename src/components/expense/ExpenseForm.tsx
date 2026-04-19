@@ -3,7 +3,11 @@ import { useState } from "react"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Button } from "@/components/ui/button"
 import { computeShares } from "@/lib/balances"
-import type { DbGroupMember } from "@/lib/types"
+import type {
+  DbGroupMember,
+  SplitOverrideMode,
+  SplitOverrides,
+} from "@/lib/types"
 import { cn, formatAmount } from "@/lib/utils"
 
 export interface ExpenseFormData {
@@ -26,6 +30,17 @@ interface ExpenseFormProps {
   onDelete?: () => void
 }
 
+const INPUT_PATTERN = /^\d*\.?\d{0,2}$/
+
+function round2(value: number): number {
+  return Math.round(value * 100) / 100
+}
+
+function formatRaw(value: number): string {
+  if (!Number.isFinite(value)) return ""
+  return round2(value).toString()
+}
+
 export default function ExpenseForm({
   members,
   currency,
@@ -44,8 +59,12 @@ export default function ExpenseForm({
   const [splitAmong, setSplitAmong] = useState<string[]>(
     initialSplitAmong ?? members.map((m) => m.id),
   )
+  const [splitMode, setSplitMode] = useState<SplitOverrideMode>("percent")
+  const [overrides, setOverrides] = useState<Record<string, string>>({})
 
   const parsedAmount = Number(amount) || 0
+
+  const activeOverrides = buildActiveOverrides(overrides, splitAmong, splitMode)
 
   const shares =
     parsedAmount > 0 && splitAmong.length > 0
@@ -53,7 +72,7 @@ export default function ExpenseForm({
           paid_by: paidBy,
           amount: parsedAmount,
           split_among: splitAmong,
-          split_overrides: null,
+          split_overrides: activeOverrides,
         })
       : {}
 
@@ -63,6 +82,53 @@ export default function ExpenseForm({
         ? prev.filter((id) => id !== memberId)
         : [...prev, memberId],
     )
+    setOverrides((prev) => {
+      if (!(memberId in prev)) return prev
+      const next = { ...prev }
+      delete next[memberId]
+      return next
+    })
+  }
+
+  function handleModeChange(nextMode: SplitOverrideMode) {
+    if (nextMode === splitMode) return
+    setOverrides((prev) => {
+      if (parsedAmount <= 0) return prev
+      const next: Record<string, string> = {}
+      for (const [memberId, raw] of Object.entries(prev)) {
+        const num = Number(raw)
+        if (!raw.trim() || !Number.isFinite(num)) {
+          next[memberId] = raw
+          continue
+        }
+        const converted =
+          splitMode === "percent" && nextMode === "amount"
+            ? (num / 100) * parsedAmount
+            : splitMode === "amount" && nextMode === "percent"
+              ? (num / parsedAmount) * 100
+              : num
+        next[memberId] = formatRaw(converted)
+      }
+      return next
+    })
+    setSplitMode(nextMode)
+  }
+
+  function handleOverrideChange(memberId: string, raw: string) {
+    if (raw !== "" && !INPUT_PATTERN.test(raw)) return
+    setOverrides((prev) => ({ ...prev, [memberId]: raw }))
+  }
+
+  function handleOverrideBlur(memberId: string) {
+    const raw = overrides[memberId]
+    if (raw === undefined) return
+    if (!raw.trim()) {
+      setOverrides((prev) => {
+        const next = { ...prev }
+        delete next[memberId]
+        return next
+      })
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -160,13 +226,44 @@ export default function ExpenseForm({
 
       {/* Split among — tappable list */}
       <div className="flex flex-col gap-2">
-        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
-          Split among
-        </span>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
+            Split among
+          </span>
+          <div className="inline-flex items-center rounded-full border border-border/70 bg-card/40 p-0.5 text-[11px] font-medium">
+            <button
+              type="button"
+              aria-pressed={splitMode === "percent"}
+              onClick={() => handleModeChange("percent")}
+              className={cn(
+                "rounded-full px-2.5 py-0.5 transition-colors",
+                splitMode === "percent"
+                  ? "bg-primary/10 text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              %
+            </button>
+            <button
+              type="button"
+              aria-pressed={splitMode === "amount"}
+              onClick={() => handleModeChange("amount")}
+              className={cn(
+                "rounded-full px-2.5 py-0.5 transition-colors",
+                splitMode === "amount"
+                  ? "bg-primary/10 text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {currency}
+            </button>
+          </div>
+        </div>
         <div className="flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card/40">
           {members.map((m, i) => {
             const checked = splitAmong.includes(m.id)
             const shareValue = shares[m.id]
+            const isOverride = m.id in overrides
             const shareNumber =
               checked && shareValue !== undefined
                 ? formatAmount(currency, shareValue)
@@ -174,6 +271,20 @@ export default function ExpenseForm({
                     .slice(1)
                     .join(" ")
                 : null
+
+            let inputValue = ""
+            if (checked) {
+              if (isOverride) {
+                inputValue = overrides[m.id]
+              } else if (parsedAmount > 0 && shareValue !== undefined) {
+                const autoValue =
+                  splitMode === "percent"
+                    ? (shareValue / parsedAmount) * 100
+                    : shareValue
+                inputValue = formatRaw(autoValue)
+              }
+            }
+
             return (
               <label
                 key={m.id}
@@ -195,7 +306,14 @@ export default function ExpenseForm({
                   className="h-7 w-7 text-[11px] shadow-sm ring-2 ring-background"
                 />
                 <div className="flex min-w-0 flex-1 flex-col leading-tight">
-                  <span className="text-sm font-medium">{m.guest_name}</span>
+                  <span
+                    className={cn(
+                      "text-sm",
+                      isOverride ? "font-semibold" : "font-medium",
+                    )}
+                  >
+                    {m.guest_name}
+                  </span>
                   {shareNumber && (
                     <span
                       data-testid={`share-${m.id}`}
@@ -204,6 +322,25 @@ export default function ExpenseForm({
                       {shareNumber} {currency}
                     </span>
                   )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    aria-label={`${m.guest_name} share`}
+                    value={inputValue}
+                    disabled={!checked}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => handleOverrideChange(m.id, e.target.value)}
+                    onBlur={() => handleOverrideBlur(m.id)}
+                    className={cn(
+                      "w-16 rounded-md border border-border/70 bg-background/60 px-1.5 py-1 text-right text-base tabular-nums outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-40",
+                      isOverride ? "font-semibold" : "font-normal",
+                    )}
+                  />
+                  <span className="w-6 text-[10px] text-muted-foreground uppercase tracking-wider">
+                    {splitMode === "percent" ? "%" : currency}
+                  </span>
                 </div>
                 <div
                   aria-hidden="true"
@@ -246,4 +383,21 @@ export default function ExpenseForm({
       </div>
     </form>
   )
+}
+
+function buildActiveOverrides(
+  overrides: Record<string, string>,
+  splitAmong: string[],
+  splitMode: SplitOverrideMode,
+): SplitOverrides | null {
+  const values: Record<string, number> = {}
+  for (const [memberId, raw] of Object.entries(overrides)) {
+    if (!splitAmong.includes(memberId)) continue
+    if (!raw.trim()) continue
+    const num = Number(raw)
+    if (!Number.isFinite(num) || num < 0) continue
+    values[memberId] = num
+  }
+  if (Object.keys(values).length === 0) return null
+  return { mode: splitMode, values }
 }

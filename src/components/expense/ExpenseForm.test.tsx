@@ -162,6 +162,90 @@ describe("ExpenseForm", () => {
     expect(screen.getByTestId("share-member-2")).toHaveTextContent("45.00")
   })
 
+  it("shows percent auto values in each row input by default", () => {
+    renderForm()
+
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "90" },
+    })
+
+    for (const m of mockMembers) {
+      expect(screen.getByLabelText(`${m.guest_name} share`)).toHaveValue(
+        "33.33",
+      )
+    }
+  })
+
+  it("toggles suffix and recomputes auto values when switching mode", () => {
+    renderForm()
+
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "90" },
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "USD" }))
+
+    for (const m of mockMembers) {
+      expect(screen.getByLabelText(`${m.guest_name} share`)).toHaveValue("30")
+    }
+  })
+
+  it("bolds overridden row and redistributes auto shares", () => {
+    renderForm()
+
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "90" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "USD" }))
+
+    const bobInput = screen.getByLabelText("Bob share")
+    fireEvent.change(bobInput, { target: { value: "50" } })
+
+    expect(bobInput).toHaveClass("font-semibold")
+    expect(bobInput).toHaveValue("50")
+    expect(screen.getByLabelText("Alice share")).toHaveValue("20")
+    expect(screen.getByLabelText("Charlie share")).toHaveValue("20")
+    expect(screen.getByTestId("share-member-2")).toHaveTextContent("50.00")
+    expect(screen.getByTestId("share-member-1")).toHaveTextContent("20.00")
+  })
+
+  it("reverts a row to auto when the override is cleared", () => {
+    renderForm()
+
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "90" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "USD" }))
+
+    const bobInput = screen.getByLabelText("Bob share")
+    fireEvent.change(bobInput, { target: { value: "50" } })
+    expect(bobInput).toHaveClass("font-semibold")
+
+    fireEvent.change(bobInput, { target: { value: "" } })
+    fireEvent.blur(bobInput)
+
+    expect(bobInput).toHaveValue("30")
+    expect(bobInput).not.toHaveClass("font-semibold")
+  })
+
+  it("disables input and clears override when member is unchecked", () => {
+    renderForm()
+
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "90" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "USD" }))
+
+    const charlieInput = screen.getByLabelText("Charlie share")
+    fireEvent.change(charlieInput, { target: { value: "40" } })
+    expect(charlieInput).toHaveValue("40")
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /charlie/i }))
+
+    expect(charlieInput).toBeDisabled()
+    expect(charlieInput).toHaveValue("")
+  })
+
   it("does not submit if no members are selected for split", () => {
     const { onSubmit } = renderForm()
 
