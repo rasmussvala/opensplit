@@ -230,33 +230,29 @@ export default function ExpenseForm({
           <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
             Split among
           </span>
-          <div className="inline-flex items-center rounded-full border border-border/70 bg-card/40 p-0.5 text-[11px] font-medium">
-            <button
-              type="button"
-              aria-pressed={splitMode === "percent"}
-              onClick={() => handleModeChange("percent")}
-              className={cn(
-                "rounded-full px-2.5 py-0.5 transition-colors",
-                splitMode === "percent"
-                  ? "bg-primary/10 text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              %
-            </button>
-            <button
-              type="button"
-              aria-pressed={splitMode === "amount"}
-              onClick={() => handleModeChange("amount")}
-              className={cn(
-                "rounded-full px-2.5 py-0.5 transition-colors",
-                splitMode === "amount"
-                  ? "bg-primary/10 text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {currency}
-            </button>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { mode: "percent" as const, label: "%" },
+              { mode: "amount" as const, label: currency },
+            ].map(({ mode, label }) => {
+              const selected = splitMode === mode
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => handleModeChange(mode)}
+                  className={cn(
+                    "inline-flex items-center rounded-full border px-3 py-0.5 text-[12px] font-medium transition-all",
+                    selected
+                      ? "border-primary/60 bg-primary/10 text-foreground shadow-xs"
+                      : "border-border/70 bg-card/40 text-muted-foreground hover:border-border hover:bg-card/70 hover:text-foreground",
+                  )}
+                >
+                  {label}
+                </button>
+              )
+            })}
           </div>
         </div>
         <div className="flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card/40">
@@ -334,7 +330,7 @@ export default function ExpenseForm({
                     onChange={(e) => handleOverrideChange(m.id, e.target.value)}
                     onBlur={() => handleOverrideBlur(m.id)}
                     className={cn(
-                      "w-16 rounded-md border border-border/70 bg-background/60 px-1.5 py-1 text-right text-base tabular-nums outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-40",
+                      "w-24 rounded-md border border-border/70 bg-background/60 px-2 py-1 text-right text-base tabular-nums outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-40",
                       isOverride ? "font-semibold" : "font-normal",
                     )}
                   />
