@@ -245,6 +245,36 @@ describe("AddExpensePage", () => {
     })
   })
 
+  it("defaults paid-by to current user even when not first in members", async () => {
+    const insert = vi.fn().mockResolvedValue({ error: null })
+    const reordered = [mockMembers[1], mockMembers[0]]
+    mockFrom({
+      groups: groupsOk(),
+      group_members: membersReady(mockMembers[0], reordered),
+      expenses: { insert },
+    })
+
+    renderPage()
+
+    await waitFor(() => {
+      expect(screen.getByText("New expense")).toBeInTheDocument()
+    })
+
+    fireEvent.change(screen.getByLabelText(/description/i), {
+      target: { value: "Dinner" },
+    })
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "42" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: /^add expense$/i }))
+
+    await waitFor(() => {
+      expect(insert).toHaveBeenCalledWith(
+        expect.objectContaining({ paid_by: "member-1" }),
+      )
+    })
+  })
+
   it("stays on page when insert returns error", async () => {
     const insert = vi.fn().mockResolvedValue({ error: { message: "db fail" } })
     mockFrom({
