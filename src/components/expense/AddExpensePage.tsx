@@ -12,7 +12,12 @@ import type { DbGroup, DbGroupMember } from "@/lib/types"
 type PageState =
   | { status: "loading" }
   | { status: "not-found" }
-  | { status: "ready"; group: DbGroup; members: DbGroupMember[] }
+  | {
+      status: "ready"
+      group: DbGroup
+      members: DbGroupMember[]
+      currentMemberId: string
+    }
 
 export default function AddExpensePage() {
   const { inviteToken } = useParams<{ inviteToken: string }>()
@@ -49,7 +54,12 @@ export default function AddExpensePage() {
       .select()
       .eq("group_id", group.id)
 
-    setState({ status: "ready", group, members: members ?? [] })
+    setState({
+      status: "ready",
+      group,
+      members: members ?? [],
+      currentMemberId: membership.id,
+    })
   }, [inviteToken, userId])
 
   useEffect(() => {
@@ -64,7 +74,7 @@ export default function AddExpensePage() {
     return <p className="p-6 text-center">Group not found</p>
   }
 
-  const { group, members } = state
+  const { group, members, currentMemberId } = state
   const groupUrl = `/groups/${inviteToken}`
 
   async function handleSubmit(data: ExpenseFormData) {
@@ -97,6 +107,7 @@ export default function AddExpensePage() {
       <ExpenseForm
         members={members}
         currency={group.currency}
+        initialPaidBy={currentMemberId}
         submitLabel="Add expense"
         onSubmit={handleSubmit}
       />
