@@ -90,6 +90,7 @@ export default function EditExpensePage() {
         amount: data.amount,
         paid_by: data.paidBy,
         split_among: data.splitAmong,
+        split_overrides: data.splitOverrides,
       })
       .eq("id", state.expense.id)
 
@@ -153,6 +154,7 @@ export default function EditExpensePage() {
         initialAmount={String(Number(expense.amount))}
         initialPaidBy={expense.paid_by}
         initialSplitAmong={expense.split_among}
+        initialSplitOverrides={expense.split_overrides}
         submitLabel="Save"
         onSubmit={handleSave}
         onCancel={() => navigate(groupUrl)}

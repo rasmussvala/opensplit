@@ -253,6 +253,7 @@ describe("EditExpensePage", () => {
         amount: 90,
         paid_by: "member-2",
         split_among: ["member-1", "member-2"],
+        split_overrides: null,
       })
     })
     expect(eq).toHaveBeenCalledWith("id", "exp-1")
@@ -260,6 +261,49 @@ describe("EditExpensePage", () => {
     await waitFor(() => {
       expect(screen.getByTestId("location")).toHaveTextContent(
         "/groups/token-abc",
+      )
+    })
+  })
+
+  it("hydrates and round-trips split_overrides", async () => {
+    const expenseWithOverrides = {
+      ...mockExpense,
+      split_overrides: {
+        mode: "amount",
+        values: { "member-2": 60 },
+      },
+    }
+    const eq = vi.fn().mockResolvedValue({ error: null })
+    const update = vi.fn().mockReturnValue({ eq })
+
+    mockFrom({
+      groups: groupsOk(),
+      group_members: membersReady(),
+      expenses: expensesTable({
+        fetch: { data: expenseWithOverrides, error: null },
+        update,
+      }),
+    })
+
+    renderPage()
+
+    await waitFor(() => {
+      expect(screen.getByText(/edit expense/i)).toBeInTheDocument()
+    })
+
+    expect(screen.getByLabelText("Bob share")).toHaveValue("60")
+    expect(screen.getByLabelText("Bob share")).toHaveClass("font-semibold")
+
+    fireEvent.click(screen.getByRole("button", { name: /^save$/i }))
+
+    await waitFor(() => {
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          split_overrides: {
+            mode: "amount",
+            values: { "member-2": 60 },
+          },
+        }),
       )
     })
   })

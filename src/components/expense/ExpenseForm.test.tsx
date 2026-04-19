@@ -110,7 +110,73 @@ describe("ExpenseForm", () => {
       amount: 90,
       paidBy: "member-2",
       splitAmong: ["member-1", "member-2", "member-3"],
+      splitOverrides: null,
     })
+  })
+
+  it("submits splitOverrides when a row has an override", () => {
+    const { onSubmit } = renderForm()
+
+    fireEvent.change(screen.getByLabelText(/description/i), {
+      target: { value: "Dinner" },
+    })
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "500" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "USD" }))
+    fireEvent.change(screen.getByLabelText("Bob share"), {
+      target: { value: "300" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: /add expense/i }))
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      description: "Dinner",
+      amount: 500,
+      paidBy: "member-1",
+      splitAmong: ["member-1", "member-2", "member-3"],
+      splitOverrides: {
+        mode: "amount",
+        values: { "member-2": 300 },
+      },
+    })
+  })
+
+  it("hydrates initialSplitOverrides", () => {
+    const onSubmit = vi.fn()
+    render(
+      <ExpenseForm
+        members={mockMembers}
+        currency="USD"
+        initialDescription="Dinner"
+        initialAmount="500"
+        initialPaidBy="member-1"
+        initialSplitAmong={["member-1", "member-2", "member-3"]}
+        initialSplitOverrides={{
+          mode: "amount",
+          values: { "member-2": 300 },
+        }}
+        submitLabel="Save"
+        onSubmit={onSubmit}
+      />,
+    )
+
+    expect(screen.getByLabelText("Bob share")).toHaveValue("300")
+    expect(screen.getByLabelText("Bob share")).toHaveClass("font-semibold")
+    expect(screen.getByRole("button", { name: "USD" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: /save/i }))
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        splitOverrides: {
+          mode: "amount",
+          values: { "member-2": 300 },
+        },
+      }),
+    )
   })
 
   it("does not submit if description is empty", () => {

@@ -196,12 +196,51 @@ describe("AddExpensePage", () => {
         amount: 42,
         paid_by: "member-1",
         split_among: ["member-1", "member-2"],
+        split_overrides: null,
       })
     })
 
     await waitFor(() => {
       expect(screen.getByTestId("location")).toHaveTextContent(
         "/groups/token-abc",
+      )
+    })
+  })
+
+  it("persists split_overrides when a row is overridden", async () => {
+    const insert = vi.fn().mockResolvedValue({ error: null })
+    mockFrom({
+      groups: groupsOk(),
+      group_members: membersReady(),
+      expenses: { insert },
+    })
+
+    renderPage()
+
+    await waitFor(() => {
+      expect(screen.getByText("New expense")).toBeInTheDocument()
+    })
+
+    fireEvent.change(screen.getByLabelText(/description/i), {
+      target: { value: "Dinner" },
+    })
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "500" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "USD" }))
+    fireEvent.change(screen.getByLabelText("Bob share"), {
+      target: { value: "300" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: /^add expense$/i }))
+
+    await waitFor(() => {
+      expect(insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          split_overrides: {
+            mode: "amount",
+            values: { "member-2": 300 },
+          },
+        }),
       )
     })
   })

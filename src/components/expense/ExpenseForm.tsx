@@ -15,6 +15,7 @@ export interface ExpenseFormData {
   amount: number
   paidBy: string
   splitAmong: string[]
+  splitOverrides: SplitOverrides | null
 }
 
 interface ExpenseFormProps {
@@ -24,6 +25,7 @@ interface ExpenseFormProps {
   initialAmount?: string
   initialPaidBy?: string
   initialSplitAmong?: string[]
+  initialSplitOverrides?: SplitOverrides | null
   submitLabel: string
   onSubmit: (data: ExpenseFormData) => void | Promise<void>
   onCancel?: () => void
@@ -48,6 +50,7 @@ export default function ExpenseForm({
   initialAmount = "",
   initialPaidBy,
   initialSplitAmong,
+  initialSplitOverrides,
   submitLabel,
   onSubmit,
   onCancel,
@@ -59,8 +62,18 @@ export default function ExpenseForm({
   const [splitAmong, setSplitAmong] = useState<string[]>(
     initialSplitAmong ?? members.map((m) => m.id),
   )
-  const [splitMode, setSplitMode] = useState<SplitOverrideMode>("percent")
-  const [overrides, setOverrides] = useState<Record<string, string>>({})
+  const [splitMode, setSplitMode] = useState<SplitOverrideMode>(
+    initialSplitOverrides?.mode ?? "percent",
+  )
+  const [overrides, setOverrides] = useState<Record<string, string>>(() => {
+    const values = initialSplitOverrides?.values
+    if (!values) return {}
+    const entries: Record<string, string> = {}
+    for (const [memberId, num] of Object.entries(values)) {
+      entries[memberId] = String(num)
+    }
+    return entries
+  })
 
   const parsedAmount = Number(amount) || 0
 
@@ -139,6 +152,7 @@ export default function ExpenseForm({
       amount: parsedAmount,
       paidBy,
       splitAmong,
+      splitOverrides: activeOverrides,
     })
   }
 
