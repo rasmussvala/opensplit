@@ -15,6 +15,13 @@ export interface DbGroupMember {
   joined_at: string
 }
 
+export type SplitOverrideMode = "percent" | "amount"
+
+export interface SplitOverrides {
+  mode: SplitOverrideMode
+  values: Record<string, number>
+}
+
 export interface DbExpense {
   id: string
   group_id: string
@@ -22,6 +29,7 @@ export interface DbExpense {
   amount: number
   description: string
   split_among: string[]
+  split_overrides: SplitOverrides | null
   created_at: string
 }
 
