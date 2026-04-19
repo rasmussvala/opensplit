@@ -29,6 +29,7 @@ const mockExpenses: DbExpense[] = [
     amount: 120,
     description: "Dinner",
     split_among: ["member-1", "member-2"],
+    split_overrides: null,
     created_at: "2026-01-01T12:00:00Z",
   },
   {
@@ -38,6 +39,7 @@ const mockExpenses: DbExpense[] = [
     amount: 45.5,
     description: "Taxi",
     split_among: ["member-1", "member-2"],
+    split_overrides: null,
     created_at: "2026-01-01T13:00:00Z",
   },
 ]

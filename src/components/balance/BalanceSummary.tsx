@@ -25,6 +25,7 @@ export default function BalanceSummary({
     paid_by: e.paid_by,
     amount: Number(e.amount),
     split_among: e.split_among,
+    split_overrides: e.split_overrides,
   }))
 
   const mappedSettlements = settlements.map((s) => ({

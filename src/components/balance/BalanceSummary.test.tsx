@@ -62,6 +62,7 @@ describe("BalanceSummary", () => {
         amount: 100,
         description: "Dinner",
         split_among: ["member-1", "member-2"],
+        split_overrides: null,
         created_at: "2026-01-01T12:00:00Z",
       },
     ]
@@ -90,6 +91,7 @@ describe("BalanceSummary", () => {
         amount: 100,
         description: "Dinner",
         split_among: ["member-1", "member-2"],
+        split_overrides: null,
         created_at: "2026-01-01T12:00:00Z",
       },
     ]
@@ -109,6 +111,7 @@ describe("BalanceSummary", () => {
         amount: 100,
         description: "Dinner",
         split_among: ["member-1", "member-2"],
+        split_overrides: null,
         created_at: "2026-01-01T12:00:00Z",
       },
     ]
@@ -128,6 +131,7 @@ describe("BalanceSummary", () => {
         amount: 100,
         description: "Dinner",
         split_among: ["member-1", "member-2"],
+        split_overrides: null,
         created_at: "2026-01-01T12:00:00Z",
       },
     ]
@@ -147,6 +151,7 @@ describe("BalanceSummary", () => {
         amount: 100,
         description: "Dinner",
         split_among: ["member-1", "member-2"],
+        split_overrides: null,
         created_at: "2026-01-01T12:00:00Z",
       },
     ]
@@ -165,6 +170,7 @@ describe("BalanceSummary", () => {
         amount: 120,
         description: "Dinner",
         split_among: ["member-1", "member-2", "member-3"],
+        split_overrides: null,
         created_at: "2026-01-01T12:00:00Z",
       },
     ]
@@ -185,6 +191,7 @@ describe("BalanceSummary", () => {
         amount: 100,
         description: "Dinner",
         split_among: ["member-1", "member-2"],
+        split_overrides: null,
         created_at: "2026-01-01T12:00:00Z",
       },
     ]
@@ -215,6 +222,7 @@ describe("BalanceSummary", () => {
         amount: 100,
         description: "Dinner",
         split_among: ["member-1", "member-2"],
+        split_overrides: null,
         created_at: "2026-01-01T12:00:00Z",
       },
     ]
@@ -235,6 +243,31 @@ describe("BalanceSummary", () => {
     })
   })
 
+  it("applies split_overrides when calculating balances", () => {
+    const expenses: DbExpense[] = [
+      {
+        id: "expense-1",
+        group_id: "group-1",
+        paid_by: "member-1",
+        amount: 500,
+        description: "Dinner",
+        split_among: ["member-1", "member-2", "member-3"],
+        split_overrides: {
+          mode: "amount",
+          values: { "member-2": 300 },
+        },
+        created_at: "2026-01-01T12:00:00Z",
+      },
+    ]
+
+    renderBalanceSummary({ expenses })
+
+    expect(screen.getByText(/bob owes alice USD 300\.00/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/charlie owes alice USD 100\.00/i),
+    ).toBeInTheDocument()
+  })
+
   it("accounts for partial settlements in balances", () => {
     const expenses: DbExpense[] = [
       {
@@ -244,6 +277,7 @@ describe("BalanceSummary", () => {
         amount: 100,
         description: "Dinner",
         split_among: ["member-1", "member-2"],
+        split_overrides: null,
         created_at: "2026-01-01T12:00:00Z",
       },
     ]
