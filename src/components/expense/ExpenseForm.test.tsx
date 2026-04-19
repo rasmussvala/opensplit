@@ -312,6 +312,103 @@ describe("ExpenseForm", () => {
     expect(charlieInput).toHaveValue("")
   })
 
+  it("shows equal-split summary when no overrides", () => {
+    renderForm()
+
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "90" },
+    })
+
+    expect(screen.getByTestId("split-status")).toHaveTextContent(
+      "3 people split USD 90.00 equally",
+    )
+  })
+
+  it("shows remainder summary when one member is overridden", () => {
+    renderForm()
+
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "500" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "USD" }))
+    fireEvent.change(screen.getByLabelText("Bob share"), {
+      target: { value: "300" },
+    })
+
+    expect(screen.getByTestId("split-status")).toHaveTextContent(
+      "Remainder USD 200.00 split equally (2 people)",
+    )
+  })
+
+  it("shows error and disables submit when percent exceeds 100", () => {
+    const { onSubmit } = renderForm()
+
+    fireEvent.change(screen.getByLabelText(/description/i), {
+      target: { value: "Dinner" },
+    })
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "100" },
+    })
+    fireEvent.change(screen.getByLabelText("Bob share"), {
+      target: { value: "150" },
+    })
+
+    const status = screen.getByTestId("split-status")
+    expect(status).toHaveClass("text-destructive")
+    expect(status).toHaveTextContent(/100 or less/i)
+    expect(screen.getByRole("button", { name: /add expense/i })).toBeDisabled()
+
+    fireEvent.click(screen.getByRole("button", { name: /add expense/i }))
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("shows error and disables submit when amounts exceed total", () => {
+    const { onSubmit } = renderForm()
+
+    fireEvent.change(screen.getByLabelText(/description/i), {
+      target: { value: "Dinner" },
+    })
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "100" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "USD" }))
+    fireEvent.change(screen.getByLabelText("Alice share"), {
+      target: { value: "80" },
+    })
+    fireEvent.change(screen.getByLabelText("Bob share"), {
+      target: { value: "80" },
+    })
+
+    const status = screen.getByTestId("split-status")
+    expect(status).toHaveClass("text-destructive")
+    expect(status).toHaveTextContent(/exceed/i)
+    expect(screen.getByRole("button", { name: /add expense/i })).toBeDisabled()
+
+    fireEvent.click(screen.getByRole("button", { name: /add expense/i }))
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("shows payer-covers-rounding summary when all overridden with drift", () => {
+    renderForm()
+
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "100" },
+    })
+    fireEvent.change(screen.getByLabelText("Alice share"), {
+      target: { value: "33.33" },
+    })
+    fireEvent.change(screen.getByLabelText("Bob share"), {
+      target: { value: "33.33" },
+    })
+    fireEvent.change(screen.getByLabelText("Charlie share"), {
+      target: { value: "33.33" },
+    })
+
+    expect(screen.getByTestId("split-status")).toHaveTextContent(
+      /alice covers USD 0\.01 rounding/i,
+    )
+  })
+
   it("does not submit if no members are selected for split", () => {
     const { onSubmit } = renderForm()
 

@@ -1,6 +1,6 @@
 # Custom Split — Living Plan
 
-> Status: **in progress**. Living doc — update as decisions change. Checked into the repo so contributors can see current direction.
+> Status: **complete** — all five phases shipped. Living doc — update as decisions change. Checked into the repo so contributors can see current direction.
 
 ## Context
 
@@ -192,8 +192,8 @@ On submit: parse `raw` → number, drop entries where member not in `splitAmong`
 | `src/lib/types.ts` | extend `DbExpense` ✅ P1 |
 | `src/lib/balances.ts` | `SplitOverrides` type, `computeShares`, update `calculateBalances` ✅ P1 |
 | `src/lib/balances.test.ts` | new unit tests ✅ P1 |
-| `src/components/expense/ExpenseForm.tsx` | live share display, mode toggle, per-row input, bold state, auto-share computation, summary, validation, extended `ExpenseFormData` 🟡 P2+P3+P4 done, P5 remaining |
-| `src/components/expense/ExpenseForm.test.tsx` | new interaction tests 🟡 P2+P3+P4 done, P5 remaining |
+| `src/components/expense/ExpenseForm.tsx` | live share display, mode toggle, per-row input, bold state, auto-share computation, summary, validation, extended `ExpenseFormData` ✅ |
+| `src/components/expense/ExpenseForm.test.tsx` | new interaction tests ✅ |
 | `src/components/expense/AddExpensePage.tsx` | include `split_overrides` in insert ✅ P4 |
 | `src/components/expense/EditExpensePage.tsx` | hydrate + include in update ✅ P4 |
 | `src/components/expense/AddExpensePage.test.tsx`, `EditExpensePage.test.tsx` | round-trip assertions ✅ P4 |
@@ -261,7 +261,7 @@ Verify:
 - Create an expense with Bob at 300 kr of 500 kr bill; expense re-renders with drift-absorbed shares, balances reflect this.
 - Edit loads override values, save round-trips.
 
-### Phase 5 — Validation, summary strip, polish
+### Phase 5 — Validation, summary strip, polish ✅
 
 Scope:
 - Summary strip text under the split list.
