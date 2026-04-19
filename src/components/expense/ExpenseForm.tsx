@@ -399,7 +399,9 @@ export default function ExpenseForm({
         <Button
           type="submit"
           className="flex-1"
-          disabled={!splitStatus.isValid}
+          disabled={
+            !splitStatus.isValid || !description.trim() || parsedAmount <= 0
+          }
         >
           {submitLabel}
         </Button>
@@ -444,7 +446,14 @@ function getSplitStatus({
   currency: string
   payerName: string
 }): SplitStatus {
-  if (parsedAmount <= 0 || splitAmong.length === 0) {
+  if (splitAmong.length === 0) {
+    return {
+      message: "Select at least one person to split with.",
+      isValid: false,
+    }
+  }
+
+  if (parsedAmount <= 0) {
     return { message: "", isValid: true }
   }
 
