@@ -245,6 +245,28 @@ describe("AddExpensePage", () => {
     })
   })
 
+  it("renders current user first in paid-by and split-among lists", async () => {
+    const reordered = [mockMembers[1], mockMembers[0]]
+    mockFrom({
+      groups: groupsOk(),
+      group_members: membersReady(mockMembers[0], reordered),
+    })
+
+    renderPage()
+
+    await waitFor(() => {
+      expect(screen.getByText("New expense")).toBeInTheDocument()
+    })
+
+    const paidBy = screen.getAllByRole("button", { name: /paid by/i })
+    expect(paidBy[0]).toHaveAccessibleName(/paid by alice/i)
+    expect(paidBy[1]).toHaveAccessibleName(/paid by bob/i)
+
+    const splitCheckboxes = screen.getAllByRole("checkbox")
+    expect(splitCheckboxes[0]).toHaveAccessibleName("Alice")
+    expect(splitCheckboxes[1]).toHaveAccessibleName("Bob")
+  })
+
   it("defaults paid-by to current user even when not first in members", async () => {
     const insert = vi.fn().mockResolvedValue({ error: null })
     const reordered = [mockMembers[1], mockMembers[0]]

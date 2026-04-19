@@ -54,10 +54,16 @@ export default function AddExpensePage() {
       .select()
       .eq("group_id", group.id)
 
+    const ordered = (members ?? []).slice().sort((a, b) => {
+      if (a.id === membership.id) return -1
+      if (b.id === membership.id) return 1
+      return 0
+    })
+
     setState({
       status: "ready",
       group,
-      members: members ?? [],
+      members: ordered,
       currentMemberId: membership.id,
     })
   }, [inviteToken, userId])
