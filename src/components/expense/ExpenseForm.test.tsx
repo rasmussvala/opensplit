@@ -137,6 +137,31 @@ describe("ExpenseForm", () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
+  it("shows a live share per checked member once amount is entered", () => {
+    renderForm()
+
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "90" },
+    })
+
+    for (const m of mockMembers) {
+      expect(screen.getByTestId(`share-${m.id}`)).toHaveTextContent("30.00")
+    }
+  })
+
+  it("hides share for unchecked members and redistributes remainder", () => {
+    renderForm()
+
+    fireEvent.change(screen.getByLabelText(/amount/i), {
+      target: { value: "90" },
+    })
+    fireEvent.click(screen.getByRole("checkbox", { name: /charlie/i }))
+
+    expect(screen.queryByTestId("share-member-3")).not.toBeInTheDocument()
+    expect(screen.getByTestId("share-member-1")).toHaveTextContent("45.00")
+    expect(screen.getByTestId("share-member-2")).toHaveTextContent("45.00")
+  })
+
   it("does not submit if no members are selected for split", () => {
     const { onSubmit } = renderForm()
 
