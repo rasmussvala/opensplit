@@ -74,6 +74,7 @@ export default function AddExpensePage() {
       amount: data.amount,
       paid_by: data.paidBy,
       split_among: data.splitAmong,
+      split_overrides: data.splitOverrides,
     })
 
     if (error) return

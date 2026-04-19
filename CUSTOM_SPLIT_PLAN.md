@@ -192,11 +192,11 @@ On submit: parse `raw` → number, drop entries where member not in `splitAmong`
 | `src/lib/types.ts` | extend `DbExpense` ✅ P1 |
 | `src/lib/balances.ts` | `SplitOverrides` type, `computeShares`, update `calculateBalances` ✅ P1 |
 | `src/lib/balances.test.ts` | new unit tests ✅ P1 |
-| `src/components/expense/ExpenseForm.tsx` | live share display, mode toggle, per-row input, bold state, auto-share computation, summary, validation, extended `ExpenseFormData` 🟡 P2+P3 done, P4/P5 remaining |
-| `src/components/expense/ExpenseForm.test.tsx` | new interaction tests 🟡 P2+P3 done, P4/P5 remaining |
-| `src/components/expense/AddExpensePage.tsx` | include `split_overrides` in insert (P4) |
-| `src/components/expense/EditExpensePage.tsx` | hydrate + include in update (P4) |
-| `src/components/expense/AddExpensePage.test.tsx`, `EditExpensePage.test.tsx` | round-trip assertions (P4) |
+| `src/components/expense/ExpenseForm.tsx` | live share display, mode toggle, per-row input, bold state, auto-share computation, summary, validation, extended `ExpenseFormData` 🟡 P2+P3+P4 done, P5 remaining |
+| `src/components/expense/ExpenseForm.test.tsx` | new interaction tests 🟡 P2+P3+P4 done, P5 remaining |
+| `src/components/expense/AddExpensePage.tsx` | include `split_overrides` in insert ✅ P4 |
+| `src/components/expense/EditExpensePage.tsx` | hydrate + include in update ✅ P4 |
+| `src/components/expense/AddExpensePage.test.tsx`, `EditExpensePage.test.tsx` | round-trip assertions ✅ P4 |
 
 ---
 
@@ -249,7 +249,7 @@ Verify:
 - Clear override → reverts to auto.
 - Submit creates an equal-split expense as before.
 
-### Phase 4 — Wire overrides end-to-end
+### Phase 4 — Wire overrides end-to-end ✅
 
 Scope:
 - `ExpenseFormData` gets `splitOverrides`.
