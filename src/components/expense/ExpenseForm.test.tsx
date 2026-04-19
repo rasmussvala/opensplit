@@ -423,6 +423,11 @@ describe("ExpenseForm", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: /bob/i }))
     fireEvent.click(screen.getByRole("checkbox", { name: /charlie/i }))
 
+    const status = screen.getByTestId("split-status")
+    expect(status).toHaveClass("text-destructive")
+    expect(status).toHaveTextContent(/at least one person/i)
+    expect(screen.getByRole("button", { name: /add expense/i })).toBeDisabled()
+
     fireEvent.click(screen.getByRole("button", { name: /add expense/i }))
 
     expect(onSubmit).not.toHaveBeenCalled()
