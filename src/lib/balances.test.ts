@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { calculateBalances, type Settlement } from "./balances"
+import { calculateBalances, computeShares, type Settlement } from "./balances"
 
 describe("calculateBalances", () => {
   it("returns empty balances when there are no expenses", () => {
@@ -217,4 +217,157 @@ describe("calculateBalances", () => {
       bob: -50,
     })
   })
+
+  it("treats null split_overrides as equal split (regression guard)", () => {
+    const balances = calculateBalances([
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob"],
+        split_overrides: null,
+      },
+    ])
+
+    expect(balances).toEqual({
+      alice: 50,
+      bob: -50,
+    })
+  })
+
+  it("applies a single percent override with the rest split equally", () => {
+    const balances = calculateBalances([
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob", "charlie", "dave"],
+        split_overrides: {
+          mode: "percent",
+          values: { bob: 40 },
+        },
+      },
+    ])
+
+    // bob owes 40% = 40
+    // remainder 60 split across alice+charlie+dave → 20 each
+    // alice: +100 - 20 = +80
+    expect(balances).toEqual({
+      alice: 80,
+      bob: -40,
+      charlie: -20,
+      dave: -20,
+    })
+  })
+
+  it("applies a single amount override with the rest split equally", () => {
+    const balances = calculateBalances([
+      {
+        paid_by: "alice",
+        amount: 500,
+        split_among: ["alice", "bob", "charlie"],
+        split_overrides: {
+          mode: "amount",
+          values: { bob: 300 },
+        },
+      },
+    ])
+
+    // bob owes 300, remainder 200 split across alice+charlie → 100 each
+    // alice: +500 - 100 = +400
+    expect(balances).toEqual({
+      alice: 400,
+      bob: -300,
+      charlie: -100,
+    })
+  })
+
+  it("handles every member overridden to an exact sum", () => {
+    const balances = calculateBalances([
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob", "charlie"],
+        split_overrides: {
+          mode: "amount",
+          values: { alice: 50, bob: 30, charlie: 20 },
+        },
+      },
+    ])
+
+    // alice: +100 - 50 = +50
+    expect(balances).toEqual({
+      alice: 50,
+      bob: -30,
+      charlie: -20,
+    })
+  })
+
+  it("absorbs rounding drift into the payer when all are overridden", () => {
+    const balances = calculateBalances([
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob", "charlie"],
+        split_overrides: {
+          mode: "percent",
+          values: { alice: 33.33, bob: 33.33, charlie: 33.33 },
+        },
+      },
+    ])
+
+    // Each percent → 33.33 share. Sum = 99.99. Drift 0.01 → alice share becomes 33.34.
+    // alice: +100 - 33.34 = 66.66
+    // bob: -33.33
+    // charlie: -33.33
+    expect(balances).toEqual({
+      alice: 66.66,
+      bob: -33.33,
+      charlie: -33.33,
+    })
+    const sum = Object.values(balances).reduce((a, b) => a + b, 0)
+    expect(round2Local(sum)).toBe(0)
+  })
+
+  it("absorbs drift to payer even when payer is not in split_among", () => {
+    const shares = computeShares({
+      paid_by: "alice",
+      amount: 100,
+      split_among: ["bob", "charlie", "dave"],
+      split_overrides: {
+        mode: "percent",
+        values: { bob: 33.33, charlie: 33.33, dave: 33.33 },
+      },
+    })
+
+    // Each 33.33 → sum 99.99 → drift 0.01 assigned to alice (payer, not in split)
+    expect(shares.bob).toBe(33.33)
+    expect(shares.charlie).toBe(33.33)
+    expect(shares.dave).toBe(33.33)
+    expect(shares.alice).toBe(0.01)
+    const sumShares = Object.values(shares).reduce((a, b) => a + b, 0)
+    expect(round2Local(sumShares)).toBe(100)
+  })
+
+  it("ignores overrides for members no longer in split_among", () => {
+    const balances = calculateBalances([
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob"],
+        split_overrides: {
+          mode: "amount",
+          values: { charlie: 30 },
+        },
+      },
+    ])
+
+    // charlie override ignored; fall back to equal split
+    expect(balances).toEqual({
+      alice: 50,
+      bob: -50,
+    })
+  })
 })
+
+function round2Local(value: number): number {
+  return Math.round(value * 100) / 100
+}
