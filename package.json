@@ -9,7 +9,7 @@
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "test": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview --host"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.2.9",
