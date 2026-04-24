@@ -121,4 +121,25 @@ describe("ExpenseList", () => {
       "/groups/token-abc/edit-expense/expense-1",
     )
   })
+
+  it("renders newest expenses first", () => {
+    renderWithRouter(
+      <ExpenseList
+        expenses={mockExpenses}
+        members={mockMembers}
+        currency="USD"
+        inviteToken="token-abc"
+      />,
+    )
+
+    const links = screen.getAllByRole("link")
+    expect(links[0]).toHaveAttribute(
+      "href",
+      "/groups/token-abc/edit-expense/expense-2",
+    )
+    expect(links[1]).toHaveAttribute(
+      "href",
+      "/groups/token-abc/edit-expense/expense-1",
+    )
+  })
 })
