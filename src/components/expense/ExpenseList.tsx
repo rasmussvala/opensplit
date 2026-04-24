@@ -32,11 +32,16 @@ export default function ExpenseList({
     )
   }
 
+  const ordered = [...expenses].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  )
+
   return (
     <div>
       <h2 className="mb-2 font-semibold text-sm">Expenses</h2>
       <div className="flex flex-col gap-2">
-        {expenses.map((expense) => (
+        {ordered.map((expense) => (
           <Link
             key={expense.id}
             to={`/groups/${inviteToken}/edit-expense/${expense.id}`}
