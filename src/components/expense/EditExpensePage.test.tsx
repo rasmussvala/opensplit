@@ -215,7 +215,7 @@ describe("EditExpensePage", () => {
     })
 
     expect(screen.getByLabelText(/description/i)).toHaveValue("Dinner")
-    expect(screen.getByLabelText(/amount/i)).toHaveValue(90)
+    expect(screen.getByLabelText(/amount/i)).toHaveValue("90")
     expect(
       screen.getByRole("button", { name: /paid by bob/i }),
     ).toHaveAttribute("aria-pressed", "true")
