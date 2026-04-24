@@ -180,11 +180,13 @@ export default function ExpenseForm({
           </span>
           <input
             id="expense-amount"
-            type="number"
-            min="0.01"
-            step="0.01"
+            type="text"
+            inputMode="decimal"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              const raw = e.target.value
+              if (raw === "" || INPUT_PATTERN.test(raw)) setAmount(raw)
+            }}
             placeholder="0.00"
             className="w-full min-w-0 flex-1 bg-transparent font-semibold text-3xl tabular-nums tracking-tight outline-none placeholder:text-muted-foreground/30"
           />
