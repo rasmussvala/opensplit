@@ -162,16 +162,6 @@ export default function GroupPage() {
 
   const totalSpent = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
 
-  async function handleSettle(from: string, to: string, amount: number) {
-    await supabase.from("settlements").insert({
-      group_id: group.id,
-      from_member: from,
-      to_member: to,
-      amount,
-    })
-    await loadGroup()
-  }
-
   return (
     <Tabs
       value={tab}
@@ -201,7 +191,7 @@ export default function GroupPage() {
           settlements={settlements}
           members={members}
           currency={group.currency}
-          onSettle={handleSettle}
+          inviteToken={inviteToken as string}
         />
       </TabsContent>
 
