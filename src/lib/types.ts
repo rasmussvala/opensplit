@@ -13,6 +13,7 @@ export interface DbGroupMember {
   guest_name: string
   user_id: string
   joined_at: string
+  swish_phone?: string | null
 }
 
 export type SplitOverrideMode = "percent" | "amount"
