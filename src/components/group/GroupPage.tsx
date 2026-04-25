@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { supabase } from "@/lib/supabase"
+import { isSwishCurrency } from "@/lib/swish"
 import type {
   DbExpense,
   DbGroup,
@@ -164,7 +165,8 @@ export default function GroupPage() {
 
   const totalSpent = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
   const currentMember = members.find((m) => m.user_id === userId) ?? null
-  const showSwishProfile = group.currency === "SEK" && currentMember !== null
+  const showSwishProfile =
+    isSwishCurrency(group.currency) && currentMember !== null
 
   return (
     <Tabs

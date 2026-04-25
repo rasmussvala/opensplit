@@ -1,9 +1,11 @@
-import { ArrowLeft, ArrowRight, Trash2 } from "lucide-react"
+import { Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
-import MemberAvatar from "@/components/group/MemberAvatar"
+import MemberPairAvatars from "@/components/group/MemberPairAvatars"
+import BackLink from "@/components/ui/back-link"
 import { Button } from "@/components/ui/button"
+import CurrencyAmount from "@/components/ui/currency-amount"
 import { LoadingState } from "@/components/ui/loading-state"
 import { supabase } from "@/lib/supabase"
 import type { DbGroupMember, DbSettlement } from "@/lib/types"
@@ -105,9 +107,6 @@ export default function EditSettlementPage() {
   const fromName = memberNames.get(settlement.from_member) ?? "Unknown"
   const toName = memberNames.get(settlement.to_member) ?? "Unknown"
   const amountValue = Number(settlement.amount)
-  const amountText = formatAmount(currency, amountValue)
-  const [currencyCode, ...amountParts] = amountText.split(" ")
-  const amountNumber = amountParts.join(" ")
   const settledAt = new Date(settlement.settled_at)
   const dateLabel = settledAt
     .toLocaleDateString("en", {
@@ -119,13 +118,7 @@ export default function EditSettlementPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-2 py-6">
-      <Link
-        to={groupUrl}
-        className="group inline-flex w-fit items-center gap-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-[0.14em] transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-        Back
-      </Link>
+      <BackLink to={groupUrl} />
 
       <div className="flex flex-col gap-1">
         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
@@ -135,21 +128,10 @@ export default function EditSettlementPage() {
       </div>
 
       <div className="flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-4">
-        <div aria-hidden="true" className="flex shrink-0 items-center">
-          <MemberAvatar
-            id={settlement.from_member}
-            name={fromName}
-            className="h-9 w-9 shadow-sm ring-2 ring-background"
-          />
-          <div className="relative z-1 -mx-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-background text-muted-foreground ring-1 ring-border">
-            <ArrowRight className="h-3 w-3" />
-          </div>
-          <MemberAvatar
-            id={settlement.to_member}
-            name={toName}
-            className="h-9 w-9 shadow-sm ring-2 ring-background"
-          />
-        </div>
+        <MemberPairAvatars
+          from={{ id: settlement.from_member, name: fromName }}
+          to={{ id: settlement.to_member, name: toName }}
+        />
 
         <div className="flex min-w-0 flex-1 flex-col leading-tight">
           <span className="truncate text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
@@ -162,15 +144,11 @@ export default function EditSettlementPage() {
           </span>
         </div>
 
-        <span className="flex shrink-0 items-baseline gap-1 font-semibold text-[15px] text-foreground tabular-nums">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-            {currencyCode}
-          </span>
-          <span>{amountNumber}</span>
-        </span>
+        <CurrencyAmount currency={currency} amount={amountValue} />
 
         <span className="sr-only">
-          {fromName} paid {toName} {amountText} on {dateLabel}
+          {fromName} paid {toName} {formatAmount(currency, amountValue)} on{" "}
+          {dateLabel}
         </span>
       </div>
 

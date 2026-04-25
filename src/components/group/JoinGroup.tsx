@@ -1,8 +1,13 @@
 import { useState } from "react"
 import { useAuth } from "@/components/auth/AuthProvider"
+import SwishPhoneInput from "@/components/group/SwishPhoneInput"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
-import { normalizeSwishPhone } from "@/lib/swish"
+import {
+  isSwishCurrency,
+  normalizeSwishPhone,
+  SWISH_PHONE_ERROR,
+} from "@/lib/swish"
 
 interface JoinGroupProps {
   groupId: string
@@ -22,7 +27,7 @@ export default function JoinGroup({
   const [swishPhone, setSwishPhone] = useState("")
   const [phoneError, setPhoneError] = useState<string | null>(null)
 
-  const showSwish = currency === "SEK"
+  const showSwish = isSwishCurrency(currency)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -32,7 +37,7 @@ export default function JoinGroup({
     if (showSwish && swishPhone.trim()) {
       normalizedPhone = normalizeSwishPhone(swishPhone)
       if (!normalizedPhone) {
-        setPhoneError("Enter a valid Swedish mobile number")
+        setPhoneError(SWISH_PHONE_ERROR)
         return
       }
     }
@@ -73,30 +78,17 @@ export default function JoinGroup({
       </div>
 
       {showSwish && (
-        <div className="flex flex-col gap-1">
-          <label htmlFor="swish-phone" className="font-medium text-sm">
-            Swish phone{" "}
-            <span className="text-muted-foreground">(optional)</span>
-          </label>
-          <input
-            id="swish-phone"
-            type="tel"
-            value={swishPhone}
-            onChange={(e) => {
-              setSwishPhone(e.target.value)
-              if (phoneError) setPhoneError(null)
-            }}
-            placeholder="070 123 45 67"
-            className="rounded border px-3 py-2 text-base md:text-sm"
-            aria-invalid={phoneError ? "true" : undefined}
-          />
-          {phoneError && (
-            <span className="text-destructive text-xs">{phoneError}</span>
-          )}
-          <span className="text-muted-foreground text-xs">
-            Lets others pay you back via Swish.
-          </span>
-        </div>
+        <SwishPhoneInput
+          id="swish-phone"
+          label="Swish phone (optional)"
+          value={swishPhone}
+          onChange={(next) => {
+            setSwishPhone(next)
+            if (phoneError) setPhoneError(null)
+          }}
+          error={phoneError}
+          helperText="Lets others pay you back via Swish."
+        />
       )}
 
       <Button type="submit">Join group</Button>

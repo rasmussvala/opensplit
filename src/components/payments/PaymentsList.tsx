@@ -1,6 +1,6 @@
-import { ArrowRight } from "lucide-react"
 import { Link } from "react-router-dom"
-import MemberAvatar from "@/components/group/MemberAvatar"
+import MemberPairAvatars from "@/components/group/MemberPairAvatars"
+import CurrencyAmount from "@/components/ui/currency-amount"
 import type { DbGroupMember, DbSettlement } from "@/lib/types"
 import { formatAmount } from "@/lib/utils"
 
@@ -43,9 +43,6 @@ export default function PaymentsList({
           const fromName = memberNames.get(settlement.from_member) ?? "Unknown"
           const toName = memberNames.get(settlement.to_member) ?? "Unknown"
           const amountValue = Number(settlement.amount)
-          const amountText = formatAmount(currency, amountValue)
-          const [currencyCode, ...amountParts] = amountText.split(" ")
-          const amountNumber = amountParts.join(" ")
           const settledAt = new Date(settlement.settled_at)
           const dateLabel = settledAt
             .toLocaleDateString("en", { month: "short", day: "numeric" })
@@ -57,21 +54,11 @@ export default function PaymentsList({
               to={`/groups/${inviteToken}/settlements/${settlement.id}`}
               className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 transition-colors hover:border-border hover:bg-card/70"
             >
-              <div aria-hidden="true" className="flex shrink-0 items-center">
-                <MemberAvatar
-                  id={settlement.from_member}
-                  name={fromName}
-                  className="h-9 w-9 shadow-sm ring-2 ring-background"
-                />
-                <div className="relative z-1 -mx-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-background text-muted-foreground ring-1 ring-border transition-transform duration-200 group-hover:translate-x-0.5">
-                  <ArrowRight className="h-3 w-3" />
-                </div>
-                <MemberAvatar
-                  id={settlement.to_member}
-                  name={toName}
-                  className="h-9 w-9 shadow-sm ring-2 ring-background"
-                />
-              </div>
+              <MemberPairAvatars
+                from={{ id: settlement.from_member, name: fromName }}
+                to={{ id: settlement.to_member, name: toName }}
+                hoverNudge
+              />
 
               <div
                 aria-hidden="true"
@@ -89,18 +76,13 @@ export default function PaymentsList({
                 </span>
               </div>
 
-              <span
-                aria-hidden="true"
-                className="flex shrink-0 items-baseline gap-1 font-semibold text-[15px] text-foreground tabular-nums"
-              >
-                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                  {currencyCode}
-                </span>
-                <span>{amountNumber}</span>
+              <span aria-hidden="true">
+                <CurrencyAmount currency={currency} amount={amountValue} />
               </span>
 
               <span className="sr-only">
-                {fromName} paid {toName} {amountText} on {dateLabel}
+                {fromName} paid {toName} {formatAmount(currency, amountValue)}{" "}
+                on {dateLabel}
               </span>
             </Link>
           )

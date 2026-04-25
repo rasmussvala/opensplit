@@ -1,8 +1,9 @@
 import { Pencil } from "lucide-react"
 import { useState } from "react"
+import SwishPhoneInput from "@/components/group/SwishPhoneInput"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
-import { normalizeSwishPhone } from "@/lib/swish"
+import { normalizeSwishPhone, SWISH_PHONE_ERROR } from "@/lib/swish"
 
 interface SwishProfileProps {
   memberId: string
@@ -36,7 +37,7 @@ export default function SwishProfile({
     if (value.trim()) {
       normalized = normalizeSwishPhone(value)
       if (!normalized) {
-        setError("Enter a valid Swedish mobile number")
+        setError(SWISH_PHONE_ERROR)
         return
       }
     }
@@ -85,27 +86,17 @@ export default function SwishProfile({
 
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-border/70 bg-card/40 p-3">
-      <label htmlFor="swish-profile-input" className="flex flex-col gap-1">
-        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
-          Your Swish phone
-        </span>
-        <input
-          id="swish-profile-input"
-          type="tel"
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value)
-            if (error) setError(null)
-          }}
-          placeholder="070 123 45 67"
-          className="rounded border px-3 py-2 text-base md:text-sm"
-          aria-invalid={error ? "true" : undefined}
-        />
-      </label>
-      {error && <span className="text-destructive text-xs">{error}</span>}
-      <span className="text-muted-foreground text-xs">
-        Leave blank to remove your number.
-      </span>
+      <SwishPhoneInput
+        id="swish-profile-input"
+        label="Your Swish phone"
+        value={value}
+        onChange={(next) => {
+          setValue(next)
+          if (error) setError(null)
+        }}
+        error={error}
+        helperText="Leave blank to remove your number."
+      />
       <div className="flex justify-end gap-2">
         <Button
           type="button"
