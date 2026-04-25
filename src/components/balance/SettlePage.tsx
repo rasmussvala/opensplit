@@ -210,6 +210,7 @@ export default function SettlePage() {
 
   const showSwish = isSwishCurrency(group.currency)
   const recipientHasPhone = !!to.swish_phone
+  const isMobileSwish = isMobileSwishDevice()
   const swishAmountStr = formatSwishAmount(amount)
   const swishDeepLink =
     swishEnabled && to.swish_phone
@@ -284,7 +285,7 @@ export default function SettlePage() {
 
           {recipientHasPhone ? (
             <>
-              {isMobileSwishDevice() && (
+              {isMobileSwish && (
                 <a
                   href={swishDeepLink}
                   className={cn(
@@ -297,7 +298,7 @@ export default function SettlePage() {
                 </a>
               )}
 
-              {qrDataUrl && (
+              {!isMobileSwish && qrDataUrl && (
                 <div className="flex flex-col items-center gap-1.5 pt-1">
                   <img
                     src={qrDataUrl}

@@ -51,6 +51,8 @@ export function formatSwishAmount(amount: number): string {
 }
 
 export function isMobileSwishDevice(): boolean {
-  if (typeof navigator === "undefined") return false
-  return /iPhone|Android/i.test(navigator.userAgent)
+  return (
+    window.matchMedia("(pointer: coarse)").matches &&
+    window.matchMedia("(hover: none)").matches
+  )
 }
