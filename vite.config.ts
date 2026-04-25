@@ -32,6 +32,7 @@ export default defineConfig({
       exclude: [
         "src/**/*.test.{ts,tsx}",
         "src/test-setup.ts",
+        "src/test-helpers.ts",
         "src/components/ui/**",
         "src/main.tsx",
         "src/vite-env.d.ts",
