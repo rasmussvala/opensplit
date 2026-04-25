@@ -1,3 +1,10 @@
+export const SWISH_CURRENCY = "SEK"
+export const SWISH_PHONE_ERROR = "Enter a valid Swedish mobile number"
+
+export function isSwishCurrency(currency: string): boolean {
+  return currency === SWISH_CURRENCY
+}
+
 export interface SwishPaymentInput {
   phone: string
   amount: string

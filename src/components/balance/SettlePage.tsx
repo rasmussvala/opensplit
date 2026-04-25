@@ -1,10 +1,11 @@
-import { ArrowLeft, ArrowRight, Check, Copy, Smartphone } from "lucide-react"
-import QRCode from "qrcode"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { Check, Copy, Smartphone } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
-import MemberAvatar from "@/components/group/MemberAvatar"
+import MemberPairAvatars from "@/components/group/MemberPairAvatars"
+import BackLink from "@/components/ui/back-link"
 import { Button, buttonVariants } from "@/components/ui/button"
+import CurrencyAmount from "@/components/ui/currency-amount"
 import { LoadingState } from "@/components/ui/loading-state"
 import { calculateBalances } from "@/lib/balances"
 import { simplifyDebts } from "@/lib/simplify"
@@ -14,6 +15,7 @@ import {
   buildSwishQrPayload,
   formatSwishAmount,
   isMobileSwishDevice,
+  isSwishCurrency,
 } from "@/lib/swish"
 import type {
   DbExpense,
@@ -29,7 +31,6 @@ type PageState =
   | {
       status: "ready"
       group: DbGroup
-      members: DbGroupMember[]
       from: DbGroupMember
       to: DbGroupMember
       amount: number | null
@@ -46,6 +47,7 @@ export default function SettlePage() {
   const [state, setState] = useState<PageState>({ status: "loading" })
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
 
   const groupUrl = `/groups/${inviteToken}?tab=balances`
 
@@ -61,24 +63,27 @@ export default function SettlePage() {
       return
     }
 
-    const { data: membership } = await supabase
-      .from("group_members")
-      .select()
-      .eq("group_id", group.id)
-      .eq("user_id", userId)
-      .maybeSingle()
+    const [
+      { data: membership },
+      { data: members },
+      { data: expenses },
+      { data: settlements },
+    ] = await Promise.all([
+      supabase
+        .from("group_members")
+        .select()
+        .eq("group_id", group.id)
+        .eq("user_id", userId)
+        .maybeSingle(),
+      supabase.from("group_members").select().eq("group_id", group.id),
+      supabase.from("expenses").select().eq("group_id", group.id),
+      supabase.from("settlements").select().eq("group_id", group.id),
+    ])
 
     if (!membership) {
       setState({ status: "not-found" })
       return
     }
-
-    const [{ data: members }, { data: expenses }, { data: settlements }] =
-      await Promise.all([
-        supabase.from("group_members").select().eq("group_id", group.id),
-        supabase.from("expenses").select().eq("group_id", group.id),
-        supabase.from("settlements").select().eq("group_id", group.id),
-      ])
 
     const memberRows = (members ?? []) as DbGroupMember[]
     const from = memberRows.find((m) => m.id === fromMemberId)
@@ -109,7 +114,6 @@ export default function SettlePage() {
     setState({
       status: "ready",
       group: group as DbGroup,
-      members: memberRows,
       from,
       to,
       amount: match ? match.amount : null,
@@ -120,54 +124,30 @@ export default function SettlePage() {
     load()
   }, [load])
 
-  const ready =
-    state.status === "ready" && state.amount !== null
-      ? {
-          group: state.group,
-          to: state.to,
-          amount: state.amount,
-        }
-      : null
-
+  const ready = state.status === "ready" ? state : null
   const swishEnabled =
     !!ready &&
-    ready.group.currency === "SEK" &&
-    !!ready.to.swish_phone &&
-    ready.to.swish_phone.length > 0
+    ready.amount !== null &&
+    isSwishCurrency(ready.group.currency) &&
+    !!ready.to.swish_phone
 
-  const swishPhone = ready?.to.swish_phone ?? null
-  const swishAmountStr = ready ? formatSwishAmount(ready.amount) : ""
-  const swishMessage = ready
-    ? `Opensplit: ${ready.group.name}`.slice(0, 50)
-    : ""
-
-  const swishDeepLink = useMemo(() => {
-    if (!swishEnabled || !swishPhone) return ""
-    return buildSwishDeepLink({
-      phone: swishPhone,
-      amount: swishAmountStr,
-      message: swishMessage,
-    })
-  }, [swishEnabled, swishPhone, swishAmountStr, swishMessage])
-
-  const swishQrPayload = useMemo(() => {
-    if (!swishEnabled || !swishPhone) return ""
-    return buildSwishQrPayload({
-      phone: swishPhone,
-      amount: swishAmountStr,
-      message: swishMessage,
-    })
-  }, [swishEnabled, swishPhone, swishAmountStr, swishMessage])
-
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+  const qrPhone = swishEnabled ? (ready?.to.swish_phone ?? null) : null
+  const qrAmount = swishEnabled && ready?.amount ? ready.amount : null
+  const qrGroupName = swishEnabled ? (ready?.group.name ?? null) : null
 
   useEffect(() => {
-    if (!swishQrPayload) {
+    if (!qrPhone || qrAmount === null || qrGroupName === null) {
       setQrDataUrl(null)
       return
     }
+    const payload = buildSwishQrPayload({
+      phone: qrPhone,
+      amount: formatSwishAmount(qrAmount),
+      message: swishMessageFor(qrGroupName),
+    })
     let cancelled = false
-    QRCode.toDataURL(swishQrPayload, { margin: 1, width: 220 })
+    import("qrcode")
+      .then((mod) => mod.default.toDataURL(payload, { margin: 1, width: 220 }))
       .then((url) => {
         if (!cancelled) setQrDataUrl(url)
       })
@@ -177,17 +157,16 @@ export default function SettlePage() {
     return () => {
       cancelled = true
     }
-  }, [swishQrPayload])
+  }, [qrPhone, qrAmount, qrGroupName])
 
   async function handleCopyAmount() {
     if (state.status !== "ready" || state.amount === null) return
-    const text = formatSwishAmount(state.amount)
     try {
-      await navigator.clipboard.writeText(text)
+      await navigator.clipboard.writeText(formatSwishAmount(state.amount))
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     } catch {
-      // clipboard unavailable; ignore
+      /* clipboard unavailable */
     }
   }
 
@@ -221,13 +200,7 @@ export default function SettlePage() {
   if (amount === null) {
     return (
       <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-2 py-6">
-        <Link
-          to={groupUrl}
-          className="group inline-flex w-fit items-center gap-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-[0.14em] transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-          Back
-        </Link>
+        <BackLink to={groupUrl} />
         <p className="rounded-xl border border-border/70 border-dashed bg-card/20 p-6 text-center text-muted-foreground text-sm">
           No outstanding debt between {from.guest_name} and {to.guest_name}.
         </p>
@@ -235,22 +208,21 @@ export default function SettlePage() {
     )
   }
 
-  const amountText = formatAmount(group.currency, amount)
-  const [currencyCode, ...amountParts] = amountText.split(" ")
-  const amountNumber = amountParts.join(" ")
-  const showSwish = group.currency === "SEK"
-  const recipientHasPhone = !!to.swish_phone && to.swish_phone.length > 0
-  const showSwishButton = isMobileSwishDevice()
+  const showSwish = isSwishCurrency(group.currency)
+  const recipientHasPhone = !!to.swish_phone
+  const swishAmountStr = formatSwishAmount(amount)
+  const swishDeepLink =
+    swishEnabled && to.swish_phone
+      ? buildSwishDeepLink({
+          phone: to.swish_phone,
+          amount: swishAmountStr,
+          message: swishMessageFor(group.name),
+        })
+      : ""
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-2 py-6">
-      <Link
-        to={groupUrl}
-        className="group inline-flex w-fit items-center gap-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-[0.14em] transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
-        Back
-      </Link>
+      <BackLink to={groupUrl} />
 
       <div className="flex flex-col gap-1">
         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
@@ -262,21 +234,10 @@ export default function SettlePage() {
       </div>
 
       <div className="flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-4">
-        <div aria-hidden="true" className="flex shrink-0 items-center">
-          <MemberAvatar
-            id={from.id}
-            name={from.guest_name}
-            className="h-9 w-9 shadow-sm ring-2 ring-background"
-          />
-          <div className="relative z-1 -mx-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-background text-muted-foreground ring-1 ring-border">
-            <ArrowRight className="h-3 w-3" />
-          </div>
-          <MemberAvatar
-            id={to.id}
-            name={to.guest_name}
-            className="h-9 w-9 shadow-sm ring-2 ring-background"
-          />
-        </div>
+        <MemberPairAvatars
+          from={{ id: from.id, name: from.guest_name }}
+          to={{ id: to.id, name: to.guest_name }}
+        />
 
         <div className="flex min-w-0 flex-1 flex-col leading-tight">
           <span className="truncate text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
@@ -289,15 +250,11 @@ export default function SettlePage() {
           </span>
         </div>
 
-        <span className="flex shrink-0 items-baseline gap-1 font-semibold text-[15px] text-foreground tabular-nums">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-            {currencyCode}
-          </span>
-          <span>{amountNumber}</span>
-        </span>
+        <CurrencyAmount currency={group.currency} amount={amount} />
 
         <span className="sr-only">
-          {from.guest_name} owes {to.guest_name} {amountText}
+          {from.guest_name} owes {to.guest_name}{" "}
+          {formatAmount(group.currency, amount)}
         </span>
       </div>
 
@@ -313,7 +270,7 @@ export default function SettlePage() {
         ) : (
           <Copy className="h-3.5 w-3.5" />
         )}
-        {copied ? "Copied" : `Copy amount (${formatSwishAmount(amount)})`}
+        {copied ? "Copied" : `Copy amount (${swishAmountStr})`}
       </Button>
 
       {showSwish && (
@@ -327,7 +284,7 @@ export default function SettlePage() {
 
           {recipientHasPhone ? (
             <>
-              {showSwishButton && (
+              {isMobileSwishDevice() && (
                 <a
                   href={swishDeepLink}
                   className={cn(
@@ -373,4 +330,8 @@ export default function SettlePage() {
       </Button>
     </div>
   )
+}
+
+function swishMessageFor(groupName: string): string {
+  return `Opensplit: ${groupName}`.slice(0, 50)
 }
