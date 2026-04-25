@@ -18,7 +18,7 @@ vi.mock("@/components/auth/AuthProvider", () => ({
 }))
 
 describe("AdminPage", () => {
-  it("renders create group form and groups section", () => {
+  it("renders create group form and groups section", async () => {
     render(
       <MemoryRouter>
         <AdminPage />
@@ -27,5 +27,8 @@ describe("AdminPage", () => {
 
     expect(screen.getByText(/create a group/i)).toBeInTheDocument()
     expect(screen.getByText(/existing groups/i)).toBeInTheDocument()
+
+    // Let the embedded GroupList finish its fetch so updates land inside act.
+    await screen.findByText(/no groups yet/i)
   })
 })

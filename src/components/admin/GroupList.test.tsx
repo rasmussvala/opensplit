@@ -23,7 +23,7 @@ describe("GroupList", () => {
     vi.clearAllMocks()
   })
 
-  it("renders loading state initially", () => {
+  it("renders loading state initially", async () => {
     mockSupabaseSelect([])
 
     render(
@@ -33,6 +33,11 @@ describe("GroupList", () => {
     )
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument()
+
+    // Let the pending fetch resolve so React state settles inside act.
+    await waitFor(() => {
+      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
+    })
   })
 
   it("renders groups after fetch", async () => {

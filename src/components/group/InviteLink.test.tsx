@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import InviteLink from "./InviteLink"
 
@@ -22,9 +22,11 @@ describe("InviteLink", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /share link/i }))
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining("groups/abc-123"),
-    )
+    await waitFor(() => {
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        expect.stringContaining("groups/abc-123"),
+      )
+    })
   })
 
   it("shows copied feedback after click", async () => {
