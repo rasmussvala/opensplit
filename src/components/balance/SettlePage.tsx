@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, Smartphone } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Copy, Smartphone } from "lucide-react"
 import QRCode from "qrcode"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
@@ -45,6 +45,7 @@ export default function SettlePage() {
   const navigate = useNavigate()
   const [state, setState] = useState<PageState>({ status: "loading" })
   const [submitting, setSubmitting] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const groupUrl = `/groups/${inviteToken}?tab=balances`
 
@@ -178,6 +179,18 @@ export default function SettlePage() {
     }
   }, [swishQrPayload])
 
+  async function handleCopyAmount() {
+    if (state.status !== "ready" || state.amount === null) return
+    const text = formatSwishAmount(state.amount)
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      // clipboard unavailable; ignore
+    }
+  }
+
   async function handleMarkSettled() {
     if (state.status !== "ready" || state.amount === null) return
     setSubmitting(true)
@@ -287,6 +300,21 @@ export default function SettlePage() {
           {from.guest_name} owes {to.guest_name} {amountText}
         </span>
       </div>
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleCopyAmount}
+        className="w-full gap-1.5"
+      >
+        {copied ? (
+          <Check className="h-3.5 w-3.5" />
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
+        {copied ? "Copied" : `Copy amount (${formatSwishAmount(amount)})`}
+      </Button>
 
       {showSwish && (
         <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-card/40 p-4">

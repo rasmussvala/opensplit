@@ -351,6 +351,35 @@ describe("SettlePage", () => {
     )
   })
 
+  it("copies the formatted amount to the clipboard when Copy amount is clicked", async () => {
+    setupSupabase()
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      clipboard: { writeText },
+      userAgent: navigator.userAgent,
+    })
+
+    renderRoute()
+
+    const copyButton = await screen.findByRole("button", {
+      name: /copy amount/i,
+    })
+    fireEvent.click(copyButton)
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith("50.00")
+    })
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /copied/i }),
+      ).toBeInTheDocument()
+    })
+
+    vi.unstubAllGlobals()
+  })
+
   it("shows the no-phone helper text without a button when recipient has no phone", async () => {
     setupSupabase({ currency: "SEK", recipientSwishPhone: null })
 
