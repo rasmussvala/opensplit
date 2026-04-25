@@ -96,29 +96,43 @@ describe("formatSwishAmount", () => {
 })
 
 describe("isMobileSwishDevice", () => {
+  function stubMatchMedia(matches: Record<string, boolean>) {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: matches[query] ?? false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }))
+  }
+
   afterEach(() => {
     vi.unstubAllGlobals()
   })
 
-  it("returns true for an iPhone user agent", () => {
-    vi.stubGlobal("navigator", {
-      userAgent:
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605",
+  it("returns true on touch device with no hover", () => {
+    stubMatchMedia({
+      "(pointer: coarse)": true,
+      "(hover: none)": true,
     })
     expect(isMobileSwishDevice()).toBe(true)
   })
 
-  it("returns true for an Android user agent", () => {
-    vi.stubGlobal("navigator", {
-      userAgent: "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537",
+  it("returns false on desktop with mouse and hover", () => {
+    stubMatchMedia({
+      "(pointer: coarse)": false,
+      "(hover: none)": false,
     })
-    expect(isMobileSwishDevice()).toBe(true)
+    expect(isMobileSwishDevice()).toBe(false)
   })
 
-  it("returns false for a desktop user agent", () => {
-    vi.stubGlobal("navigator", {
-      userAgent:
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605",
+  it("returns false when only one condition matches", () => {
+    stubMatchMedia({
+      "(pointer: coarse)": true,
+      "(hover: none)": false,
     })
     expect(isMobileSwishDevice()).toBe(false)
   })

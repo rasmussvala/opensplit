@@ -349,6 +349,7 @@ describe("SettlePage", () => {
       "href",
       "swish://payment?phone=46701234567&amount=50.00&message=Opensplit%3A%20Trip",
     )
+    expect(screen.queryByAltText(/swish qr code/i)).not.toBeInTheDocument()
   })
 
   it("copies the formatted amount to the clipboard when Copy amount is clicked", async () => {
