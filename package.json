@@ -9,6 +9,7 @@
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "test": "vitest",
+    "test:coverage": "vitest --coverage --run",
     "preview": "vite preview --host"
   },
   "dependencies": {
@@ -37,6 +38,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.5",
     "jsdom": "^28.1.0",
     "typescript": "~5.9.3",
     "vite": "^8.0.1",
