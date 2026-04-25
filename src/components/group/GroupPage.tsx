@@ -6,6 +6,7 @@ import BalanceSummary from "@/components/balance/BalanceSummary"
 import ExpenseList from "@/components/expense/ExpenseList"
 import GroupHeader from "@/components/group/GroupHeader"
 import JoinGroup from "@/components/group/JoinGroup"
+import SwishProfile from "@/components/group/SwishProfile"
 import PaymentsList from "@/components/payments/PaymentsList"
 import { Button } from "@/components/ui/button"
 import { LoadingState } from "@/components/ui/loading-state"
@@ -153,6 +154,7 @@ export default function GroupPage() {
       <JoinGroup
         groupId={state.group.id}
         groupName={state.group.name}
+        currency={state.group.currency}
         onJoined={loadGroup}
       />
     )
@@ -161,6 +163,8 @@ export default function GroupPage() {
   const { group, members, expenses, settlements } = state
 
   const totalSpent = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
+  const currentMember = members.find((m) => m.user_id === userId) ?? null
+  const showSwishProfile = group.currency === "SEK" && currentMember !== null
 
   return (
     <Tabs
@@ -175,6 +179,14 @@ export default function GroupPage() {
           <TabsTrigger value="payments">Payments</TabsTrigger>
         </TabsList>
       </GroupHeader>
+
+      {showSwishProfile && currentMember && (
+        <SwishProfile
+          memberId={currentMember.id}
+          currentPhone={currentMember.swish_phone ?? null}
+          onUpdated={loadGroup}
+        />
+      )}
 
       <TabsContent value="expenses">
         <ExpenseList
