@@ -28,6 +28,7 @@ function renderPage(inviteToken = "token-abc", expenseId = "exp-1") {
           path="/groups/:inviteToken/expenses/:expenseId/edit"
           element={<EditExpensePage />}
         />
+        <Route path="/groups/:inviteToken" element={null} />
       </Routes>
     </MemoryRouter>,
   )

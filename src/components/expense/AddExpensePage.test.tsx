@@ -26,6 +26,7 @@ function renderPage(inviteToken = "token-abc") {
           path="/groups/:inviteToken/add-expense"
           element={<AddExpensePage />}
         />
+        <Route path="/groups/:inviteToken" element={null} />
       </Routes>
     </MemoryRouter>,
   )
