@@ -1,20 +1,26 @@
-import { ArrowLeft, ArrowRight, Check } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { ArrowLeft, ArrowRight, Check, Smartphone } from "lucide-react"
+import QRCode from "qrcode"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
 import MemberAvatar from "@/components/group/MemberAvatar"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { LoadingState } from "@/components/ui/loading-state"
 import { calculateBalances } from "@/lib/balances"
 import { simplifyDebts } from "@/lib/simplify"
 import { supabase } from "@/lib/supabase"
+import {
+  buildSwishDeepLink,
+  buildSwishQrPayload,
+  formatSwishAmount,
+} from "@/lib/swish"
 import type {
   DbExpense,
   DbGroup,
   DbGroupMember,
   DbSettlement,
 } from "@/lib/types"
-import { formatAmount } from "@/lib/utils"
+import { cn, formatAmount } from "@/lib/utils"
 
 type PageState =
   | { status: "loading" }
@@ -38,6 +44,7 @@ export default function SettlePage() {
   const navigate = useNavigate()
   const [state, setState] = useState<PageState>({ status: "loading" })
   const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage] = useState("")
 
   const groupUrl = `/groups/${inviteToken}?tab=balances`
 
@@ -112,6 +119,67 @@ export default function SettlePage() {
     load()
   }, [load])
 
+  const ready =
+    state.status === "ready" && state.amount !== null
+      ? {
+          group: state.group,
+          to: state.to,
+          amount: state.amount,
+        }
+      : null
+
+  const swishEnabled =
+    !!ready &&
+    ready.group.currency === "SEK" &&
+    !!ready.to.swish_phone &&
+    ready.to.swish_phone.length > 0
+
+  const swishPhone = ready?.to.swish_phone ?? null
+  const swishAmountStr = ready ? formatSwishAmount(ready.amount) : ""
+  const effectiveMessage = (
+    message.trim() ||
+    ready?.group.name ||
+    "Settlement"
+  ).slice(0, 50)
+
+  const swishDeepLink = useMemo(() => {
+    if (!swishEnabled || !swishPhone) return ""
+    return buildSwishDeepLink({
+      phone: swishPhone,
+      amount: swishAmountStr,
+      message: effectiveMessage,
+    })
+  }, [swishEnabled, swishPhone, swishAmountStr, effectiveMessage])
+
+  const swishQrPayload = useMemo(() => {
+    if (!swishEnabled || !swishPhone) return ""
+    return buildSwishQrPayload({
+      phone: swishPhone,
+      amount: swishAmountStr,
+      message: effectiveMessage,
+    })
+  }, [swishEnabled, swishPhone, swishAmountStr, effectiveMessage])
+
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!swishQrPayload) {
+      setQrDataUrl(null)
+      return
+    }
+    let cancelled = false
+    QRCode.toDataURL(swishQrPayload, { margin: 1, width: 220 })
+      .then((url) => {
+        if (!cancelled) setQrDataUrl(url)
+      })
+      .catch(() => {
+        if (!cancelled) setQrDataUrl(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [swishQrPayload])
+
   async function handleMarkSettled() {
     if (state.status !== "ready" || state.amount === null) return
     setSubmitting(true)
@@ -159,6 +227,8 @@ export default function SettlePage() {
   const amountText = formatAmount(group.currency, amount)
   const [currencyCode, ...amountParts] = amountText.split(" ")
   const amountNumber = amountParts.join(" ")
+  const showSwish = group.currency === "SEK"
+  const recipientHasPhone = !!to.swish_phone && to.swish_phone.length > 0
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-2 py-6">
@@ -219,10 +289,74 @@ export default function SettlePage() {
         </span>
       </div>
 
+      {showSwish && (
+        <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-card/40 p-4">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
+              Swish
+            </span>
+            <h3 className="font-semibold text-sm">Pay {to.guest_name}</h3>
+          </div>
+
+          {recipientHasPhone ? (
+            <>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
+                  Message
+                </span>
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder={group.name}
+                  maxLength={50}
+                  className="h-9 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+              </label>
+
+              <a
+                href={swishDeepLink}
+                className={cn(
+                  buttonVariants({ variant: "default" }),
+                  "w-full gap-1.5",
+                )}
+              >
+                <Smartphone className="h-4 w-4" />
+                Pay with Swish
+              </a>
+
+              {qrDataUrl && (
+                <div className="flex flex-col items-center gap-1.5 pt-1">
+                  <img
+                    src={qrDataUrl}
+                    alt="Swish QR code"
+                    className="h-44 w-44 rounded-md bg-white p-2"
+                  />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
+                    Scan in the Swish app
+                  </span>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <Button type="button" disabled className="w-full gap-1.5">
+                <Smartphone className="h-4 w-4" />
+                Pay with Swish
+              </Button>
+              <p className="text-muted-foreground text-xs">
+                {to.guest_name} hasn't added a Swish number yet.
+              </p>
+            </>
+          )}
+        </div>
+      )}
+
       <Button
         type="button"
         onClick={handleMarkSettled}
         disabled={submitting}
+        variant={showSwish ? "outline" : "default"}
         className="w-full"
       >
         <Check className="h-4 w-4" />

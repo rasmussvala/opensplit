@@ -14,20 +14,29 @@ vi.mock("@/components/auth/AuthProvider", () => ({
   useAuth: () => ({ userId: "test-user-id" }),
 }))
 
-const mockGroup = {
+vi.mock("qrcode", () => ({
+  default: {
+    toDataURL: vi
+      .fn()
+      .mockResolvedValue("data:image/png;base64,FAKE_QR_PAYLOAD"),
+  },
+}))
+
+const baseGroup = {
   id: "group-1",
   name: "Trip",
   currency: "USD",
   invite_token: "token-abc",
 }
 
-const mockMembers = [
+const baseMembers = [
   {
     id: "member-1",
     group_id: "group-1",
     guest_name: "Alice",
     user_id: "user-1",
     joined_at: "2026-01-01",
+    swish_phone: null,
   },
   {
     id: "member-2",
@@ -35,10 +44,11 @@ const mockMembers = [
     guest_name: "Bob",
     user_id: "test-user-id",
     joined_at: "2026-01-01",
+    swish_phone: null,
   },
 ]
 
-const mockExpense = {
+const baseExpense = {
   id: "expense-1",
   group_id: "group-1",
   paid_by: "member-1",
@@ -50,9 +60,12 @@ const mockExpense = {
 }
 
 interface SetupOptions {
-  group?: typeof mockGroup | null
-  members?: typeof mockMembers
-  expenses?: (typeof mockExpense)[]
+  group?: typeof baseGroup | null
+  currency?: string
+  members?: typeof baseMembers
+  recipientSwishPhone?: string | null
+  groupName?: string
+  expenses?: (typeof baseExpense)[]
   settlements?: unknown[]
   membership?: unknown
   insertResponse?: { error: unknown }
@@ -60,9 +73,11 @@ interface SetupOptions {
 
 function setupSupabase(options: SetupOptions = {}) {
   const {
-    group = mockGroup,
-    members = mockMembers,
-    expenses = [mockExpense],
+    currency,
+    groupName,
+    recipientSwishPhone,
+    members = baseMembers,
+    expenses = [baseExpense],
     settlements = [],
     membership = {
       id: "member-2",
@@ -71,6 +86,22 @@ function setupSupabase(options: SetupOptions = {}) {
     },
     insertResponse = { error: null },
   } = options
+
+  const group =
+    options.group === null
+      ? null
+      : {
+          ...baseGroup,
+          ...(currency ? { currency } : {}),
+          ...(groupName ? { name: groupName } : {}),
+        }
+
+  const finalMembers =
+    recipientSwishPhone !== undefined
+      ? members.map((m) =>
+          m.id === "member-1" ? { ...m, swish_phone: recipientSwishPhone } : m,
+        )
+      : members
 
   const insertMock = vi.fn().mockResolvedValue(insertResponse)
 
@@ -106,7 +137,7 @@ function setupSupabase(options: SetupOptions = {}) {
       }
       return {
         select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: members, error: null }),
+          eq: vi.fn().mockResolvedValue({ data: finalMembers, error: null }),
         }),
       } as unknown as ReturnType<typeof supabase.from>
     }
@@ -258,6 +289,83 @@ describe("SettlePage", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/group page/i)).toBeInTheDocument()
+    })
+  })
+
+  it("does not render the Swish card for non-SEK groups", async () => {
+    setupSupabase({ recipientSwishPhone: "46701234567" })
+
+    renderRoute()
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /mark settled/i }),
+      ).toBeInTheDocument()
+    })
+
+    expect(
+      screen.queryByRole("link", { name: /pay with swish/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: /pay with swish/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("renders the Pay-with-Swish anchor and QR for a SEK group with recipient phone", async () => {
+    setupSupabase({
+      currency: "SEK",
+      groupName: "Trip",
+      recipientSwishPhone: "46701234567",
+    })
+
+    renderRoute()
+
+    const link = await screen.findByRole("link", { name: /pay with swish/i })
+    expect(link).toHaveAttribute(
+      "href",
+      "swish://payment?phone=46701234567&amount=50.00&message=Trip",
+    )
+
+    const qr = await screen.findByAltText(/swish qr code/i)
+    expect(qr).toHaveAttribute("src", "data:image/png;base64,FAKE_QR_PAYLOAD")
+  })
+
+  it("disables Pay-with-Swish when recipient has no phone", async () => {
+    setupSupabase({ currency: "SEK", recipientSwishPhone: null })
+
+    renderRoute()
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /pay with swish/i }),
+      ).toBeDisabled()
+    })
+
+    expect(
+      screen.getByText(/alice hasn't added a swish number yet/i),
+    ).toBeInTheDocument()
+  })
+
+  it("updates the deep-link message when the user types in the message field", async () => {
+    setupSupabase({
+      currency: "SEK",
+      groupName: "Trip",
+      recipientSwishPhone: "46701234567",
+    })
+
+    renderRoute()
+
+    const input = (await screen.findByPlaceholderText(
+      "Trip",
+    )) as HTMLInputElement
+    fireEvent.change(input, { target: { value: "Pizza night" } })
+
+    await waitFor(() => {
+      const link = screen.getByRole("link", { name: /pay with swish/i })
+      expect(link).toHaveAttribute(
+        "href",
+        "swish://payment?phone=46701234567&amount=50.00&message=Pizza%20night",
+      )
     })
   })
 })
