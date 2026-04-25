@@ -9,7 +9,7 @@ interface BalanceSummaryProps {
   settlements: DbSettlement[]
   members: DbGroupMember[]
   currency: string
-  onSettle: (from: string, to: string, amount: number) => Promise<void>
+  inviteToken: string
 }
 
 export default function BalanceSummary({
@@ -17,7 +17,7 @@ export default function BalanceSummary({
   settlements,
   members,
   currency,
-  onSettle,
+  inviteToken,
 }: BalanceSummaryProps) {
   const memberNames = new Map(members.map((m) => [m.id, m.guest_name]))
 
@@ -56,7 +56,7 @@ export default function BalanceSummary({
         transactions={transactions}
         memberNames={memberNames}
         currency={currency}
-        onSettle={onSettle}
+        inviteToken={inviteToken}
       />
     </div>
   )

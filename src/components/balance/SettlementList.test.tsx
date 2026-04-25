@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
+import { describe, expect, it } from "vitest"
 import type { Transaction } from "@/lib/simplify"
 import SettlementList from "./SettlementList"
 
@@ -8,19 +9,17 @@ const memberNames = new Map([
   ["m2", "Bob"],
 ])
 
-function renderWith(
-  transactions: Transaction[],
-  onSettle = vi.fn().mockResolvedValue(undefined),
-) {
-  render(
-    <SettlementList
-      transactions={transactions}
-      memberNames={memberNames}
-      currency="USD"
-      onSettle={onSettle}
-    />,
+function renderWith(transactions: Transaction[], inviteToken = "abc") {
+  return render(
+    <MemoryRouter>
+      <SettlementList
+        transactions={transactions}
+        memberNames={memberNames}
+        currency="USD"
+        inviteToken={inviteToken}
+      />
+    </MemoryRouter>,
   )
-  return { onSettle }
 }
 
 describe("SettlementList", () => {
@@ -43,28 +42,10 @@ describe("SettlementList", () => {
     ).toBeInTheDocument()
   })
 
-  it("invokes onSettle with the from/to/amount when the button is clicked", async () => {
-    const { onSettle } = renderWith([{ from: "m2", to: "m1", amount: 25 }])
-    fireEvent.click(screen.getByRole("button", { name: /settle/i }))
-    await waitFor(() => expect(onSettle).toHaveBeenCalledWith("m2", "m1", 25))
-  })
-
-  it("disables the settle button while the promise is pending", async () => {
-    let resolveSettle: () => void = () => {}
-    const onSettle = vi.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveSettle = resolve
-        }),
-    )
-    renderWith([{ from: "m2", to: "m1", amount: 25 }], onSettle)
-
-    const button = screen.getByRole("button", { name: /settle/i })
-    fireEvent.click(button)
-    await waitFor(() => expect(button).toBeDisabled())
-
-    resolveSettle()
-    await waitFor(() => expect(button).not.toBeDisabled())
+  it("links each row to the settle page for that pair", () => {
+    renderWith([{ from: "m2", to: "m1", amount: 25 }], "token-xyz")
+    const link = screen.getByRole("link", { name: /bob owes alice/i })
+    expect(link).toHaveAttribute("href", "/groups/token-xyz/settle/m2/m1")
   })
 
   it("renders one row per transaction", () => {
@@ -72,6 +53,6 @@ describe("SettlementList", () => {
       { from: "m2", to: "m1", amount: 25 },
       { from: "m1", to: "m2", amount: 10 },
     ])
-    expect(screen.getAllByRole("button", { name: /settle/i })).toHaveLength(2)
+    expect(screen.getAllByRole("link")).toHaveLength(2)
   })
 })

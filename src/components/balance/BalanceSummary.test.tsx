@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
+import { describe, expect, it } from "vitest"
 import type { DbExpense, DbGroupMember, DbSettlement } from "@/lib/types"
 import BalanceSummary from "./BalanceSummary"
 
@@ -33,7 +34,7 @@ function renderBalanceSummary(
     settlements?: DbSettlement[]
     members?: DbGroupMember[]
     currency?: string
-    onSettle?: (from: string, to: string, amount: number) => Promise<void>
+    inviteToken?: string
   } = {},
 ) {
   const props = {
@@ -41,9 +42,13 @@ function renderBalanceSummary(
     settlements: overrides.settlements ?? [],
     members: overrides.members ?? mockMembers,
     currency: overrides.currency ?? "USD",
-    onSettle: overrides.onSettle ?? vi.fn(),
+    inviteToken: overrides.inviteToken ?? "abc",
   }
-  return render(<BalanceSummary {...props} />)
+  return render(
+    <MemoryRouter>
+      <BalanceSummary {...props} />
+    </MemoryRouter>,
+  )
 }
 
 describe("BalanceSummary", () => {
@@ -161,7 +166,7 @@ describe("BalanceSummary", () => {
     expect(screen.getByText(/bob owes alice USD 50\.00/i)).toBeInTheDocument()
   })
 
-  it("renders settle button per transaction", () => {
+  it("renders one settle link per transaction", () => {
     const expenses: DbExpense[] = [
       {
         id: "expense-1",
@@ -177,12 +182,10 @@ describe("BalanceSummary", () => {
 
     renderBalanceSummary({ expenses })
 
-    const settleButtons = screen.getAllByRole("button", { name: /settle/i })
-    expect(settleButtons.length).toBe(2)
+    expect(screen.getAllByRole("link")).toHaveLength(2)
   })
 
-  it("calls onSettle with correct args when settle is clicked", async () => {
-    const onSettle = vi.fn().mockResolvedValue(undefined)
+  it("links each transaction to the settle page", () => {
     const expenses: DbExpense[] = [
       {
         id: "expense-1",
@@ -196,51 +199,10 @@ describe("BalanceSummary", () => {
       },
     ]
 
-    renderBalanceSummary({ expenses, onSettle })
+    renderBalanceSummary({ expenses, inviteToken: "abc" })
 
-    const settleButton = screen.getByRole("button", { name: /settle/i })
-    fireEvent.click(settleButton)
-
-    await waitFor(() => {
-      expect(onSettle).toHaveBeenCalledWith("member-2", "member-1", 50)
-    })
-  })
-
-  it("disables settle button while settling", async () => {
-    let resolveSettle!: () => void
-    const onSettle = vi.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveSettle = resolve
-        }),
-    )
-    const expenses: DbExpense[] = [
-      {
-        id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
-        amount: 100,
-        description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
-      },
-    ]
-
-    renderBalanceSummary({ expenses, onSettle })
-
-    const settleButton = screen.getByRole("button", { name: /settle/i })
-    fireEvent.click(settleButton)
-
-    await waitFor(() => {
-      expect(settleButton).toBeDisabled()
-    })
-
-    resolveSettle()
-
-    await waitFor(() => {
-      expect(settleButton).not.toBeDisabled()
-    })
+    const link = screen.getByRole("link", { name: /bob owes alice/i })
+    expect(link).toHaveAttribute("href", "/groups/abc/settle/member-2/member-1")
   })
 
   it("applies split_overrides when calculating balances", () => {

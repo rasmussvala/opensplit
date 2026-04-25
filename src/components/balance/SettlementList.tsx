@@ -1,7 +1,6 @@
-import { ArrowRight, Check } from "lucide-react"
-import { useState } from "react"
+import { ArrowRight, ChevronRight } from "lucide-react"
+import { Link } from "react-router-dom"
 import MemberAvatar from "@/components/group/MemberAvatar"
-import { Button } from "@/components/ui/button"
 import type { Transaction } from "@/lib/simplify"
 import { formatAmount } from "@/lib/utils"
 
@@ -9,27 +8,15 @@ interface SettlementListProps {
   transactions: Transaction[]
   memberNames: Map<string, string>
   currency: string
-  onSettle: (from: string, to: string, amount: number) => Promise<void>
+  inviteToken: string
 }
 
 export default function SettlementList({
   transactions,
   memberNames,
   currency,
-  onSettle,
+  inviteToken,
 }: SettlementListProps) {
-  const [settlingKey, setSettlingKey] = useState<string | null>(null)
-
-  async function handleSettle(from: string, to: string, amount: number) {
-    const key = `${from}-${to}`
-    setSettlingKey(key)
-    try {
-      await onSettle(from, to, amount)
-    } finally {
-      setSettlingKey(null)
-    }
-  }
-
   return (
     <div>
       <h2 className="mb-2 font-semibold text-sm">Settlements</h2>
@@ -42,11 +29,11 @@ export default function SettlementList({
           const [currencyCode, ...amountParts] = amountText.split(" ")
           const amountNumber = amountParts.join(" ")
           return (
-            <div
+            <Link
               key={key}
+              to={`/groups/${inviteToken}/settle/${t.from}/${t.to}`}
               className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 transition-colors hover:border-border hover:bg-card/70"
             >
-              {/* Paired avatars with a directional flow arrow */}
               <div aria-hidden="true" className="flex shrink-0 items-center">
                 <MemberAvatar
                   id={t.from}
@@ -63,20 +50,16 @@ export default function SettlementList({
                 />
               </div>
 
-              {/* Names label + amount */}
-              <div className="flex min-w-0 flex-1 flex-col leading-tight">
-                <span
-                  aria-hidden="true"
-                  className="truncate text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]"
-                >
+              <div
+                aria-hidden="true"
+                className="flex min-w-0 flex-1 flex-col leading-tight"
+              >
+                <span className="truncate text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
                   {fromName}
                   <span className="mx-1 opacity-40">→</span>
                   {toName}
                 </span>
-                <span
-                  aria-hidden="true"
-                  className="mt-1 flex items-baseline gap-1.5 font-semibold text-[15px] text-foreground tabular-nums"
-                >
+                <span className="mt-1 flex items-baseline gap-1.5 font-semibold text-[15px] text-foreground tabular-nums">
                   <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
                     {currencyCode}
                   </span>
@@ -84,22 +67,15 @@ export default function SettlementList({
                 </span>
               </div>
 
-              {/* Accessible phrase (also used by existing tests) */}
               <span className="sr-only">
                 {fromName} owes {toName} {amountText}
               </span>
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleSettle(t.from, t.to, t.amount)}
-                disabled={settlingKey === key}
-                className="gap-1.5"
-              >
-                <Check className="h-3.5 w-3.5" />
-                Settle
-              </Button>
-            </div>
+              <ChevronRight
+                aria-hidden="true"
+                className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5"
+              />
+            </Link>
           )
         })}
       </div>
