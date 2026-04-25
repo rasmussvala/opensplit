@@ -54,7 +54,7 @@ describe("buildSwishDeepLink", () => {
         message: "Dinner & drinks",
       }),
     ).toBe(
-      "https://app.swish.nu/1/p/sw/?sw=46701234567&amt=42.50&cur=SEK&msg=Dinner+%26+drinks&src=qr",
+      "https://app.swish.nu/1/p/sw/?sw=46701234567&amt=42.50&cur=SEK&msg=Dinner%20%26%20drinks&src=qr",
     )
   })
 
