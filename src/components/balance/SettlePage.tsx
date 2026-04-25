@@ -13,6 +13,7 @@ import {
   buildSwishDeepLink,
   buildSwishQrPayload,
   formatSwishAmount,
+  isMobileSwishDevice,
 } from "@/lib/swish"
 import type {
   DbExpense,
@@ -44,7 +45,6 @@ export default function SettlePage() {
   const navigate = useNavigate()
   const [state, setState] = useState<PageState>({ status: "loading" })
   const [submitting, setSubmitting] = useState(false)
-  const [message, setMessage] = useState("")
 
   const groupUrl = `/groups/${inviteToken}?tab=balances`
 
@@ -136,29 +136,27 @@ export default function SettlePage() {
 
   const swishPhone = ready?.to.swish_phone ?? null
   const swishAmountStr = ready ? formatSwishAmount(ready.amount) : ""
-  const effectiveMessage = (
-    message.trim() ||
-    ready?.group.name ||
-    "Settlement"
-  ).slice(0, 50)
+  const swishMessage = ready
+    ? `Opensplit: ${ready.group.name}`.slice(0, 50)
+    : ""
 
   const swishDeepLink = useMemo(() => {
     if (!swishEnabled || !swishPhone) return ""
     return buildSwishDeepLink({
       phone: swishPhone,
       amount: swishAmountStr,
-      message: effectiveMessage,
+      message: swishMessage,
     })
-  }, [swishEnabled, swishPhone, swishAmountStr, effectiveMessage])
+  }, [swishEnabled, swishPhone, swishAmountStr, swishMessage])
 
   const swishQrPayload = useMemo(() => {
     if (!swishEnabled || !swishPhone) return ""
     return buildSwishQrPayload({
       phone: swishPhone,
       amount: swishAmountStr,
-      message: effectiveMessage,
+      message: swishMessage,
     })
-  }, [swishEnabled, swishPhone, swishAmountStr, effectiveMessage])
+  }, [swishEnabled, swishPhone, swishAmountStr, swishMessage])
 
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
 
@@ -229,6 +227,7 @@ export default function SettlePage() {
   const amountNumber = amountParts.join(" ")
   const showSwish = group.currency === "SEK"
   const recipientHasPhone = !!to.swish_phone && to.swish_phone.length > 0
+  const showSwishButton = isMobileSwishDevice()
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-2 py-6">
@@ -300,30 +299,18 @@ export default function SettlePage() {
 
           {recipientHasPhone ? (
             <>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
-                  Message
-                </span>
-                <input
-                  type="text"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder={group.name}
-                  maxLength={50}
-                  className="h-9 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </label>
-
-              <a
-                href={swishDeepLink}
-                className={cn(
-                  buttonVariants({ variant: "default" }),
-                  "w-full gap-1.5",
-                )}
-              >
-                <Smartphone className="h-4 w-4" />
-                Pay with Swish
-              </a>
+              {showSwishButton && (
+                <a
+                  href={swishDeepLink}
+                  className={cn(
+                    buttonVariants({ variant: "default" }),
+                    "w-full gap-1.5",
+                  )}
+                >
+                  <Smartphone className="h-4 w-4" />
+                  Pay with Swish
+                </a>
+              )}
 
               {qrDataUrl && (
                 <div className="flex flex-col items-center gap-1.5 pt-1">
@@ -339,15 +326,9 @@ export default function SettlePage() {
               )}
             </>
           ) : (
-            <>
-              <Button type="button" disabled className="w-full gap-1.5">
-                <Smartphone className="h-4 w-4" />
-                Pay with Swish
-              </Button>
-              <p className="text-muted-foreground text-xs">
-                {to.guest_name} hasn't added a Swish number yet.
-              </p>
-            </>
+            <p className="text-muted-foreground text-xs">
+              {to.guest_name} hasn't added a Swish number yet.
+            </p>
           )}
         </div>
       )}

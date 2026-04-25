@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { supabase } from "@/lib/supabase"
+import * as swishLib from "@/lib/swish"
 import SettlePage from "./SettlePage"
 
 vi.mock("@/lib/supabase", () => ({
@@ -187,6 +188,11 @@ function renderRoute(
 describe("SettlePage", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.spyOn(swishLib, "isMobileSwishDevice").mockReturnValue(false)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it("shows loading state initially", () => {
@@ -311,7 +317,25 @@ describe("SettlePage", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("renders the Pay-with-Swish anchor and QR for a SEK group with recipient phone", async () => {
+  it("renders the QR for a SEK group with recipient phone, but hides the button on desktop", async () => {
+    setupSupabase({
+      currency: "SEK",
+      groupName: "Trip",
+      recipientSwishPhone: "46701234567",
+    })
+
+    renderRoute()
+
+    const qr = await screen.findByAltText(/swish qr code/i)
+    expect(qr).toHaveAttribute("src", "data:image/png;base64,FAKE_QR_PAYLOAD")
+
+    expect(
+      screen.queryByRole("link", { name: /pay with swish/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("renders the Pay-with-Swish anchor on mobile with the hardcoded Opensplit message", async () => {
+    vi.spyOn(swishLib, "isMobileSwishDevice").mockReturnValue(true)
     setupSupabase({
       currency: "SEK",
       groupName: "Trip",
@@ -323,49 +347,26 @@ describe("SettlePage", () => {
     const link = await screen.findByRole("link", { name: /pay with swish/i })
     expect(link).toHaveAttribute(
       "href",
-      "swish://payment?phone=46701234567&amount=50.00&message=Trip",
+      "swish://payment?phone=46701234567&amount=50.00&message=Opensplit%3A%20Trip",
     )
-
-    const qr = await screen.findByAltText(/swish qr code/i)
-    expect(qr).toHaveAttribute("src", "data:image/png;base64,FAKE_QR_PAYLOAD")
   })
 
-  it("disables Pay-with-Swish when recipient has no phone", async () => {
+  it("shows the no-phone helper text without a button when recipient has no phone", async () => {
     setupSupabase({ currency: "SEK", recipientSwishPhone: null })
 
     renderRoute()
 
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: /pay with swish/i }),
-      ).toBeDisabled()
+        screen.getByText(/alice hasn't added a swish number yet/i),
+      ).toBeInTheDocument()
     })
 
     expect(
-      screen.getByText(/alice hasn't added a swish number yet/i),
-    ).toBeInTheDocument()
-  })
-
-  it("updates the deep-link message when the user types in the message field", async () => {
-    setupSupabase({
-      currency: "SEK",
-      groupName: "Trip",
-      recipientSwishPhone: "46701234567",
-    })
-
-    renderRoute()
-
-    const input = (await screen.findByPlaceholderText(
-      "Trip",
-    )) as HTMLInputElement
-    fireEvent.change(input, { target: { value: "Pizza night" } })
-
-    await waitFor(() => {
-      const link = screen.getByRole("link", { name: /pay with swish/i })
-      expect(link).toHaveAttribute(
-        "href",
-        "swish://payment?phone=46701234567&amount=50.00&message=Pizza%20night",
-      )
-    })
+      screen.queryByRole("link", { name: /pay with swish/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: /pay with swish/i }),
+    ).not.toBeInTheDocument()
   })
 })

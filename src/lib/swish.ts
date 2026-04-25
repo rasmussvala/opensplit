@@ -42,3 +42,8 @@ export function buildSwishQrPayload({
 export function formatSwishAmount(amount: number): string {
   return amount.toFixed(2)
 }
+
+export function isMobileSwishDevice(): boolean {
+  if (typeof navigator === "undefined") return false
+  return /iPhone|Android/i.test(navigator.userAgent)
+}

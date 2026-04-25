@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   buildSwishDeepLink,
   buildSwishQrPayload,
   formatSwishAmount,
+  isMobileSwishDevice,
   normalizeSwishPhone,
 } from "./swish"
 
@@ -91,5 +92,34 @@ describe("formatSwishAmount", () => {
 
   it("preserves two decimals as-is", () => {
     expect(formatSwishAmount(123.45)).toBe("123.45")
+  })
+})
+
+describe("isMobileSwishDevice", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it("returns true for an iPhone user agent", () => {
+    vi.stubGlobal("navigator", {
+      userAgent:
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605",
+    })
+    expect(isMobileSwishDevice()).toBe(true)
+  })
+
+  it("returns true for an Android user agent", () => {
+    vi.stubGlobal("navigator", {
+      userAgent: "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537",
+    })
+    expect(isMobileSwishDevice()).toBe(true)
+  })
+
+  it("returns false for a desktop user agent", () => {
+    vi.stubGlobal("navigator", {
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605",
+    })
+    expect(isMobileSwishDevice()).toBe(false)
   })
 })
