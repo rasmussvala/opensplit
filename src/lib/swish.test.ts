@@ -54,7 +54,7 @@ describe("buildSwishDeepLink", () => {
         message: "Dinner & drinks",
       }),
     ).toBe(
-      "swish://payment?data=%7B%22version%22%3A1%2C%22payee%22%3A%7B%22value%22%3A%22%2B46701234567%22%7D%2C%22amount%22%3A%7B%22value%22%3A42.5%7D%2C%22message%22%3A%7B%22value%22%3A%22Dinner%20%26%20drinks%22%7D%7D",
+      "swish://payment?data=%7B%22version%22%3A1%2C%22payee%22%3A%7B%22value%22%3A%2246701234567%22%7D%2C%22amount%22%3A%7B%22value%22%3A42.5%7D%2C%22message%22%3A%7B%22value%22%3A%22Dinner%20%26%20drinks%22%7D%7D",
     )
   })
 
@@ -66,7 +66,7 @@ describe("buildSwishDeepLink", () => {
         message: "Räkor",
       }),
     ).toBe(
-      "swish://payment?data=%7B%22version%22%3A1%2C%22payee%22%3A%7B%22value%22%3A%22%2B46701234567%22%7D%2C%22amount%22%3A%7B%22value%22%3A100%7D%2C%22message%22%3A%7B%22value%22%3A%22R%C3%A4kor%22%7D%7D",
+      "swish://payment?data=%7B%22version%22%3A1%2C%22payee%22%3A%7B%22value%22%3A%2246701234567%22%7D%2C%22amount%22%3A%7B%22value%22%3A100%7D%2C%22message%22%3A%7B%22value%22%3A%22R%C3%A4kor%22%7D%7D",
     )
   })
 })
