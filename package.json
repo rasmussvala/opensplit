@@ -10,7 +10,8 @@
     "check:fix": "biome check --write .",
     "test": "vitest",
     "test:coverage": "vitest --coverage --run",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.2.9",
