@@ -37,7 +37,7 @@ export function buildSwishDeepLink({
 }: SwishPaymentInput): string {
   const data = {
     version: 1,
-    payee: { value: `+${phone}` },
+    payee: { value: phone },
     amount: { value: Number(amount) },
     message: { value: message },
   }
