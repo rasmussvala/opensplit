@@ -347,7 +347,7 @@ describe("SettlePage", () => {
     const link = await screen.findByRole("link", { name: /pay with swish/i })
     expect(link).toHaveAttribute(
       "href",
-      "https://app.swish.nu/1/p/sw/?sw=46701234567&amt=50.00&cur=SEK&msg=Opensplit%3A%20Trip&src=qr",
+      "swish://payment?data=%7B%22version%22%3A1%2C%22payee%22%3A%7B%22value%22%3A%22%2B46701234567%22%7D%2C%22amount%22%3A%7B%22value%22%3A50%7D%2C%22message%22%3A%7B%22value%22%3A%22Opensplit%3A%20Trip%22%7D%7D",
     )
     expect(screen.queryByAltText(/swish qr code/i)).not.toBeInTheDocument()
   })
