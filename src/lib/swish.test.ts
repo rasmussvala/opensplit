@@ -46,7 +46,7 @@ describe("normalizeSwishPhone", () => {
 })
 
 describe("buildSwishDeepLink", () => {
-  it("builds an app.swish.nu URL with encoded params", () => {
+  it("builds a swish:// URL with the v1 JSON data payload", () => {
     expect(
       buildSwishDeepLink({
         phone: "46701234567",
@@ -54,7 +54,7 @@ describe("buildSwishDeepLink", () => {
         message: "Dinner & drinks",
       }),
     ).toBe(
-      "https://app.swish.nu/1/p/sw/?sw=46701234567&amt=42.50&cur=SEK&msg=Dinner%20%26%20drinks&src=qr",
+      "swish://payment?data=%7B%22version%22%3A1%2C%22payee%22%3A%7B%22value%22%3A%22%2B46701234567%22%7D%2C%22amount%22%3A%7B%22value%22%3A42.5%7D%2C%22message%22%3A%7B%22value%22%3A%22Dinner%20%26%20drinks%22%7D%7D",
     )
   })
 
@@ -66,7 +66,7 @@ describe("buildSwishDeepLink", () => {
         message: "Räkor",
       }),
     ).toBe(
-      "https://app.swish.nu/1/p/sw/?sw=46701234567&amt=100.00&cur=SEK&msg=R%C3%A4kor&src=qr",
+      "swish://payment?data=%7B%22version%22%3A1%2C%22payee%22%3A%7B%22value%22%3A%22%2B46701234567%22%7D%2C%22amount%22%3A%7B%22value%22%3A100%7D%2C%22message%22%3A%7B%22value%22%3A%22R%C3%A4kor%22%7D%7D",
     )
   })
 })

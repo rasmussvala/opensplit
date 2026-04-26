@@ -35,7 +35,13 @@ export function buildSwishDeepLink({
   amount,
   message,
 }: SwishPaymentInput): string {
-  return `https://app.swish.nu/1/p/sw/?sw=${encodeURIComponent(phone)}&amt=${encodeURIComponent(amount)}&cur=${encodeURIComponent(SWISH_CURRENCY)}&msg=${encodeURIComponent(message)}&src=qr`
+  const data = {
+    version: 1,
+    payee: { value: `+${phone}` },
+    amount: { value: Number(amount) },
+    message: { value: message },
+  }
+  return `swish://payment?data=${encodeURIComponent(JSON.stringify(data))}`
 }
 
 export function buildSwishQrPayload({
