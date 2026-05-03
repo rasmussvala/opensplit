@@ -334,11 +334,11 @@ describe("SettlePage", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("renders the Pay-with-Swish anchor on mobile with the hardcoded Opensplit message", async () => {
+  it("renders the Pay-with-Swish anchor on mobile with an emoji-safe Swish message", async () => {
     vi.spyOn(swishLib, "isMobileSwishDevice").mockReturnValue(true)
     setupSupabase({
       currency: "SEK",
-      groupName: "Trip",
+      groupName: "Trip 🧳",
       recipientSwishPhone: "46701234567",
     })
 

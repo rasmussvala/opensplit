@@ -12,6 +12,7 @@ import { simplifyDebts } from "@/lib/simplify"
 import { supabase } from "@/lib/supabase"
 import {
   buildSwishDeepLink,
+  buildSwishMessage,
   buildSwishQrPayload,
   formatSwishAmount,
   isMobileSwishDevice,
@@ -143,7 +144,7 @@ export default function SettlePage() {
     const payload = buildSwishQrPayload({
       phone: qrPhone,
       amount: formatSwishAmount(qrAmount),
-      message: swishMessageFor(qrGroupName),
+      message: buildSwishMessage(qrGroupName),
     })
     let cancelled = false
     import("qrcode")
@@ -217,7 +218,7 @@ export default function SettlePage() {
       ? buildSwishDeepLink({
           phone: to.swish_phone,
           amount: swishAmountStr,
-          message: swishMessageFor(group.name),
+          message: buildSwishMessage(group.name),
         })
       : ""
 
@@ -331,8 +332,4 @@ export default function SettlePage() {
       </Button>
     </div>
   )
-}
-
-function swishMessageFor(groupName: string): string {
-  return `Opensplit: ${groupName}`.slice(0, 50)
 }

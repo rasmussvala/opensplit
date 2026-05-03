@@ -11,6 +11,9 @@ export interface SwishPaymentInput {
   message: string
 }
 
+const SWISH_EMOJI_PATTERN =
+  /(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\u{20E3}|\u{200D}|\u{FE0F})/gu
+
 export function normalizeSwishPhone(input: string): string | null {
   const cleaned = input.replace(/[\s\-()+]/g, "")
   if (cleaned === "" || !/^\d+$/.test(cleaned)) return null
@@ -50,6 +53,16 @@ export function buildSwishQrPayload({
   message,
 }: SwishPaymentInput): string {
   return `C${phone};${amount};${message};`
+}
+
+export function buildSwishMessage(groupName: string): string {
+  const sanitizedGroupName = groupName
+    .replace(SWISH_EMOJI_PATTERN, "")
+    .replace(/\s+/g, " ")
+    .trim()
+
+  if (!sanitizedGroupName) return "Opensplit"
+  return `Opensplit: ${sanitizedGroupName}`.slice(0, 50).trim()
 }
 
 export function formatSwishAmount(amount: number): string {

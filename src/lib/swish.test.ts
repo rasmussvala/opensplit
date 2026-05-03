@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   buildSwishDeepLink,
+  buildSwishMessage,
   buildSwishQrPayload,
   formatSwishAmount,
   isMobileSwishDevice,
@@ -80,6 +81,32 @@ describe("buildSwishQrPayload", () => {
         message: "Dinner",
       }),
     ).toBe("C46701234567;42.50;Dinner;")
+  })
+})
+
+describe("buildSwishMessage", () => {
+  it("keeps regular unicode letters in the group name", () => {
+    expect(buildSwishMessage("Räkor på Söder")).toBe(
+      "Opensplit: Räkor på Söder",
+    )
+  })
+
+  it("truncates long group names to the Swish message limit", () => {
+    expect(
+      buildSwishMessage(
+        "Summer road trip through Sweden and Norway with the whole crew",
+      ),
+    ).toBe("Opensplit: Summer road trip through Sweden and Nor")
+  })
+
+  it("strips emoji from the group name", () => {
+    expect(buildSwishMessage("Trip 🧳 to Göteborg")).toBe(
+      "Opensplit: Trip to Göteborg",
+    )
+  })
+
+  it("falls back to just the app name when the group name is only emoji", () => {
+    expect(buildSwishMessage("🎉🎉")).toBe("Opensplit")
   })
 })
 
