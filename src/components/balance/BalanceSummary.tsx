@@ -25,7 +25,7 @@ export default function BalanceSummary({
   inviteToken,
   currentMemberId,
 }: BalanceSummaryProps) {
-  const [showBalances, setShowBalances] = useState(false)
+  const [showBalances, setShowBalances] = useState(true)
   const [onlyYou, setOnlyYou] = useState(false)
   const memberNames = new Map(members.map((m) => [m.id, m.guest_name]))
 

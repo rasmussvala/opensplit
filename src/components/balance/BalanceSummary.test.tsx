@@ -117,7 +117,6 @@ describe("BalanceSummary", () => {
     ]
 
     renderBalanceSummary({ expenses })
-    fireEvent.click(screen.getByRole("button", { name: /show balances/i }))
 
     const aliceBalance = screen.getByTestId("balance-member-1")
     expect(aliceBalance).toHaveClass("text-positive")
@@ -138,7 +137,6 @@ describe("BalanceSummary", () => {
     ]
 
     renderBalanceSummary({ expenses })
-    fireEvent.click(screen.getByRole("button", { name: /show balances/i }))
 
     const bobBalance = screen.getByTestId("balance-member-2")
     expect(bobBalance).toHaveClass("text-destructive")
@@ -159,7 +157,6 @@ describe("BalanceSummary", () => {
     ]
 
     renderBalanceSummary({ expenses })
-    fireEvent.click(screen.getByRole("button", { name: /show balances/i }))
 
     expect(screen.getByText(/\+USD 50\.00/)).toBeInTheDocument()
     expect(screen.getByText(/-USD 50\.00/)).toBeInTheDocument()
@@ -184,7 +181,7 @@ describe("BalanceSummary", () => {
     expect(screen.getByText(/bob owes alice USD 50\.00/i)).toBeInTheDocument()
   })
 
-  it("hides balance rows by default while keeping settlements visible", () => {
+  it("shows balance rows by default while keeping settlements visible", () => {
     const expenses: DbExpense[] = [
       {
         id: "expense-1",
@@ -199,37 +196,37 @@ describe("BalanceSummary", () => {
     ]
 
     renderBalanceSummary({ expenses })
-
-    expect(
-      screen.getByRole("button", { name: /show balances/i }),
-    ).toHaveAttribute("aria-expanded", "false")
-    expect(screen.queryByTestId("balance-member-1")).not.toBeInTheDocument()
-    expect(screen.getByText(/bob owes alice USD 50\.00/i)).toBeInTheDocument()
-  })
-
-  it("shows balance rows after expanding the section", () => {
-    const expenses: DbExpense[] = [
-      {
-        id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
-        amount: 100,
-        description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
-      },
-    ]
-
-    renderBalanceSummary({ expenses })
-
-    fireEvent.click(screen.getByRole("button", { name: /show balances/i }))
 
     expect(
       screen.getByRole("button", { name: /hide balances/i }),
     ).toHaveAttribute("aria-expanded", "true")
     expect(screen.getByTestId("balance-member-1")).toBeInTheDocument()
-    expect(screen.getByTestId("balance-member-2")).toBeInTheDocument()
+    expect(screen.getByText(/bob owes alice USD 50\.00/i)).toBeInTheDocument()
+  })
+
+  it("hides balance rows after collapsing the section", () => {
+    const expenses: DbExpense[] = [
+      {
+        id: "expense-1",
+        group_id: "group-1",
+        paid_by: "member-1",
+        amount: 100,
+        description: "Dinner",
+        split_among: ["member-1", "member-2"],
+        split_overrides: null,
+        created_at: "2026-01-01T12:00:00Z",
+      },
+    ]
+
+    renderBalanceSummary({ expenses })
+
+    fireEvent.click(screen.getByRole("button", { name: /hide balances/i }))
+
+    expect(
+      screen.getByRole("button", { name: /show balances/i }),
+    ).toHaveAttribute("aria-expanded", "false")
+    expect(screen.queryByTestId("balance-member-1")).not.toBeInTheDocument()
+    expect(screen.queryByTestId("balance-member-2")).not.toBeInTheDocument()
   })
 
   it("renders one settle link per transaction", () => {
