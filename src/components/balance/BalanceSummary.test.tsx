@@ -310,4 +310,25 @@ describe("BalanceSummary", () => {
     expect(screen.getByText(/bob owes alice USD 20\.00/i)).toBeInTheDocument()
     expect(screen.queryByText(/all settled up/i)).not.toBeInTheDocument()
   })
+
+  it("renders the Balances section heading", () => {
+    const expenses: DbExpense[] = [
+      {
+        id: "expense-1",
+        group_id: "group-1",
+        paid_by: "member-1",
+        amount: 100,
+        description: "Dinner",
+        split_among: ["member-1", "member-2"],
+        split_overrides: null,
+        created_at: "2026-01-01T12:00:00Z",
+      },
+    ]
+
+    renderBalanceSummary({ expenses })
+
+    expect(
+      screen.getByRole("heading", { name: "Balances" }),
+    ).toBeInTheDocument()
+  })
 })

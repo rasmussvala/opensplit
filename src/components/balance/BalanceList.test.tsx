@@ -66,17 +66,4 @@ describe("BalanceList", () => {
     )
     expect(screen.getByText("missing-id")).toBeInTheDocument()
   })
-
-  it("renders the section heading", () => {
-    render(
-      <BalanceList
-        balances={{ m1: 5, m2: -5 }}
-        memberNames={memberNames}
-        currency="USD"
-      />,
-    )
-    expect(
-      screen.getByRole("heading", { name: "Balances" }),
-    ).toBeInTheDocument()
-  })
 })
