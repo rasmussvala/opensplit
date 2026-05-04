@@ -35,6 +35,7 @@ function renderBalanceSummary(
     members?: DbGroupMember[]
     currency?: string
     inviteToken?: string
+    currentMemberId?: string | null
   } = {},
 ) {
   const props = {
@@ -43,6 +44,7 @@ function renderBalanceSummary(
     members: overrides.members ?? mockMembers,
     currency: overrides.currency ?? "USD",
     inviteToken: overrides.inviteToken ?? "abc",
+    currentMemberId: overrides.currentMemberId ?? null,
   }
   return render(
     <MemoryRouter>
@@ -52,6 +54,19 @@ function renderBalanceSummary(
 }
 
 describe("BalanceSummary", () => {
+  const threeWayExpense: DbExpense[] = [
+    {
+      id: "expense-1",
+      group_id: "group-1",
+      paid_by: "member-1",
+      amount: 120,
+      description: "Dinner",
+      split_among: ["member-1", "member-2", "member-3"],
+      split_overrides: null,
+      created_at: "2026-01-01T12:00:00Z",
+    },
+  ]
+
   it("shows all settled up when no expenses", () => {
     renderBalanceSummary()
 
@@ -218,20 +233,7 @@ describe("BalanceSummary", () => {
   })
 
   it("renders one settle link per transaction", () => {
-    const expenses: DbExpense[] = [
-      {
-        id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
-        amount: 120,
-        description: "Dinner",
-        split_among: ["member-1", "member-2", "member-3"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
-      },
-    ]
-
-    renderBalanceSummary({ expenses })
+    renderBalanceSummary({ expenses: threeWayExpense })
 
     expect(screen.getAllByRole("link")).toHaveLength(2)
   })
@@ -327,8 +329,55 @@ describe("BalanceSummary", () => {
 
     renderBalanceSummary({ expenses })
 
+    expect(screen.getByRole("heading", { name: "Balances" })).toBeInTheDocument()
+  })
+
+  it("does not show the you filter by default without a current member", () => {
+    renderBalanceSummary({ expenses: threeWayExpense })
+
     expect(
-      screen.getByRole("heading", { name: "Balances" }),
-    ).toBeInTheDocument()
+      screen.queryByRole("button", { name: /only you/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows the you filter when there are suggested settlements for a current member", () => {
+    renderBalanceSummary({
+      expenses: threeWayExpense,
+      currentMemberId: "member-2",
+    })
+
+    expect(screen.getByRole("button", { name: /only you/i })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    )
+    expect(screen.getAllByRole("link")).toHaveLength(2)
+  })
+
+  it("filters settlements down to payments the current member should make", () => {
+    renderBalanceSummary({
+      expenses: threeWayExpense,
+      currentMemberId: "member-2",
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: /only you/i }))
+
+    expect(screen.getByText(/bob owes alice USD 40\.00/i)).toBeInTheDocument()
+    expect(
+      screen.queryByText(/charlie owes alice USD 40\.00/i),
+    ).not.toBeInTheDocument()
+    expect(screen.getAllByRole("link")).toHaveLength(1)
+  })
+
+  it("shows a filter-specific empty state when you owe nobody", () => {
+    renderBalanceSummary({
+      expenses: threeWayExpense,
+      currentMemberId: "member-1",
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: /only you/i }))
+
+    expect(screen.getByText(/you have no payments to make/i)).toBeInTheDocument()
+    expect(screen.queryByText(/all settled up/i)).not.toBeInTheDocument()
+    expect(screen.queryAllByRole("link")).toHaveLength(0)
   })
 })
