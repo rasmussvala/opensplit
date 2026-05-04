@@ -362,9 +362,10 @@ describe("GroupPage", () => {
     renderWithRoute("token-abc?tab=balances")
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /only you/i }),
-      ).toHaveAttribute("aria-pressed", "false")
+      expect(screen.getByRole("button", { name: /only you/i })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      )
     })
   })
 

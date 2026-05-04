@@ -329,7 +329,9 @@ describe("BalanceSummary", () => {
 
     renderBalanceSummary({ expenses })
 
-    expect(screen.getByRole("heading", { name: "Balances" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "Balances" }),
+    ).toBeInTheDocument()
   })
 
   it("does not show the you filter by default without a current member", () => {
@@ -376,7 +378,9 @@ describe("BalanceSummary", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /only you/i }))
 
-    expect(screen.getByText(/you have no payments to make/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/you have no payments to make/i),
+    ).toBeInTheDocument()
     expect(screen.queryByText(/all settled up/i)).not.toBeInTheDocument()
     expect(screen.queryAllByRole("link")).toHaveLength(0)
   })

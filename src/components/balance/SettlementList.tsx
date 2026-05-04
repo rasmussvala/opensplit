@@ -1,5 +1,5 @@
-import type { ReactNode } from "react"
 import { ChevronRight } from "lucide-react"
+import type { ReactNode } from "react"
 import { Link } from "react-router-dom"
 import MemberPairAvatars from "@/components/group/MemberPairAvatars"
 import CurrencyAmount from "@/components/ui/currency-amount"
