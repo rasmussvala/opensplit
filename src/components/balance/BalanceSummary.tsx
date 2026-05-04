@@ -1,3 +1,6 @@
+import { ChevronDown, ChevronUp } from "lucide-react"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
 import { calculateBalances } from "@/lib/balances"
 import { simplifyDebts } from "@/lib/simplify"
 import type { DbExpense, DbGroupMember, DbSettlement } from "@/lib/types"
@@ -19,6 +22,7 @@ export default function BalanceSummary({
   currency,
   inviteToken,
 }: BalanceSummaryProps) {
+  const [showBalances, setShowBalances] = useState(false)
   const memberNames = new Map(members.map((m) => [m.id, m.guest_name]))
 
   const mappedExpenses = expenses.map((e) => ({
@@ -47,11 +51,31 @@ export default function BalanceSummary({
 
   return (
     <div className="flex flex-col gap-4">
-      <BalanceList
-        balances={balances}
-        memberNames={memberNames}
-        currency={currency}
-      />
+      <section className="flex flex-col gap-2" aria-labelledby="balances-heading">
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="balances-heading" className="font-semibold text-sm">
+            Balances
+          </h2>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-expanded={showBalances}
+            aria-label={showBalances ? "Hide balances" : "Show balances"}
+            onClick={() => setShowBalances((current) => !current)}
+          >
+            {showBalances ? <ChevronUp /> : <ChevronDown />}
+          </Button>
+        </div>
+
+        {showBalances && (
+          <BalanceList
+            balances={balances}
+            memberNames={memberNames}
+            currency={currency}
+          />
+        )}
+      </section>
       <SettlementList
         transactions={transactions}
         memberNames={memberNames}
