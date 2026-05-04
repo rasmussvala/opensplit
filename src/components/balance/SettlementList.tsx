@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { ChevronRight } from "lucide-react"
 import { Link } from "react-router-dom"
 import MemberPairAvatars from "@/components/group/MemberPairAvatars"
@@ -10,6 +11,7 @@ interface SettlementListProps {
   memberNames: Map<string, string>
   currency: string
   inviteToken: string
+  headerAction?: ReactNode
 }
 
 export default function SettlementList({
@@ -17,10 +19,14 @@ export default function SettlementList({
   memberNames,
   currency,
   inviteToken,
+  headerAction,
 }: SettlementListProps) {
   return (
     <div>
-      <h2 className="mb-2 font-semibold text-sm">Settlements</h2>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <h2 className="font-semibold text-sm">Settlements</h2>
+        {headerAction}
+      </div>
       <div className="flex flex-col gap-2">
         {transactions.map((t) => {
           const fromName = memberNames.get(t.from) ?? t.from

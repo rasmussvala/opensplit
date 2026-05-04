@@ -206,6 +206,7 @@ export default function GroupPage() {
           members={members}
           currency={group.currency}
           inviteToken={inviteToken as string}
+          currentMemberId={currentMember?.id ?? null}
         />
       </TabsContent>
 
