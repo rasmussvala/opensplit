@@ -51,7 +51,10 @@ export default function BalanceSummary({
 
   return (
     <div className="flex flex-col gap-4">
-      <section className="flex flex-col gap-2" aria-labelledby="balances-heading">
+      <section
+        className="flex flex-col gap-2"
+        aria-labelledby="balances-heading"
+      >
         <div className="flex items-center justify-between gap-3">
           <h2 id="balances-heading" className="font-semibold text-sm">
             Balances
