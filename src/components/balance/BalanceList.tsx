@@ -35,7 +35,6 @@ export default function BalanceList({
 
   return (
     <div>
-      <h2 className="mb-2 font-semibold text-sm">Balances</h2>
       <div className="flex flex-col gap-2">
         {rows.map((row) => {
           return (
