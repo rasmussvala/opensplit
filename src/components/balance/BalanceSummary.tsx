@@ -47,7 +47,9 @@ export default function BalanceSummary({
   const canFilterByCurrentMember = currentMemberId !== null
   const filteredTransactions =
     onlyYou && currentMemberId
-      ? transactions.filter((transaction) => transaction.from === currentMemberId)
+      ? transactions.filter(
+          (transaction) => transaction.from === currentMemberId,
+        )
       : transactions
 
   if (transactions.length === 0) {
