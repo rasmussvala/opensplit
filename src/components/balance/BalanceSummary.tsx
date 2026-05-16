@@ -2,7 +2,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { calculateBalances } from "@/lib/balances"
-import { simplifyDebts } from "@/lib/simplify"
+import { suggestedSettlements } from "@/lib/simplify"
 import type { DbExpense, DbGroupMember, DbSettlement } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import BalanceList from "./BalanceList"
@@ -43,7 +43,7 @@ export default function BalanceSummary({
   }))
 
   const balances = calculateBalances(mappedExpenses, mappedSettlements)
-  const transactions = simplifyDebts(balances)
+  const transactions = suggestedSettlements(mappedExpenses, mappedSettlements)
   const canFilterByCurrentMember = currentMemberId !== null
   const filteredTransactions =
     onlyYou && currentMemberId

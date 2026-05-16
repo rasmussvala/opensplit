@@ -7,8 +7,7 @@ import BackLink from "@/components/ui/back-link"
 import { Button, buttonVariants } from "@/components/ui/button"
 import CurrencyAmount from "@/components/ui/currency-amount"
 import { LoadingState } from "@/components/ui/loading-state"
-import { calculateBalances } from "@/lib/balances"
-import { simplifyDebts } from "@/lib/simplify"
+import { suggestedSettlements } from "@/lib/simplify"
 import { supabase } from "@/lib/supabase"
 import {
   buildSwishDeepLink,
@@ -106,8 +105,7 @@ export default function SettlePage() {
       to: s.to_member,
       amount: Number(s.amount),
     }))
-    const balances = calculateBalances(mappedExpenses, mappedSettlements)
-    const transactions = simplifyDebts(balances)
+    const transactions = suggestedSettlements(mappedExpenses, mappedSettlements)
     const match = transactions.find(
       (t) => t.from === fromMemberId && t.to === toMemberId,
     )
