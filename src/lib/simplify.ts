@@ -1,3 +1,6 @@
+import { calculateBalances, type Expense, type Settlement } from "./balances"
+import { round2 } from "./utils"
+
 export interface Transaction {
   from: string
   to: string
@@ -37,4 +40,25 @@ export function simplifyDebts(balances: Record<string, number>): Transaction[] {
   }
 
   return transactions.filter((t) => Math.round(t.amount * 100) > 0)
+}
+
+export function suggestedSettlements(
+  expenses: Expense[],
+  settlements: Settlement[],
+): Transaction[] {
+  const basePlan = simplifyDebts(calculateBalances(expenses))
+
+  const paid = new Map<string, number>()
+  for (const s of settlements) {
+    const k = `${s.from}|${s.to}`
+    paid.set(k, (paid.get(k) ?? 0) + s.amount)
+  }
+
+  return basePlan
+    .map((t) => {
+      const fwd = paid.get(`${t.from}|${t.to}`) ?? 0
+      const rev = paid.get(`${t.to}|${t.from}`) ?? 0
+      return { from: t.from, to: t.to, amount: round2(t.amount - fwd + rev) }
+    })
+    .filter((t) => Math.round(t.amount * 100) > 0)
 }
