@@ -22,7 +22,7 @@ export default function MyGroups() {
         .eq("user_id", userId)
 
       if (!error && data) {
-        const joined = (data as { group: GroupWithCount | null }[])
+        const joined = (data as unknown as { group: GroupWithCount | null }[])
           .map((row) => row.group)
           .filter((group): group is GroupWithCount => group !== null)
         setGroups(joined)
