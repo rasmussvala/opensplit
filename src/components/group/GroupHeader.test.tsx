@@ -49,7 +49,7 @@ describe("GroupHeader", () => {
     expect(screen.getByText("Bob")).toBeInTheDocument()
   })
 
-  it("renders the share-link button (InviteLink)", () => {
+  it("renders the copy code button (InviteCode)", () => {
     render(
       <GroupHeader
         group={makeGroup({ invite_token: "abc-123" })}
@@ -58,11 +58,11 @@ describe("GroupHeader", () => {
       />,
     )
     expect(
-      screen.getByRole("button", { name: /share link/i }),
+      screen.getByRole("button", { name: /copy code/i }),
     ).toBeInTheDocument()
   })
 
-  it("renders children below the invite link", () => {
+  it("renders children below the invite code", () => {
     render(
       <GroupHeader group={makeGroup()} members={[makeMember()]} totalSpent={0}>
         <div data-testid="extra">Extra content</div>
