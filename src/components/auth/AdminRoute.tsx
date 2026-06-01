@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Outlet } from "react-router-dom"
-import BackButton from "@/components/layout/BackButton"
+import BackLink from "@/components/ui/back-link"
 import { Button } from "@/components/ui/button"
 
 const STORAGE_KEY = "opensplit:admin_pin"
@@ -35,7 +35,7 @@ export default function AdminRoute() {
         onSubmit={handlePinSubmit}
         className="mx-auto flex max-w-sm flex-col gap-4 p-6"
       >
-        <BackButton />
+        <BackLink to="/" />
         <h1 className="text-2xl font-bold">Admin PIN</h1>
         <div className="flex flex-col gap-1">
           <label htmlFor="admin-pin" className="text-sm font-medium">
