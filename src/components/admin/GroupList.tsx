@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
-import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import GroupCard from "@/components/group/GroupCard"
 import { LoadingState } from "@/components/ui/loading-state"
 import { supabase } from "@/lib/supabase"
 import type { DbGroup } from "@/lib/types"
@@ -38,16 +31,7 @@ export default function GroupList() {
   return (
     <div className="flex flex-col gap-3">
       {groups.map((group) => (
-        <Link key={group.id} to={`/groups/${group.invite_token}`}>
-          <Card size="sm">
-            <CardHeader>
-              <CardTitle>{group.name}</CardTitle>
-              <CardDescription className="flex items-center gap-2">
-                <Badge variant="secondary">{group.currency}</Badge>
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </Link>
+        <GroupCard key={group.id} group={group} />
       ))}
     </div>
   )

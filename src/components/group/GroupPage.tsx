@@ -7,8 +7,8 @@ import ExpenseList from "@/components/expense/ExpenseList"
 import GroupHeader from "@/components/group/GroupHeader"
 import JoinGroup from "@/components/group/JoinGroup"
 import SwishProfile from "@/components/group/SwishProfile"
-import BackButton from "@/components/layout/BackButton"
 import PaymentsList from "@/components/payments/PaymentsList"
+import BackLink from "@/components/ui/back-link"
 import { Button } from "@/components/ui/button"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -175,7 +175,7 @@ export default function GroupPage() {
       onValueChange={handleTabChange}
       className="mx-auto flex w-full max-w-sm flex-col gap-4 p-2"
     >
-      <BackButton />
+      <BackLink to="/" />
       <GroupHeader group={group} members={members} totalSpent={totalSpent}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
