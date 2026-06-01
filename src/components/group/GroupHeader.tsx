@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import InviteLink from "@/components/group/InviteLink"
+import InviteCode from "@/components/group/InviteCode"
 import MemberList from "@/components/group/MemberList"
 import type { DbGroup, DbGroupMember } from "@/lib/types"
 import { formatAmount } from "@/lib/utils"
@@ -26,7 +26,7 @@ export default function GroupHeader({
         </span>
       </div>
       <MemberList members={members} />
-      <InviteLink inviteToken={group.invite_token} />
+      <InviteCode inviteToken={group.invite_token} />
       {children}
     </div>
   )
