@@ -1,8 +1,11 @@
 import { Settings } from "lucide-react"
+import { useState } from "react"
 import { Link } from "react-router-dom"
+import AddToHomeScreen from "@/components/home/AddToHomeScreen"
 import { Button } from "@/components/ui/button"
+import { isMobileDevice, useStandalone } from "@/lib/useStandalone"
 
-export default function HomePage() {
+function AppHome() {
   return (
     <div className="mx-auto flex w-full max-w-sm flex-col gap-6 px-2 py-6">
       <header className="flex items-center justify-between">
@@ -15,4 +18,21 @@ export default function HomePage() {
       </header>
     </div>
   )
+}
+
+export default function HomePage() {
+  const installed = useStandalone()
+  const [continueInBrowser, setContinueInBrowser] = useState(false)
+
+  // Show the install guide only on mobile, when not installed, and the user
+  // hasn't chosen to keep using the browser. Desktop always gets the app.
+  const showGuide = isMobileDevice() && !installed && !continueInBrowser
+
+  if (showGuide) {
+    return (
+      <AddToHomeScreen onContinueInBrowser={() => setContinueInBrowser(true)} />
+    )
+  }
+
+  return <AppHome />
 }
