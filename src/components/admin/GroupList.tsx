@@ -11,23 +11,19 @@ import { LoadingState } from "@/components/ui/loading-state"
 import { supabase } from "@/lib/supabase"
 import type { DbGroup } from "@/lib/types"
 
-type GroupWithCount = DbGroup & {
-  group_members: [{ count: number }]
-}
-
 export default function GroupList() {
-  const [groups, setGroups] = useState<GroupWithCount[]>([])
+  const [groups, setGroups] = useState<DbGroup[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchGroups() {
       const { data, error } = await supabase
         .from("groups")
-        .select("*, group_members(count)")
+        .select("*")
         .order("created_at", { ascending: false })
 
       if (!error && data) {
-        setGroups(data as GroupWithCount[])
+        setGroups(data as DbGroup[])
       }
       setLoading(false)
     }
@@ -41,24 +37,18 @@ export default function GroupList() {
 
   return (
     <div className="flex flex-col gap-3">
-      {groups.map((group) => {
-        const count = group.group_members[0]?.count ?? 0
-        return (
-          <Link key={group.id} to={`/groups/${group.invite_token}`}>
-            <Card size="sm">
-              <CardHeader>
-                <CardTitle>{group.name}</CardTitle>
-                <CardDescription className="flex items-center gap-2">
-                  <Badge variant="secondary">{group.currency}</Badge>
-                  <span>
-                    {count} {count === 1 ? "member" : "members"}
-                  </span>
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        )
-      })}
+      {groups.map((group) => (
+        <Link key={group.id} to={`/groups/${group.invite_token}`}>
+          <Card size="sm">
+            <CardHeader>
+              <CardTitle>{group.name}</CardTitle>
+              <CardDescription className="flex items-center gap-2">
+                <Badge variant="secondary">{group.currency}</Badge>
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
+      ))}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import SettlePage from "@/components/balance/SettlePage"
 import AddExpensePage from "@/components/expense/AddExpensePage"
 import EditExpensePage from "@/components/expense/EditExpensePage"
 import GroupPage from "@/components/group/GroupPage"
+import HomePage from "@/components/home/HomePage"
 import AppFooter from "@/components/layout/AppFooter"
 import EditSettlementPage from "@/components/payments/EditSettlementPage"
 
@@ -15,8 +16,9 @@ export default function App() {
       <Router basename={import.meta.env.BASE_URL}>
         <main className="flex-1">
           <Routes>
+            <Route path="/" element={<HomePage />} />
             <Route element={<AdminRoute />}>
-              <Route path="/" element={<AdminPage />} />
+              <Route path="/admin" element={<AdminPage />} />
             </Route>
             <Route path="/groups/:inviteToken" element={<GroupPage />} />
             <Route
