@@ -2,6 +2,7 @@ import { Settings } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import AddToHomeScreen from "@/components/home/AddToHomeScreen"
+import MyGroups from "@/components/home/MyGroups"
 import { Button } from "@/components/ui/button"
 import { isMobileDevice, useStandalone } from "@/lib/useStandalone"
 
@@ -16,6 +17,11 @@ function AppHome() {
           </Link>
         </Button>
       </header>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-xl font-bold">Your groups</h2>
+        <MyGroups />
+      </div>
     </div>
   )
 }
