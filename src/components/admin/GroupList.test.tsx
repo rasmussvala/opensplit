@@ -48,7 +48,6 @@ describe("GroupList", () => {
         currency: "NOK",
         invite_token: "token-1",
         created_at: "2026-04-01T00:00:00Z",
-        group_members: [{ count: 3 }],
       },
       {
         id: "g2",
@@ -56,7 +55,6 @@ describe("GroupList", () => {
         currency: "USD",
         invite_token: "token-2",
         created_at: "2026-04-02T00:00:00Z",
-        group_members: [{ count: 1 }],
       },
     ])
 
@@ -73,8 +71,6 @@ describe("GroupList", () => {
 
     expect(screen.getByText("NOK")).toBeInTheDocument()
     expect(screen.getByText("USD")).toBeInTheDocument()
-    expect(screen.getByText("3 members")).toBeInTheDocument()
-    expect(screen.getByText("1 member")).toBeInTheDocument()
   })
 
   it("renders empty state when no groups exist", async () => {
@@ -99,7 +95,6 @@ describe("GroupList", () => {
         currency: "NOK",
         invite_token: "token-1",
         created_at: "2026-04-01T00:00:00Z",
-        group_members: [{ count: 2 }],
       },
     ])
 
