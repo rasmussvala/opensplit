@@ -7,6 +7,7 @@ import HomePage from "./HomePage"
 vi.mock("@/lib/useStandalone", () => ({
   useStandalone: vi.fn(),
   isMobileDevice: vi.fn(),
+  getMobilePlatform: vi.fn(() => "ios"),
 }))
 
 vi.mock("@/components/auth/AuthProvider", () => ({
@@ -66,9 +67,7 @@ describe("HomePage", () => {
 
     renderHome()
 
-    expect(
-      screen.getByText(/add opensplit to your home screen/i),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/install opensplit/i)).toBeInTheDocument()
   })
 
   it("reveals the app home after 'Continue in browser'", async () => {
@@ -82,9 +81,7 @@ describe("HomePage", () => {
     )
 
     expect(screen.getByText("opensplit")).toBeInTheDocument()
-    expect(
-      screen.queryByText(/add opensplit to your home screen/i),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/install opensplit/i)).not.toBeInTheDocument()
     await screen.findByText(/haven't joined any groups/i)
   })
 })

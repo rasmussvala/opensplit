@@ -1,6 +1,10 @@
 import { act, renderHook } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { isMobileDevice, useStandalone } from "./useStandalone"
+import {
+  getMobilePlatform,
+  isMobileDevice,
+  useStandalone,
+} from "./useStandalone"
 
 function mockMatchMedia(matchingModes: string[]) {
   window.matchMedia = vi.fn().mockImplementation((query: string) => ({
@@ -107,5 +111,17 @@ describe("isMobileDevice", () => {
       maxTouchPoints: 0,
     })
     expect(isMobileDevice()).toBe(false)
+  })
+})
+
+describe("getMobilePlatform", () => {
+  it("returns android for an Android user agent", () => {
+    setNavigator({ userAgent: "Mozilla/5.0 (Linux; Android 14)" })
+    expect(getMobilePlatform()).toBe("android")
+  })
+
+  it("defaults to ios otherwise", () => {
+    setNavigator({ userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0)" })
+    expect(getMobilePlatform()).toBe("ios")
   })
 })

@@ -55,3 +55,12 @@ export function isMobileDevice(): boolean {
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
   )
 }
+
+/**
+ * Which mobile platform's "add to home screen" instructions to show.
+ * Defaults to iOS (also covers iPad and anything non-Android).
+ */
+export function getMobilePlatform(): "ios" | "android" {
+  if (typeof navigator === "undefined") return "ios"
+  return /android/i.test(navigator.userAgent) ? "android" : "ios"
+}
