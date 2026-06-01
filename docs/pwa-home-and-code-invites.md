@@ -47,13 +47,12 @@ All step commits land on this branch; we open a PR at the end.
 - **Admin entry point:** add a small, subtle admin icon (e.g. lucide `Settings`/`Shield`) in the home header corner that links to `/admin`. (Footer is an acceptable alternative location.)
 - **Back navigation (lucide `ArrowLeft`, links to `/`):** add a back button to the top of `AdminPage` (so the admin can return home) and to `GroupHeader` (so a group view can return home). Both currently have no way back to the home page.
 
-## Step 1.5 — Fix iOS standalone meta (REQUIRED for auto-guide to work) 🧪
+## Step 1.5 — DROPPED (not needed)
 
-Verified against [MDN](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable): on iOS **before iOS 26**, a home-screen icon opens in a *Safari tab* (not standalone) unless `apple-mobile-web-app-capable` is set. `index.html` currently lacks it — so standalone detection would never flip, and the guide would show forever. Add to the `<head>`:
-- `<meta name="apple-mobile-web-app-capable" content="yes">` (legacy iOS) **and** `<meta name="mobile-web-app-capable" content="yes">` (standard, replaces it)
-- `<meta name="apple-mobile-web-app-title" content="opensplit">`
-- `<meta name="theme-color" content="...">` (match chosen accent)
-- In `public/manifest.json`: add `background_color` and `theme_color` (MDN lists these among recommended installability fields).
+This step was investigated and **dropped**; no code change shipped.
+
+- An earlier draft claimed `apple-mobile-web-app-capable` was required for iOS standalone launch. **Wrong/outdated.** Since **iOS 16.4**, Safari honors the manifest's `display: standalone` directly, and [web.dev](https://web.dev/learn/pwa/web-app-manifest) advises *against* the legacy `apple-mobile-web-app-capable` / `mobile-web-app-capable` tags (they ignore `start_url`/`scope` and can harm the install experience). `public/manifest.json` already has `display: standalone`, so the app already opens standalone (confirmed on a real device). **Step 2 standalone detection works with no meta tag.**
+- The remaining `theme-color` polish was also dropped: `theme-color` is **ignored on iOS** (Apple uses the deprecated `apple-mobile-web-app-status-bar-style`, only valid with the `-capable` tag). It would only benefit Android's address bar / splash. Not worth it for an iOS-first target; can be revisited deliberately if Android polish is wanted later.
 
 ## Step 2 — Standalone detection + HomePage branching 🧪
 
