@@ -9,6 +9,20 @@ vi.mock("@/lib/useStandalone", () => ({
   isMobileDevice: vi.fn(),
 }))
 
+vi.mock("@/components/auth/AuthProvider", () => ({
+  useAuth: () => ({ userId: "test-user-id" }),
+}))
+
+vi.mock("@/lib/supabase", () => ({
+  supabase: {
+    from: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+      }),
+    }),
+  },
+}))
+
 function renderHome() {
   return render(
     <MemoryRouter>
@@ -22,7 +36,7 @@ describe("HomePage", () => {
     vi.clearAllMocks()
   })
 
-  it("shows the app home on desktop", () => {
+  it("shows the app home on desktop", async () => {
     vi.mocked(isMobileDevice).mockReturnValue(false)
     vi.mocked(useStandalone).mockReturnValue(false)
 
@@ -33,15 +47,17 @@ describe("HomePage", () => {
       "href",
       "/admin",
     )
+    await screen.findByText(/haven't joined any groups/i)
   })
 
-  it("shows the app home when installed on mobile", () => {
+  it("shows the app home when installed on mobile", async () => {
     vi.mocked(isMobileDevice).mockReturnValue(true)
     vi.mocked(useStandalone).mockReturnValue(true)
 
     renderHome()
 
     expect(screen.getByText("opensplit")).toBeInTheDocument()
+    await screen.findByText(/haven't joined any groups/i)
   })
 
   it("shows the install guide on mobile when not installed", () => {
@@ -55,7 +71,7 @@ describe("HomePage", () => {
     ).toBeInTheDocument()
   })
 
-  it("reveals the app home after 'Continue in browser'", () => {
+  it("reveals the app home after 'Continue in browser'", async () => {
     vi.mocked(isMobileDevice).mockReturnValue(true)
     vi.mocked(useStandalone).mockReturnValue(false)
 
@@ -69,5 +85,6 @@ describe("HomePage", () => {
     expect(
       screen.queryByText(/add opensplit to your home screen/i),
     ).not.toBeInTheDocument()
+    await screen.findByText(/haven't joined any groups/i)
   })
 })
