@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react"
+import { ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import AddToHomeScreen from "@/components/home/AddToHomeScreen"
@@ -14,7 +14,7 @@ function AppHome() {
         <h1 className="text-2xl font-bold">opensplit</h1>
         <Button asChild variant="ghost" size="icon" aria-label="Admin">
           <Link to="/admin">
-            <Settings className="h-4 w-4" />
+            <ShieldCheck className="h-4 w-4" />
           </Link>
         </Button>
       </header>
