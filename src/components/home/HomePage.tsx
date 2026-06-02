@@ -19,12 +19,12 @@ function AppHome() {
         </Button>
       </header>
 
+      <JoinByCode />
+
       <div className="flex flex-col gap-3">
         <h2 className="text-xl font-bold">Your groups</h2>
         <MyGroups />
       </div>
-
-      <JoinByCode />
     </div>
   )
 }
