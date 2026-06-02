@@ -1,4 +1,4 @@
-import { Link2 } from "lucide-react"
+import { Copy } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 
@@ -17,7 +17,7 @@ export default function InviteCode({ inviteToken }: InviteCodeProps) {
 
   return (
     <Button variant="outline" size="sm" onClick={handleCopy}>
-      <Link2 className="h-4 w-4" data-icon="inline-start" />
+      <Copy className="h-4 w-4" data-icon="inline-start" />
       {copied ? "Copied!" : "Copy code"}
     </Button>
   )
