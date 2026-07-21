@@ -44,7 +44,7 @@ describe("MyGroups", () => {
     })
   })
 
-  it("renders joined groups with member counts", async () => {
+  it("renders joined groups with member previews and total spending", async () => {
     mockMembership([
       {
         group: {
@@ -53,7 +53,13 @@ describe("MyGroups", () => {
           currency: "NOK",
           invite_token: "token-1",
           created_at: "2026-04-01T00:00:00Z",
-          members: [{ count: 3 }],
+          members: [
+            { id: "m1", guest_name: "Ada" },
+            { id: "m2", guest_name: "Mina" },
+            { id: "m3", guest_name: "Jo" },
+            { id: "m4", guest_name: "Sam" },
+          ],
+          expenses: [{ amount: 120 }, { amount: 45.5 }],
         },
       },
       {
@@ -63,7 +69,8 @@ describe("MyGroups", () => {
           currency: "USD",
           invite_token: "token-2",
           created_at: "2026-04-02T00:00:00Z",
-          members: [{ count: 1 }],
+          members: [{ id: "m5", guest_name: "Pat" }],
+          expenses: [],
         },
       },
     ])
@@ -74,12 +81,19 @@ describe("MyGroups", () => {
       expect(screen.getByText("Trip to Oslo")).toBeInTheDocument()
     })
     expect(screen.getByText("Dinner Club")).toBeInTheDocument()
-    expect(screen.getByText("3 members")).toBeInTheDocument()
+    expect(screen.getByText("4 members")).toBeInTheDocument()
     expect(screen.getByText("1 member")).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: /trip to oslo/i })).toHaveAttribute(
-      "href",
-      "/groups/token-1",
-    )
+    expect(screen.getByText("S")).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", {
+        name: "Trip to Oslo, NOK 165.50 spent, 4 members",
+      }),
+    ).toHaveAttribute("href", "/groups/token-1")
+    expect(
+      screen.getByRole("link", {
+        name: "Dinner Club, USD 0.00 spent, 1 member",
+      }),
+    ).toBeInTheDocument()
   })
 
   it("renders an empty state when no groups are joined", async () => {
