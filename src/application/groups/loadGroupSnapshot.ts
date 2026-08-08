@@ -21,6 +21,7 @@ export interface Expense {
   paidBy: string
   splitAmong: string[]
   splitOverrides: SplitOverrides | null
+  createdAt: string
 }
 
 export interface Settlement {
@@ -69,6 +70,7 @@ export interface ExpenseRow {
   description: string
   split_among: string[]
   split_overrides: SplitOverrides | null
+  created_at: string
 }
 
 export interface SettlementRow {
@@ -193,6 +195,7 @@ function toExpense(row: ExpenseRow): Expense {
     paidBy: row.paid_by,
     splitAmong: row.split_among,
     splitOverrides: row.split_overrides,
+    createdAt: row.created_at,
   }
 }
 
