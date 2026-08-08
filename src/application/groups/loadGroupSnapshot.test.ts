@@ -77,6 +77,7 @@ describe("loadGroupSnapshot", () => {
           from_member: "member-2",
           to_member: "member-1",
           amount: "50.25",
+          settled_at: "2026-01-02T12:00:00Z",
         },
       ],
     })
@@ -132,6 +133,7 @@ describe("loadGroupSnapshot", () => {
             from: "member-2",
             to: "member-1",
             amount: 50.25,
+            settledAt: "2026-01-02T12:00:00Z",
           },
         ],
       },

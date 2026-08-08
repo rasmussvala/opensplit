@@ -29,6 +29,7 @@ export interface Settlement {
   from: string
   to: string
   amount: number
+  settledAt: string
 }
 
 export interface GroupSnapshot {
@@ -79,6 +80,7 @@ export interface SettlementRow {
   from_member: string
   to_member: string
   amount: number | string
+  settled_at: string
 }
 
 export type LoadGroupResult =
@@ -205,5 +207,6 @@ function toSettlement(row: SettlementRow): Settlement {
     from: row.from_member,
     to: row.to_member,
     amount: Number(row.amount),
+    settledAt: row.settled_at,
   }
 }

@@ -1,38 +1,38 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
-import type { DbExpense, DbGroupMember, DbSettlement } from "@/lib/types"
+import type { Expense, Member, Settlement } from "@/lib/types"
 import BalanceSummary from "./BalanceSummary"
 
-const mockMembers: DbGroupMember[] = [
+const mockMembers: Member[] = [
   {
     id: "member-1",
-    group_id: "group-1",
-    guest_name: "Alice",
-    user_id: "user-1",
-    joined_at: "2026-01-01",
+    groupId: "group-1",
+    name: "Alice",
+    userId: "user-1",
+    joinedAt: "2026-01-01",
   },
   {
     id: "member-2",
-    group_id: "group-1",
-    guest_name: "Bob",
-    user_id: "user-2",
-    joined_at: "2026-01-01",
+    groupId: "group-1",
+    name: "Bob",
+    userId: "user-2",
+    joinedAt: "2026-01-01",
   },
   {
     id: "member-3",
-    group_id: "group-1",
-    guest_name: "Charlie",
-    user_id: "user-3",
-    joined_at: "2026-01-01",
+    groupId: "group-1",
+    name: "Charlie",
+    userId: "user-3",
+    joinedAt: "2026-01-01",
   },
 ]
 
 function renderBalanceSummary(
   overrides: {
-    expenses?: DbExpense[]
-    settlements?: DbSettlement[]
-    members?: DbGroupMember[]
+    expenses?: Expense[]
+    settlements?: Settlement[]
+    members?: Member[]
     currency?: string
     inviteToken?: string
     currentMemberId?: string | null
@@ -54,16 +54,16 @@ function renderBalanceSummary(
 }
 
 describe("BalanceSummary", () => {
-  const threeWayExpense: DbExpense[] = [
+  const threeWayExpense: Expense[] = [
     {
       id: "expense-1",
-      group_id: "group-1",
-      paid_by: "member-1",
+      groupId: "group-1",
+      paidBy: "member-1",
       amount: 120,
       description: "Dinner",
-      split_among: ["member-1", "member-2", "member-3"],
-      split_overrides: null,
-      created_at: "2026-01-01T12:00:00Z",
+      splitAmong: ["member-1", "member-2", "member-3"],
+      splitOverrides: null,
+      createdAt: "2026-01-01T12:00:00Z",
     },
   ]
 
@@ -74,26 +74,26 @@ describe("BalanceSummary", () => {
   })
 
   it("shows all settled up when fully settled", () => {
-    const expenses: DbExpense[] = [
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 100,
         description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
+        splitAmong: ["member-1", "member-2"],
+        splitOverrides: null,
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
-    const settlements: DbSettlement[] = [
+    const settlements: Settlement[] = [
       {
         id: "settlement-1",
-        group_id: "group-1",
-        from_member: "member-2",
-        to_member: "member-1",
+        groupId: "group-1",
+        from: "member-2",
+        to: "member-1",
         amount: 50,
-        settled_at: "2026-01-02T12:00:00Z",
+        settledAt: "2026-01-02T12:00:00Z",
       },
     ]
 
@@ -103,16 +103,16 @@ describe("BalanceSummary", () => {
   })
 
   it("shows positive balance in the positive theme color", () => {
-    const expenses: DbExpense[] = [
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 100,
         description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
+        splitAmong: ["member-1", "member-2"],
+        splitOverrides: null,
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
 
@@ -123,16 +123,16 @@ describe("BalanceSummary", () => {
   })
 
   it("shows negative balance in the destructive theme color", () => {
-    const expenses: DbExpense[] = [
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 100,
         description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
+        splitAmong: ["member-1", "member-2"],
+        splitOverrides: null,
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
 
@@ -143,16 +143,16 @@ describe("BalanceSummary", () => {
   })
 
   it("shows formatted balance amounts", () => {
-    const expenses: DbExpense[] = [
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 100,
         description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
+        splitAmong: ["member-1", "member-2"],
+        splitOverrides: null,
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
 
@@ -163,16 +163,16 @@ describe("BalanceSummary", () => {
   })
 
   it("shows simplified transaction text with member names", () => {
-    const expenses: DbExpense[] = [
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 100,
         description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
+        splitAmong: ["member-1", "member-2"],
+        splitOverrides: null,
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
 
@@ -182,16 +182,16 @@ describe("BalanceSummary", () => {
   })
 
   it("shows balance rows by default while keeping settlements visible", () => {
-    const expenses: DbExpense[] = [
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 100,
         description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
+        splitAmong: ["member-1", "member-2"],
+        splitOverrides: null,
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
 
@@ -205,16 +205,16 @@ describe("BalanceSummary", () => {
   })
 
   it("hides balance rows after collapsing the section", () => {
-    const expenses: DbExpense[] = [
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 100,
         description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
+        splitAmong: ["member-1", "member-2"],
+        splitOverrides: null,
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
 
@@ -236,16 +236,16 @@ describe("BalanceSummary", () => {
   })
 
   it("links each transaction to the settle page", () => {
-    const expenses: DbExpense[] = [
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 100,
         description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
+        splitAmong: ["member-1", "member-2"],
+        splitOverrides: null,
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
 
@@ -255,20 +255,20 @@ describe("BalanceSummary", () => {
     expect(link).toHaveAttribute("href", "/groups/abc/settle/member-2/member-1")
   })
 
-  it("applies split_overrides when calculating balances", () => {
-    const expenses: DbExpense[] = [
+  it("applies splitOverrides when calculating balances", () => {
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 500,
         description: "Dinner",
-        split_among: ["member-1", "member-2", "member-3"],
-        split_overrides: {
+        splitAmong: ["member-1", "member-2", "member-3"],
+        splitOverrides: {
           mode: "amount",
           values: { "member-2": 300 },
         },
-        created_at: "2026-01-01T12:00:00Z",
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
 
@@ -281,26 +281,26 @@ describe("BalanceSummary", () => {
   })
 
   it("accounts for partial settlements in balances", () => {
-    const expenses: DbExpense[] = [
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 100,
         description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
+        splitAmong: ["member-1", "member-2"],
+        splitOverrides: null,
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
-    const settlements: DbSettlement[] = [
+    const settlements: Settlement[] = [
       {
         id: "settlement-1",
-        group_id: "group-1",
-        from_member: "member-2",
-        to_member: "member-1",
+        groupId: "group-1",
+        from: "member-2",
+        to: "member-1",
         amount: 30,
-        settled_at: "2026-01-02T12:00:00Z",
+        settledAt: "2026-01-02T12:00:00Z",
       },
     ]
 
@@ -311,16 +311,16 @@ describe("BalanceSummary", () => {
   })
 
   it("renders the Balances section heading", () => {
-    const expenses: DbExpense[] = [
+    const expenses: Expense[] = [
       {
         id: "expense-1",
-        group_id: "group-1",
-        paid_by: "member-1",
+        groupId: "group-1",
+        paidBy: "member-1",
         amount: 100,
         description: "Dinner",
-        split_among: ["member-1", "member-2"],
-        split_overrides: null,
-        created_at: "2026-01-01T12:00:00Z",
+        splitAmong: ["member-1", "member-2"],
+        splitOverrides: null,
+        createdAt: "2026-01-01T12:00:00Z",
       },
     ]
 
