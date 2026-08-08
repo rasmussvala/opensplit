@@ -1,6 +1,13 @@
 import { Plus } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useParams, useSearchParams } from "react-router-dom"
+import {
+  type Expense,
+  type Group,
+  loadGroupSnapshot,
+  type Member,
+  type Settlement,
+} from "@/application/groups/loadGroupSnapshot"
 import { useAuth } from "@/components/auth/AuthProvider"
 import BalanceSummary from "@/components/balance/BalanceSummary"
 import ExpenseList from "@/components/expense/ExpenseList"
@@ -12,14 +19,9 @@ import BackLink from "@/components/ui/back-link"
 import { Button } from "@/components/ui/button"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { SupabaseGroupDataSource } from "@/infrastructure/supabase/supabaseGroupDataSource"
 import { supabase } from "@/lib/supabase"
 import { isSwishCurrency } from "@/lib/swish"
-import type {
-  DbExpense,
-  DbGroup,
-  DbGroupMember,
-  DbSettlement,
-} from "@/lib/types"
 
 type TabValue = "expenses" | "balances" | "payments"
 
@@ -31,14 +33,17 @@ function parseTab(value: string | null): TabValue {
 type PageState =
   | { status: "loading" }
   | { status: "not-found" }
-  | { status: "join"; group: DbGroup }
+  | { status: "join"; group: Group }
   | {
       status: "member"
-      group: DbGroup
-      members: DbGroupMember[]
-      expenses: DbExpense[]
-      settlements: DbSettlement[]
+      group: Group
+      currentMember: Member
+      members: Member[]
+      expenses: Expense[]
+      settlements: Settlement[]
     }
+
+const groupLoader = loadGroupSnapshot(new SupabaseGroupDataSource())
 
 export default function GroupPage() {
   const { inviteToken } = useParams<{ inviteToken: string }>()
@@ -61,43 +66,18 @@ export default function GroupPage() {
   }
 
   const loadGroup = useCallback(async () => {
-    const { data: group, error: groupError } = await supabase
-      .from("groups")
-      .select()
-      .eq("invite_token", inviteToken as string)
-      .single()
-
-    if (groupError || !group) {
-      setState({ status: "not-found" })
-      return
-    }
-
-    const { data: membership } = await supabase
-      .from("group_members")
-      .select()
-      .eq("group_id", group.id)
-      .eq("user_id", userId)
-      .maybeSingle()
-
-    if (!membership) {
-      setState({ status: "join", group })
-      return
-    }
-
-    const [{ data: members }, { data: expenses }, { data: settlements }] =
-      await Promise.all([
-        supabase.from("group_members").select().eq("group_id", group.id),
-        supabase.from("expenses").select().eq("group_id", group.id),
-        supabase.from("settlements").select().eq("group_id", group.id),
-      ])
-
-    setState({
-      status: "member",
-      group,
-      members: members ?? [],
-      expenses: (expenses ?? []) as DbExpense[],
-      settlements: (settlements ?? []) as DbSettlement[],
+    const result = await groupLoader.execute({
+      inviteToken: inviteToken as string,
+      userId,
     })
+
+    if (result.status === "not-found") {
+      setState({ status: "not-found" })
+    } else if (result.status === "join-required") {
+      setState({ status: "join", group: result.group })
+    } else {
+      setState({ status: "member", ...result.snapshot })
+    }
   }, [inviteToken, userId])
 
   useEffect(() => {
@@ -162,12 +142,13 @@ export default function GroupPage() {
     )
   }
 
-  const { group, members, expenses, settlements } = state
+  const { group, currentMember, members, expenses, settlements } = state
 
-  const totalSpent = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
-  const currentMember = members.find((m) => m.user_id === userId) ?? null
-  const showSwishProfile =
-    isSwishCurrency(group.currency) && currentMember !== null
+  const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0)
+  const showSwishProfile = isSwishCurrency(group.currency)
+
+  const legacyExpenses = expenses.map(toLegacyExpense)
+  const legacySettlements = settlements.map(toLegacySettlement)
 
   return (
     <Tabs
@@ -187,14 +168,14 @@ export default function GroupPage() {
       {showSwishProfile && currentMember && (
         <SwishProfile
           memberId={currentMember.id}
-          currentPhone={currentMember.swish_phone ?? null}
+          currentPhone={currentMember.swishPhone}
           onUpdated={loadGroup}
         />
       )}
 
       <TabsContent value="expenses">
         <ExpenseList
-          expenses={expenses}
+          expenses={legacyExpenses}
           members={members}
           currency={group.currency}
           inviteToken={inviteToken as string}
@@ -203,8 +184,8 @@ export default function GroupPage() {
 
       <TabsContent value="balances">
         <BalanceSummary
-          expenses={expenses}
-          settlements={settlements}
+          expenses={legacyExpenses}
+          settlements={legacySettlements}
           members={members}
           currency={group.currency}
           inviteToken={inviteToken as string}
@@ -214,7 +195,7 @@ export default function GroupPage() {
 
       <TabsContent value="payments">
         <PaymentsList
-          settlements={settlements}
+          settlements={legacySettlements}
           members={members}
           currency={group.currency}
           inviteToken={inviteToken as string}
@@ -233,4 +214,28 @@ export default function GroupPage() {
       </Button>
     </Tabs>
   )
+}
+
+function toLegacyExpense(expense: Expense) {
+  return {
+    id: expense.id,
+    group_id: "",
+    paid_by: expense.paidBy,
+    amount: expense.amount,
+    description: expense.description,
+    split_among: expense.splitAmong,
+    split_overrides: expense.splitOverrides,
+    created_at: "",
+  }
+}
+
+function toLegacySettlement(settlement: Settlement) {
+  return {
+    id: settlement.id,
+    group_id: "",
+    from_member: settlement.from,
+    to_member: settlement.to,
+    amount: settlement.amount,
+    settled_at: "",
+  }
 }

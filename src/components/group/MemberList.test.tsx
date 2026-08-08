@@ -1,22 +1,20 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import type { DbGroupMember } from "@/lib/types"
+import type { Member } from "@/application/groups/loadGroupSnapshot"
 import MemberList from "./MemberList"
 
-const members: DbGroupMember[] = [
+const members: Member[] = [
   {
     id: "m1",
-    group_id: "g1",
-    guest_name: "Alice",
-    user_id: "u1",
-    joined_at: "2026-01-01T00:00:00Z",
+    name: "Alice",
+    userId: "u1",
+    swishPhone: null,
   },
   {
     id: "m2",
-    group_id: "g1",
-    guest_name: "Bob",
-    user_id: "u2",
-    joined_at: "2026-01-02T00:00:00Z",
+    name: "Bob",
+    userId: "u2",
+    swishPhone: null,
   },
 ]
 

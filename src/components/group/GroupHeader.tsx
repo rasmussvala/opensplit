@@ -1,12 +1,12 @@
 import type { ReactNode } from "react"
+import type { Group, Member } from "@/application/groups/loadGroupSnapshot"
 import InviteCode from "@/components/group/InviteCode"
 import MemberList from "@/components/group/MemberList"
-import type { DbGroup, DbGroupMember } from "@/lib/types"
 import { formatAmount } from "@/lib/utils"
 
 interface GroupHeaderProps {
-  group: DbGroup
-  members: DbGroupMember[]
+  group: Group
+  members: Member[]
   totalSpent: number
   children?: ReactNode
 }
@@ -26,7 +26,7 @@ export default function GroupHeader({
         </span>
       </div>
       <MemberList members={members} />
-      <InviteCode inviteToken={group.invite_token} />
+      <InviteCode inviteToken={group.inviteToken} />
       {children}
     </div>
   )
