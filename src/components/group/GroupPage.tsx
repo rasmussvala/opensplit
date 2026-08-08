@@ -237,7 +237,7 @@ function toLegacyExpense(expense: Expense) {
     description: expense.description,
     split_among: expense.splitAmong,
     split_overrides: expense.splitOverrides,
-    created_at: "",
+    created_at: expense.createdAt,
   }
 }
 

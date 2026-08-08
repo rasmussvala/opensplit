@@ -50,7 +50,7 @@ export class SupabaseGroupDataSource implements GroupDataSource {
     const { data, error } = await supabase
       .from("expenses")
       .select(
-        "id, group_id, paid_by, amount, description, split_among, split_overrides",
+        "id, group_id, paid_by, amount, description, split_among, split_overrides, created_at",
       )
       .eq("group_id", groupId)
 
