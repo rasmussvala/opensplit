@@ -155,6 +155,7 @@ describe("GroupPage", () => {
             paidBy: "member-1",
             splitAmong: ["member-1", "member-2", "member-3"],
             splitOverrides: null,
+            createdAt: "2026-01-01T12:00:00Z",
           },
         ],
         settlements: [],

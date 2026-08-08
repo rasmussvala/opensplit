@@ -1,7 +1,18 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import { makeExpense } from "@/test-helpers"
+import type { Expense } from "@/application/groups/loadGroupSnapshot"
 import ExpenseItem from "./ExpenseItem"
+
+const makeExpense = (overrides: Partial<Expense> = {}): Expense => ({
+  id: "e1",
+  description: "Pizza",
+  amount: 100,
+  paidBy: "m1",
+  splitAmong: ["m1", "m2"],
+  splitOverrides: null,
+  createdAt: "2026-01-15T00:00:00Z",
+  ...overrides,
+})
 
 const memberNames: Record<string, string> = {
   m1: "Alice",
@@ -29,7 +40,7 @@ describe("ExpenseItem", () => {
   it("formats created_at as 'MON D' uppercased", () => {
     render(
       <ExpenseItem
-        expense={makeExpense({ created_at: "2026-03-15T12:00:00Z" })}
+        expense={makeExpense({ createdAt: "2026-03-15T12:00:00Z" })}
         currency="USD"
         getMemberName={getMemberName}
       />,
@@ -40,7 +51,7 @@ describe("ExpenseItem", () => {
   it("shows the payer's name", () => {
     render(
       <ExpenseItem
-        expense={makeExpense({ paid_by: "m2" })}
+        expense={makeExpense({ paidBy: "m2" })}
         currency="USD"
         getMemberName={getMemberName}
       />,
@@ -51,7 +62,7 @@ describe("ExpenseItem", () => {
   it("falls back to id when payer is unknown", () => {
     render(
       <ExpenseItem
-        expense={makeExpense({ paid_by: "ghost" })}
+        expense={makeExpense({ paidBy: "ghost" })}
         currency="USD"
         getMemberName={getMemberName}
       />,
@@ -62,7 +73,7 @@ describe("ExpenseItem", () => {
   it("lists all split members in the screen-reader summary", () => {
     render(
       <ExpenseItem
-        expense={makeExpense({ split_among: ["m1", "m2", "m3"] })}
+        expense={makeExpense({ splitAmong: ["m1", "m2", "m3"] })}
         currency="USD"
         getMemberName={getMemberName}
       />,
@@ -74,7 +85,7 @@ describe("ExpenseItem", () => {
     render(
       <ExpenseItem
         expense={makeExpense({
-          split_among: ["m1", "m2", "m3", "m4", "m5", "m6"],
+          splitAmong: ["m1", "m2", "m3", "m4", "m5", "m6"],
         })}
         currency="USD"
         getMemberName={getMemberName}
@@ -86,7 +97,7 @@ describe("ExpenseItem", () => {
   it("does not show the overflow badge when split has 4 or fewer members", () => {
     render(
       <ExpenseItem
-        expense={makeExpense({ split_among: ["m1", "m2", "m3", "m4"] })}
+        expense={makeExpense({ splitAmong: ["m1", "m2", "m3", "m4"] })}
         currency="USD"
         getMemberName={getMemberName}
       />,

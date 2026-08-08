@@ -1,46 +1,42 @@
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
-import type { DbExpense, DbGroupMember } from "@/lib/types"
+import type { Expense, Member } from "@/application/groups/loadGroupSnapshot"
 import ExpenseList from "./ExpenseList"
 
-const mockMembers: DbGroupMember[] = [
+const mockMembers: Member[] = [
   {
     id: "member-1",
-    group_id: "group-1",
-    guest_name: "Alice",
-    user_id: "user-1",
-    joined_at: "2026-01-01",
+    name: "Alice",
+    userId: "user-1",
+    swishPhone: null,
   },
   {
     id: "member-2",
-    group_id: "group-1",
-    guest_name: "Bob",
-    user_id: "user-2",
-    joined_at: "2026-01-01",
+    name: "Bob",
+    userId: "user-2",
+    swishPhone: null,
   },
 ]
 
-const mockExpenses: DbExpense[] = [
+const mockExpenses: Expense[] = [
   {
     id: "expense-1",
-    group_id: "group-1",
-    paid_by: "member-1",
-    amount: 120,
     description: "Dinner",
-    split_among: ["member-1", "member-2"],
-    split_overrides: null,
-    created_at: "2026-01-01T12:00:00Z",
+    amount: 120,
+    paidBy: "member-1",
+    splitAmong: ["member-1", "member-2"],
+    splitOverrides: null,
+    createdAt: "2026-01-01T12:00:00Z",
   },
   {
     id: "expense-2",
-    group_id: "group-1",
-    paid_by: "member-2",
-    amount: 45.5,
     description: "Taxi",
-    split_among: ["member-1", "member-2"],
-    split_overrides: null,
-    created_at: "2026-01-01T13:00:00Z",
+    amount: 45.5,
+    paidBy: "member-2",
+    splitAmong: ["member-1", "member-2"],
+    splitOverrides: null,
+    createdAt: "2026-01-01T13:00:00Z",
   },
 ]
 

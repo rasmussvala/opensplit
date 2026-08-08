@@ -1,9 +1,9 @@
+import type { Expense } from "@/application/groups/loadGroupSnapshot"
 import MemberAvatar from "@/components/group/MemberAvatar"
-import type { DbExpense } from "@/lib/types"
 import { formatAmount } from "@/lib/utils"
 
 interface ExpenseItemProps {
-  expense: DbExpense
+  expense: Expense
   currency: string
   getMemberName: (id: string) => string
 }
@@ -15,18 +15,18 @@ export default function ExpenseItem({
   currency,
   getMemberName,
 }: ExpenseItemProps) {
-  const createdAt = new Date(expense.created_at)
+  const createdAt = new Date(expense.createdAt)
   const dateLabel = createdAt
     .toLocaleDateString("en", { month: "short", day: "numeric" })
     .toUpperCase()
 
-  const payerName = getMemberName(expense.paid_by)
-  const amountValue = Number(expense.amount)
+  const payerName = getMemberName(expense.paidBy)
+  const amountValue = expense.amount
   const amountText = formatAmount(currency, amountValue)
   const [currencyCode, ...amountParts] = amountText.split(" ")
   const amountNumber = amountParts.join(" ")
 
-  const splitIds = expense.split_among
+  const splitIds = expense.splitAmong
   const splitCount = splitIds.length
   const visibleAvatars = splitIds.slice(0, MAX_STACK_AVATARS)
   const extraAvatars = Math.max(0, splitCount - MAX_STACK_AVATARS)
@@ -81,7 +81,7 @@ export default function ExpenseItem({
             Paid by
           </span>
           <MemberAvatar
-            id={expense.paid_by}
+            id={expense.paidBy}
             name={payerName}
             className="h-5 w-5 text-[9px] shadow-sm ring-2 ring-background"
           />

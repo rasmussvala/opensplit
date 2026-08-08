@@ -67,6 +67,7 @@ describe("loadGroupSnapshot", () => {
           description: "Dinner",
           split_among: ["member-1", "member-2"],
           split_overrides: null,
+          created_at: "2026-01-01T12:00:00Z",
         },
       ],
       settlements: [
@@ -122,6 +123,7 @@ describe("loadGroupSnapshot", () => {
             paidBy: "member-1",
             splitAmong: ["member-1", "member-2"],
             splitOverrides: null,
+            createdAt: "2026-01-01T12:00:00Z",
           },
         ],
         settlements: [

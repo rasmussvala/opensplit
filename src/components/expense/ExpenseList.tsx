@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom"
-import type { DbExpense, DbGroupMember } from "@/lib/types"
+import type { Expense, Member } from "@/application/groups/loadGroupSnapshot"
 import ExpenseItem from "./ExpenseItem"
 
 interface ExpenseListProps {
-  expenses: DbExpense[]
-  members: DbGroupMember[]
+  expenses: Expense[]
+  members: Member[]
   currency: string
   inviteToken: string
 }
@@ -15,7 +15,7 @@ export default function ExpenseList({
   currency,
   inviteToken,
 }: ExpenseListProps) {
-  const memberNames = new Map(members.map((m) => [m.id, m.guest_name]))
+  const memberNames = new Map(members.map((m) => [m.id, m.name]))
 
   function getMemberName(id: string): string {
     return memberNames.get(id) ?? "Unknown"
@@ -33,8 +33,7 @@ export default function ExpenseList({
   }
 
   const ordered = [...expenses].sort(
-    (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   )
 
   return (
