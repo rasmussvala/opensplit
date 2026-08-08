@@ -149,6 +149,7 @@ export default function GroupPage() {
 
   const legacyExpenses = expenses.map(toLegacyExpense)
   const legacySettlements = settlements.map(toLegacySettlement)
+  const legacyMembers = members.map(toLegacyMember)
 
   return (
     <Tabs
@@ -176,7 +177,7 @@ export default function GroupPage() {
       <TabsContent value="expenses">
         <ExpenseList
           expenses={legacyExpenses}
-          members={members}
+          members={legacyMembers}
           currency={group.currency}
           inviteToken={inviteToken as string}
         />
@@ -186,7 +187,7 @@ export default function GroupPage() {
         <BalanceSummary
           expenses={legacyExpenses}
           settlements={legacySettlements}
-          members={members}
+          members={legacyMembers}
           currency={group.currency}
           inviteToken={inviteToken as string}
           currentMemberId={currentMember?.id ?? null}
@@ -196,7 +197,7 @@ export default function GroupPage() {
       <TabsContent value="payments">
         <PaymentsList
           settlements={legacySettlements}
-          members={members}
+          members={legacyMembers}
           currency={group.currency}
           inviteToken={inviteToken as string}
         />
@@ -214,6 +215,17 @@ export default function GroupPage() {
       </Button>
     </Tabs>
   )
+}
+
+function toLegacyMember(member: Member) {
+  return {
+    id: member.id,
+    group_id: "",
+    guest_name: member.name,
+    user_id: member.userId,
+    joined_at: "",
+    swish_phone: member.swishPhone,
+  }
 }
 
 function toLegacyExpense(expense: Expense) {
