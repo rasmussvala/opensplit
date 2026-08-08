@@ -1,7 +1,21 @@
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { makeGroup, makeMember } from "@/test-helpers"
+import type { Group, Member } from "@/application/groups/loadGroupSnapshot"
 import GroupHeader from "./GroupHeader"
+
+const group: Group = {
+  id: "g1",
+  name: "Test Group",
+  currency: "USD",
+  inviteToken: "invite-abc",
+}
+
+const member: Member = {
+  id: "m1",
+  name: "Alice",
+  userId: "u1",
+  swishPhone: null,
+}
 
 beforeEach(() => {
   Object.assign(navigator, {
@@ -13,8 +27,8 @@ describe("GroupHeader", () => {
   it("renders the group name as a heading", () => {
     render(
       <GroupHeader
-        group={makeGroup({ name: "Trip to Berlin" })}
-        members={[makeMember()]}
+        group={{ ...group, name: "Trip to Berlin" }}
+        members={[member]}
         totalSpent={0}
       />,
     )
@@ -26,8 +40,8 @@ describe("GroupHeader", () => {
   it("renders total spent in the group's currency", () => {
     render(
       <GroupHeader
-        group={makeGroup({ currency: "EUR" })}
-        members={[makeMember()]}
+        group={{ ...group, currency: "EUR" }}
+        members={[member]}
         totalSpent={1234.5}
       />,
     )
@@ -37,11 +51,8 @@ describe("GroupHeader", () => {
   it("renders each member name", () => {
     render(
       <GroupHeader
-        group={makeGroup()}
-        members={[
-          makeMember({ id: "m1", guest_name: "Alice" }),
-          makeMember({ id: "m2", guest_name: "Bob" }),
-        ]}
+        group={group}
+        members={[member, { ...member, id: "m2", name: "Bob" }]}
         totalSpent={0}
       />,
     )
@@ -52,8 +63,8 @@ describe("GroupHeader", () => {
   it("renders the copy code button (InviteCode)", () => {
     render(
       <GroupHeader
-        group={makeGroup({ invite_token: "abc-123" })}
-        members={[makeMember()]}
+        group={{ ...group, inviteToken: "abc-123" }}
+        members={[member]}
         totalSpent={0}
       />,
     )
@@ -64,7 +75,7 @@ describe("GroupHeader", () => {
 
   it("renders children below the invite code", () => {
     render(
-      <GroupHeader group={makeGroup()} members={[makeMember()]} totalSpent={0}>
+      <GroupHeader group={group} members={[member]} totalSpent={0}>
         <div data-testid="extra">Extra content</div>
       </GroupHeader>,
     )
@@ -72,13 +83,7 @@ describe("GroupHeader", () => {
   })
 
   it("renders zero total when nothing has been spent", () => {
-    render(
-      <GroupHeader
-        group={makeGroup({ currency: "USD" })}
-        members={[makeMember()]}
-        totalSpent={0}
-      />,
-    )
+    render(<GroupHeader group={group} members={[member]} totalSpent={0} />)
     expect(screen.getByText("USD 0.00")).toBeInTheDocument()
   })
 })
