@@ -103,13 +103,13 @@ describe("GroupPage", () => {
     })
   })
 
-  it("shows not-found when loading the group fails", async () => {
+  it("shows a load error when loading the group fails", async () => {
     executeMock.mockRejectedValue(new Error("network unavailable"))
 
     renderWithRoute("unavailable-token")
 
     await waitFor(() => {
-      expect(screen.getByText(/group not found/i)).toBeInTheDocument()
+      expect(screen.getByText(/unable to load group/i)).toBeInTheDocument()
     })
   })
 

@@ -33,6 +33,7 @@ function parseTab(value: string | null): TabValue {
 type PageState =
   | { status: "loading" }
   | { status: "not-found" }
+  | { status: "error" }
   | { status: "join"; group: Group }
   | {
       status: "member"
@@ -80,7 +81,7 @@ export default function GroupPage() {
         setState({ status: "member", ...result.snapshot })
       }
     } catch {
-      setState({ status: "not-found" })
+      setState({ status: "error" })
     }
   }, [inviteToken, userId])
 
@@ -135,6 +136,12 @@ export default function GroupPage() {
 
   if (state.status === "not-found") {
     return <p className="p-6 text-center">Group not found</p>
+  }
+
+  if (state.status === "error") {
+    return (
+      <p className="p-6 text-center">Unable to load group. Please try again.</p>
+    )
   }
 
   if (state.status === "join") {
