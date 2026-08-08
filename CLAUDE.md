@@ -19,3 +19,17 @@ npm run test:coverage # tests + coverage report (must pass 75% overall, 90% for 
 **UI components:** `src/components/ui/` are shadcn primitives — edit sparingly. Feature components live in domain folders
 
 **Database:** Supabase with RLS enabled. Migrations in `supabase/migrations/`. All tables use Postgres RLS; anonymous users can only access groups they are members of.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live in GitHub Issues; use `gh`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the default labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a single-context repo using root `CONTEXT.md` and `docs/adr/`. See `docs/agents/domain.md`.
