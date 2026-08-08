@@ -1,37 +1,37 @@
 import { render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
-import type { DbGroupMember, DbSettlement } from "@/lib/types"
+import type { Member, Settlement } from "@/lib/types"
 import PaymentsList from "./PaymentsList"
 
-const mockMembers: DbGroupMember[] = [
+const mockMembers: Member[] = [
   {
     id: "member-1",
-    group_id: "group-1",
-    guest_name: "Alice",
-    user_id: "user-1",
-    joined_at: "2026-01-01",
+    groupId: "group-1",
+    name: "Alice",
+    userId: "user-1",
+    joinedAt: "2026-01-01",
   },
   {
     id: "member-2",
-    group_id: "group-1",
-    guest_name: "Bob",
-    user_id: "user-2",
-    joined_at: "2026-01-01",
+    groupId: "group-1",
+    name: "Bob",
+    userId: "user-2",
+    joinedAt: "2026-01-01",
   },
   {
     id: "member-3",
-    group_id: "group-1",
-    guest_name: "Charlie",
-    user_id: "user-3",
-    joined_at: "2026-01-01",
+    groupId: "group-1",
+    name: "Charlie",
+    userId: "user-3",
+    joinedAt: "2026-01-01",
   },
 ]
 
 function renderPaymentsList(
   overrides: {
-    settlements?: DbSettlement[]
-    members?: DbGroupMember[]
+    settlements?: Settlement[]
+    members?: Member[]
     currency?: string
     inviteToken?: string
   } = {},
@@ -57,22 +57,22 @@ describe("PaymentsList", () => {
   })
 
   it("renders one row per settlement", () => {
-    const settlements: DbSettlement[] = [
+    const settlements: Settlement[] = [
       {
         id: "settlement-1",
-        group_id: "group-1",
-        from_member: "member-2",
-        to_member: "member-1",
+        groupId: "group-1",
+        from: "member-2",
+        to: "member-1",
         amount: 50,
-        settled_at: "2026-01-02T12:00:00Z",
+        settledAt: "2026-01-02T12:00:00Z",
       },
       {
         id: "settlement-2",
-        group_id: "group-1",
-        from_member: "member-3",
-        to_member: "member-1",
+        groupId: "group-1",
+        from: "member-3",
+        to: "member-1",
         amount: 30,
-        settled_at: "2026-01-03T12:00:00Z",
+        settledAt: "2026-01-03T12:00:00Z",
       },
     ]
 
@@ -84,23 +84,23 @@ describe("PaymentsList", () => {
     ).toBeInTheDocument()
   })
 
-  it("orders rows by settled_at descending", () => {
-    const settlements: DbSettlement[] = [
+  it("orders rows by settledAt descending", () => {
+    const settlements: Settlement[] = [
       {
         id: "settlement-old",
-        group_id: "group-1",
-        from_member: "member-2",
-        to_member: "member-1",
+        groupId: "group-1",
+        from: "member-2",
+        to: "member-1",
         amount: 10,
-        settled_at: "2026-01-01T12:00:00Z",
+        settledAt: "2026-01-01T12:00:00Z",
       },
       {
         id: "settlement-new",
-        group_id: "group-1",
-        from_member: "member-3",
-        to_member: "member-1",
+        groupId: "group-1",
+        from: "member-3",
+        to: "member-1",
         amount: 20,
-        settled_at: "2026-02-15T12:00:00Z",
+        settledAt: "2026-02-15T12:00:00Z",
       },
     ]
 
@@ -112,14 +112,14 @@ describe("PaymentsList", () => {
   })
 
   it("renders the formatted amount, names and date label", () => {
-    const settlements: DbSettlement[] = [
+    const settlements: Settlement[] = [
       {
         id: "settlement-1",
-        group_id: "group-1",
-        from_member: "member-2",
-        to_member: "member-1",
+        groupId: "group-1",
+        from: "member-2",
+        to: "member-1",
         amount: 50,
-        settled_at: "2026-03-04T12:00:00Z",
+        settledAt: "2026-03-04T12:00:00Z",
       },
     ]
 
@@ -134,22 +134,22 @@ describe("PaymentsList", () => {
   })
 
   it("renders each settlement as a link to its edit page", () => {
-    const settlements: DbSettlement[] = [
+    const settlements: Settlement[] = [
       {
         id: "settlement-1",
-        group_id: "group-1",
-        from_member: "member-2",
-        to_member: "member-1",
+        groupId: "group-1",
+        from: "member-2",
+        to: "member-1",
         amount: 50,
-        settled_at: "2026-03-04T12:00:00Z",
+        settledAt: "2026-03-04T12:00:00Z",
       },
       {
         id: "settlement-2",
-        group_id: "group-1",
-        from_member: "member-3",
-        to_member: "member-1",
+        groupId: "group-1",
+        from: "member-3",
+        to: "member-1",
         amount: 30,
-        settled_at: "2026-03-05T12:00:00Z",
+        settledAt: "2026-03-05T12:00:00Z",
       },
     ]
 

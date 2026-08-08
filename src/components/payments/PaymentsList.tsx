@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom"
+import type { Member, Settlement } from "@/application/groups/loadGroupSnapshot"
 import MemberPairAvatars from "@/components/group/MemberPairAvatars"
 import CurrencyAmount from "@/components/ui/currency-amount"
-import type { DbGroupMember, DbSettlement } from "@/lib/types"
 import { formatAmount } from "@/lib/utils"
 
 interface PaymentsListProps {
-  settlements: DbSettlement[]
-  members: DbGroupMember[]
+  settlements: Settlement[]
+  members: Member[]
   currency: string
   inviteToken: string
 }
@@ -17,7 +17,7 @@ export default function PaymentsList({
   currency,
   inviteToken,
 }: PaymentsListProps) {
-  const memberNames = new Map(members.map((m) => [m.id, m.guest_name]))
+  const memberNames = new Map(members.map((m) => [m.id, m.name]))
 
   if (settlements.length === 0) {
     return (
@@ -31,8 +31,7 @@ export default function PaymentsList({
   }
 
   const ordered = [...settlements].sort(
-    (a, b) =>
-      new Date(b.settled_at).getTime() - new Date(a.settled_at).getTime(),
+    (a, b) => new Date(b.settledAt).getTime() - new Date(a.settledAt).getTime(),
   )
 
   return (
@@ -40,10 +39,10 @@ export default function PaymentsList({
       <h2 className="mb-2 font-semibold text-sm">Payments</h2>
       <div className="flex flex-col gap-2">
         {ordered.map((settlement) => {
-          const fromName = memberNames.get(settlement.from_member) ?? "Unknown"
-          const toName = memberNames.get(settlement.to_member) ?? "Unknown"
-          const amountValue = Number(settlement.amount)
-          const settledAt = new Date(settlement.settled_at)
+          const fromName = memberNames.get(settlement.from) ?? "Unknown"
+          const toName = memberNames.get(settlement.to) ?? "Unknown"
+          const amountValue = settlement.amount
+          const settledAt = new Date(settlement.settledAt)
           const dateLabel = settledAt
             .toLocaleDateString("en", { month: "short", day: "numeric" })
             .toUpperCase()
@@ -55,8 +54,8 @@ export default function PaymentsList({
               className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 transition-colors hover:border-border hover:bg-card/70"
             >
               <MemberPairAvatars
-                from={{ id: settlement.from_member, name: fromName }}
-                to={{ id: settlement.to_member, name: toName }}
+                from={{ id: settlement.from, name: fromName }}
+                to={{ id: settlement.to, name: toName }}
                 hoverNudge
               />
 
