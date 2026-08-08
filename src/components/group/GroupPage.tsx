@@ -81,7 +81,7 @@ export default function GroupPage() {
   }, [inviteToken, userId])
 
   useEffect(() => {
-    loadGroup()
+    void loadGroup()
   }, [loadGroup])
 
   const groupId = state.status === "member" ? state.group.id : null
@@ -95,7 +95,9 @@ export default function GroupPage() {
     // so we listen to all changes and rely on loadGroup's queries to scope data.
     const refetch = () => {
       clearTimeout(timeout)
-      timeout = setTimeout(loadGroup, 300)
+      timeout = setTimeout(() => {
+        void loadGroup()
+      }, 300)
     }
 
     const channel = supabase
@@ -119,7 +121,7 @@ export default function GroupPage() {
 
     return () => {
       clearTimeout(timeout)
-      supabase.removeChannel(channel)
+      void supabase.removeChannel(channel)
     }
   }, [groupId, loadGroup])
 
