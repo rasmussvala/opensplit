@@ -61,7 +61,7 @@ export class SupabaseGroupDataSource implements GroupDataSource {
   async listSettlements(groupId: string): Promise<SettlementRow[]> {
     const { data, error } = await supabase
       .from("settlements")
-      .select("id, group_id, from_member, to_member, amount")
+      .select("id, group_id, from_member, to_member, amount, settled_at")
       .eq("group_id", groupId)
 
     if (error) {

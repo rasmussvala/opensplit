@@ -1,17 +1,21 @@
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useState } from "react"
+import type {
+  Expense,
+  Member,
+  Settlement,
+} from "@/application/groups/loadGroupSnapshot"
 import { Button } from "@/components/ui/button"
 import { calculateBalances } from "@/lib/balances"
 import { suggestedSettlements } from "@/lib/simplify"
-import type { DbExpense, DbGroupMember, DbSettlement } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import BalanceList from "./BalanceList"
 import SettlementList from "./SettlementList"
 
 interface BalanceSummaryProps {
-  expenses: DbExpense[]
-  settlements: DbSettlement[]
-  members: DbGroupMember[]
+  expenses: Expense[]
+  settlements: Settlement[]
+  members: Member[]
   currency: string
   inviteToken: string
   currentMemberId: string | null
@@ -27,19 +31,19 @@ export default function BalanceSummary({
 }: BalanceSummaryProps) {
   const [showBalances, setShowBalances] = useState(true)
   const [onlyYou, setOnlyYou] = useState(false)
-  const memberNames = new Map(members.map((m) => [m.id, m.guest_name]))
+  const memberNames = new Map(members.map((m) => [m.id, m.name]))
 
   const mappedExpenses = expenses.map((e) => ({
-    paid_by: e.paid_by,
+    paid_by: e.paidBy,
     amount: Number(e.amount),
-    split_among: e.split_among,
-    split_overrides: e.split_overrides,
+    split_among: e.splitAmong,
+    split_overrides: e.splitOverrides,
   }))
 
   const mappedSettlements = settlements.map((s) => ({
-    from: s.from_member,
-    to: s.to_member,
-    amount: Number(s.amount),
+    from: s.from,
+    to: s.to,
+    amount: s.amount,
   }))
 
   const balances = calculateBalances(mappedExpenses, mappedSettlements)

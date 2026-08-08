@@ -147,10 +147,6 @@ export default function GroupPage() {
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0)
   const showSwishProfile = isSwishCurrency(group.currency)
 
-  const legacyExpenses = expenses.map(toLegacyExpense)
-  const legacySettlements = settlements.map(toLegacySettlement)
-  const legacyMembers = members.map(toLegacyMember)
-
   return (
     <Tabs
       value={tab}
@@ -176,8 +172,8 @@ export default function GroupPage() {
 
       <TabsContent value="expenses">
         <ExpenseList
-          expenses={legacyExpenses}
-          members={legacyMembers}
+          expenses={expenses}
+          members={members}
           currency={group.currency}
           inviteToken={inviteToken as string}
         />
@@ -185,9 +181,9 @@ export default function GroupPage() {
 
       <TabsContent value="balances">
         <BalanceSummary
-          expenses={legacyExpenses}
-          settlements={legacySettlements}
-          members={legacyMembers}
+          expenses={expenses}
+          settlements={settlements}
+          members={members}
           currency={group.currency}
           inviteToken={inviteToken as string}
           currentMemberId={currentMember?.id ?? null}
@@ -196,8 +192,8 @@ export default function GroupPage() {
 
       <TabsContent value="payments">
         <PaymentsList
-          settlements={legacySettlements}
-          members={legacyMembers}
+          settlements={settlements}
+          members={members}
           currency={group.currency}
           inviteToken={inviteToken as string}
         />
@@ -215,39 +211,4 @@ export default function GroupPage() {
       </Button>
     </Tabs>
   )
-}
-
-function toLegacyMember(member: Member) {
-  return {
-    id: member.id,
-    group_id: "",
-    guest_name: member.name,
-    user_id: member.userId,
-    joined_at: "",
-    swish_phone: member.swishPhone,
-  }
-}
-
-function toLegacyExpense(expense: Expense) {
-  return {
-    id: expense.id,
-    group_id: "",
-    paid_by: expense.paidBy,
-    amount: expense.amount,
-    description: expense.description,
-    split_among: expense.splitAmong,
-    split_overrides: expense.splitOverrides,
-    created_at: expense.createdAt,
-  }
-}
-
-function toLegacySettlement(settlement: Settlement) {
-  return {
-    id: settlement.id,
-    group_id: "",
-    from_member: settlement.from,
-    to_member: settlement.to,
-    amount: settlement.amount,
-    settled_at: "",
-  }
 }
