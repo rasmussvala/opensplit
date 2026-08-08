@@ -103,6 +103,16 @@ describe("GroupPage", () => {
     })
   })
 
+  it("shows not-found when loading the group fails", async () => {
+    executeMock.mockRejectedValue(new Error("network unavailable"))
+
+    renderWithRoute("unavailable-token")
+
+    await waitFor(() => {
+      expect(screen.getByText(/group not found/i)).toBeInTheDocument()
+    })
+  })
+
   it("shows join form when the loader says membership is required", async () => {
     executeMock.mockResolvedValue({ status: "join-required", group })
 
