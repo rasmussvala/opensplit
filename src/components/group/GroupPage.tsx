@@ -66,17 +66,21 @@ export default function GroupPage() {
   }
 
   const loadGroup = useCallback(async () => {
-    const result = await groupLoader.execute({
-      inviteToken: inviteToken as string,
-      userId,
-    })
+    try {
+      const result = await groupLoader.execute({
+        inviteToken: inviteToken as string,
+        userId,
+      })
 
-    if (result.status === "not-found") {
+      if (result.status === "not-found") {
+        setState({ status: "not-found" })
+      } else if (result.status === "join-required") {
+        setState({ status: "join", group: result.group })
+      } else {
+        setState({ status: "member", ...result.snapshot })
+      }
+    } catch {
       setState({ status: "not-found" })
-    } else if (result.status === "join-required") {
-      setState({ status: "join", group: result.group })
-    } else {
-      setState({ status: "member", ...result.snapshot })
     }
   }, [inviteToken, userId])
 
