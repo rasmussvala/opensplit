@@ -5,16 +5,50 @@ import { supabase } from "@/lib/supabase"
 import * as swishLib from "@/lib/swish"
 import SettlePage from "./SettlePage"
 
+let recordOverride: (() => Promise<unknown>) | null = null
+const realtimeCallbacks: ((payload: unknown) => void)[] = []
+const realtimeFilters: unknown[] = []
+
 vi.mock("@/lib/supabase", () => ({
   supabase: {
     from: vi.fn(),
-    channel: vi.fn(() => ({
-      on: vi.fn().mockReturnThis(),
-      subscribe: vi.fn(),
-    })),
+    channel: vi.fn(() => {
+      const channel = {
+        on: vi.fn((_event, filter, callback) => {
+          realtimeFilters.push(filter)
+          realtimeCallbacks.push(callback)
+          return channel
+        }),
+        subscribe: vi.fn(),
+      }
+      return channel
+    }),
     removeChannel: vi.fn(),
   },
 }))
+
+vi.mock(
+  "@/application/settlements/manageSettlements",
+  async (importOriginal) => {
+    const actual =
+      await importOriginal<
+        typeof import("@/application/settlements/manageSettlements")
+      >()
+    return {
+      ...actual,
+      manageSettlements: (
+        source: Parameters<typeof actual.manageSettlements>[0],
+      ) => {
+        const manager = actual.manageSettlements(source)
+        return {
+          ...manager,
+          record: async (...args: Parameters<typeof manager.record>) =>
+            recordOverride ? recordOverride() : manager.record(...args),
+        }
+      },
+    }
+  },
+)
 
 vi.mock("@/components/auth/AuthProvider", () => ({
   useAuth: () => ({ userId: "test-user-id" }),
@@ -164,15 +198,17 @@ function setupSupabase(options: SetupOptions = {}) {
           return {
             select: vi.fn().mockReturnValue({
               single: vi.fn().mockResolvedValue({
-                data: {
-                  id: "settlement-1",
-                  group_id: "group-1",
-                  from_member: "member-2",
-                  to_member: "member-1",
-                  amount: 50,
-                  settled_at: "2026-01-02T03:04:05.000Z",
-                },
-                error: null,
+                data: insertResponse.error
+                  ? null
+                  : {
+                      id: "settlement-1",
+                      group_id: "group-1",
+                      from_member: "member-2",
+                      to_member: "member-1",
+                      amount: 50,
+                      settled_at: "2026-01-02T03:04:05.000Z",
+                    },
+                error: insertResponse.error,
               }),
             }),
           }
@@ -210,6 +246,9 @@ function renderRoute(
 describe("SettlePage", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    recordOverride = null
+    realtimeCallbacks.length = 0
+    realtimeFilters.length = 0
     vi.spyOn(swishLib, "isMobileSwishDevice").mockReturnValue(false)
   })
 
@@ -294,6 +333,56 @@ describe("SettlePage", () => {
     expect(
       screen.queryByRole("button", { name: /mark settled/i }),
     ).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ["exceeds-outstanding", "The outstanding amount changed"],
+    ["no-outstanding", "This settlement is no longer outstanding"],
+  ])("renders a stale %s error", async (status, message) => {
+    setupSupabase()
+    recordOverride = async () => ({ status })
+    renderRoute()
+
+    const settleButton = await screen.findByRole("button", {
+      name: /mark settled/i,
+    })
+    fireEvent.click(settleButton)
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(message)
+  })
+
+  it("renders an adapter recording failure inline", async () => {
+    setupSupabase({ insertResponse: { error: { message: "insert denied" } } })
+    renderRoute()
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: /mark settled/i }),
+    )
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /unable to record settlement/i,
+    )
+  })
+
+  it("reloads only for changes belonging to the current group, including members", async () => {
+    setupSupabase()
+    renderRoute()
+    await screen.findByRole("button", { name: /mark settled/i })
+
+    expect(realtimeFilters).toEqual([
+      expect.objectContaining({
+        table: "expenses",
+        filter: "group_id=eq.group-1",
+      }),
+      expect.objectContaining({
+        table: "settlements",
+        filter: "group_id=eq.group-1",
+      }),
+      expect.objectContaining({
+        table: "group_members",
+        filter: "group_id=eq.group-1",
+      }),
+    ])
   })
 
   it("inserts a settlement and navigates to the payments tab", async () => {

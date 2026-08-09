@@ -101,25 +101,47 @@ export default function SettlePage() {
     load()
   }, [load])
 
+  const groupId = state.status === "ready" ? state.group.id : null
+
   useEffect(() => {
-    if (!inviteToken) return
+    if (!groupId) return
     const channel = supabase
       .channel(`settle-${inviteToken}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "expenses" },
+        {
+          event: "*",
+          schema: "public",
+          table: "expenses",
+          filter: `group_id=eq.${groupId}`,
+        },
         () => void load(),
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "settlements" },
+        {
+          event: "*",
+          schema: "public",
+          table: "settlements",
+          filter: `group_id=eq.${groupId}`,
+        },
+        () => void load(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "group_members",
+          filter: `group_id=eq.${groupId}`,
+        },
         () => void load(),
       )
       .subscribe()
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [inviteToken, load])
+  }, [inviteToken, load, groupId])
 
   const ready = state.status === "ready" ? state : null
   const swishEnabled =
