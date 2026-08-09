@@ -12,6 +12,12 @@ export type SettlementCommand = {
   amount: number
 }
 
+export type SettlementSuggestion = {
+  from: string
+  to: string
+  amount: number
+}
+
 export type SettlementDataSource = {
   record(command: SettlementCommand): Promise<Settlement>
   delete(groupId: string, settlementId: string): Promise<void>
@@ -28,7 +34,7 @@ export type DeleteSettlementResult = { status: "deleted" }
 
 export function manageSettlements(dataSource: SettlementDataSource) {
   return {
-    async suggest(snapshot: GroupSnapshot) {
+    async suggest(snapshot: GroupSnapshot): Promise<SettlementSuggestion[]> {
       return suggestedSettlements(
         snapshot.expenses.map((expense) => ({
           paid_by: expense.paidBy,
