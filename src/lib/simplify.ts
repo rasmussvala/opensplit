@@ -1,4 +1,8 @@
-import { calculateBalances, type Expense, type Settlement } from "./balances"
+import type {
+  Expense,
+  Settlement,
+} from "@/application/groups/loadGroupSnapshot"
+import { calculateBalances } from "./balances"
 import { round2 } from "./utils"
 
 export interface Transaction {
