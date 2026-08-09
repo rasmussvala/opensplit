@@ -7,21 +7,21 @@ const mockMembers: DbGroupMember[] = [
   {
     id: "member-1",
     group_id: "group-1",
-    guest_name: "Alice",
+    name: "Alice",
     user_id: "user-1",
     joined_at: "2026-01-01",
   },
   {
     id: "member-2",
     group_id: "group-1",
-    guest_name: "Bob",
+    name: "Bob",
     user_id: "user-2",
     joined_at: "2026-01-01",
   },
   {
     id: "member-3",
     group_id: "group-1",
-    guest_name: "Charlie",
+    name: "Charlie",
     user_id: "user-3",
     joined_at: "2026-01-01",
   },
@@ -79,7 +79,7 @@ describe("ExpenseForm", () => {
     renderForm()
 
     for (const m of mockMembers) {
-      expect(screen.getByRole("checkbox", { name: m.guest_name })).toBeChecked()
+      expect(screen.getByRole("checkbox", { name: m.name })).toBeChecked()
     }
   })
 
@@ -236,9 +236,7 @@ describe("ExpenseForm", () => {
     })
 
     for (const m of mockMembers) {
-      expect(screen.getByLabelText(`${m.guest_name} share`)).toHaveValue(
-        "33.33",
-      )
+      expect(screen.getByLabelText(`${m.name} share`)).toHaveValue("33.33")
     }
   })
 
@@ -252,7 +250,7 @@ describe("ExpenseForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "USD" }))
 
     for (const m of mockMembers) {
-      expect(screen.getByLabelText(`${m.guest_name} share`)).toHaveValue("30")
+      expect(screen.getByLabelText(`${m.name} share`)).toHaveValue("30")
     }
   })
 

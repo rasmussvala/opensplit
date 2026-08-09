@@ -1,21 +1,27 @@
 import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
+import {
+  type ExpenseCreationContext,
+  manageExpenses,
+} from "@/application/expenses/manageExpenses"
+import type { Member } from "@/application/groups/loadGroupSnapshot"
 import { useAuth } from "@/components/auth/AuthProvider"
 import ExpenseForm, {
   type ExpenseFormData,
 } from "@/components/expense/ExpenseForm"
 import { LoadingState } from "@/components/ui/loading-state"
-import { supabase } from "@/lib/supabase"
-import type { DbGroup, DbGroupMember } from "@/lib/types"
+import { SupabaseExpenseDataSource } from "@/infrastructure/supabase/supabaseExpenseDataSource"
+import { SupabaseGroupDataSource } from "@/infrastructure/supabase/supabaseGroupDataSource"
 
 type PageState =
   | { status: "loading" }
   | { status: "not-found" }
   | {
       status: "ready"
-      group: DbGroup
-      members: DbGroupMember[]
+      groupId: string
+      currency: string
+      members: Member[]
       currentMemberId: string
     }
 
@@ -26,50 +32,36 @@ export default function AddExpensePage() {
   const [state, setState] = useState<PageState>({ status: "loading" })
 
   const load = useCallback(async () => {
-    const { data: group, error: groupError } = await supabase
-      .from("groups")
-      .select()
-      .eq("invite_token", inviteToken as string)
-      .single()
-
-    if (groupError || !group) {
+    let context: ExpenseCreationContext | null
+    try {
+      context = await manageExpenses(
+        new SupabaseGroupDataSource(),
+        new SupabaseExpenseDataSource(),
+      ).loadCreateContext(inviteToken as string, userId)
+    } catch {
       setState({ status: "not-found" })
       return
     }
-
-    const { data: membership } = await supabase
-      .from("group_members")
-      .select()
-      .eq("group_id", group.id)
-      .eq("user_id", userId)
-      .maybeSingle()
-
-    if (!membership) {
+    if (!context) {
       setState({ status: "not-found" })
       return
     }
-
-    const { data: members } = await supabase
-      .from("group_members")
-      .select()
-      .eq("group_id", group.id)
-
-    const ordered = (members ?? []).slice().sort((a, b) => {
-      if (a.id === membership.id) return -1
-      if (b.id === membership.id) return 1
+    const ordered = context.members.slice().sort((a, b) => {
+      if (a.id === context.currentMemberId) return -1
+      if (b.id === context.currentMemberId) return 1
       return 0
     })
-
     setState({
       status: "ready",
-      group,
+      groupId: context.groupId,
+      currency: context.currency,
       members: ordered,
-      currentMemberId: membership.id,
+      currentMemberId: context.currentMemberId,
     })
   }, [inviteToken, userId])
 
   useEffect(() => {
-    load()
+    void load()
   }, [load])
 
   if (state.status === "loading") {
@@ -80,21 +72,18 @@ export default function AddExpensePage() {
     return <p className="p-6 text-center">Group not found</p>
   }
 
-  const { group, members, currentMemberId } = state
+  const { groupId, members, currency, currentMemberId } = state
   const groupUrl = `/groups/${inviteToken}`
 
   async function handleSubmit(data: ExpenseFormData) {
-    const { error } = await supabase.from("expenses").insert({
-      group_id: group.id,
-      description: data.description,
-      amount: data.amount,
-      paid_by: data.paidBy,
-      split_among: data.splitAmong,
-      split_overrides: data.splitOverrides,
-    })
-
-    if (error) return
-
+    try {
+      await manageExpenses(
+        new SupabaseGroupDataSource(),
+        new SupabaseExpenseDataSource(),
+      ).create(groupId, data)
+    } catch {
+      return
+    }
     navigate(groupUrl)
   }
 
@@ -112,7 +101,7 @@ export default function AddExpensePage() {
 
       <ExpenseForm
         members={members}
-        currency={group.currency}
+        currency={currency}
         initialPaidBy={currentMemberId}
         submitLabel="Add expense"
         onSubmit={handleSubmit}

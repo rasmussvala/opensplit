@@ -1,21 +1,26 @@
 import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
+import {
+  type ExpenseEditingContext,
+  manageExpenses,
+} from "@/application/expenses/manageExpenses"
+import type { Expense, Member } from "@/application/groups/loadGroupSnapshot"
 import { useAuth } from "@/components/auth/AuthProvider"
 import ExpenseForm, {
   type ExpenseFormData,
 } from "@/components/expense/ExpenseForm"
 import { LoadingState } from "@/components/ui/loading-state"
-import { supabase } from "@/lib/supabase"
-import type { DbExpense, DbGroupMember } from "@/lib/types"
+import { SupabaseExpenseDataSource } from "@/infrastructure/supabase/supabaseExpenseDataSource"
+import { SupabaseGroupDataSource } from "@/infrastructure/supabase/supabaseGroupDataSource"
 
 type PageState =
   | { status: "loading" }
   | { status: "not-found" }
   | {
       status: "ready"
-      expense: DbExpense
-      members: DbGroupMember[]
+      expense: Expense
+      members: Member[]
       currency: string
     }
 
@@ -31,82 +36,57 @@ export default function EditExpensePage() {
   const groupUrl = `/groups/${inviteToken}`
 
   const load = useCallback(async () => {
-    const { data: group, error: groupError } = await supabase
-      .from("groups")
-      .select()
-      .eq("invite_token", inviteToken as string)
-      .single()
-
-    if (groupError || !group) {
+    let context: ExpenseEditingContext | null
+    try {
+      context = await manageExpenses(
+        new SupabaseGroupDataSource(),
+        new SupabaseExpenseDataSource(),
+      ).loadContext(inviteToken as string, userId, expenseId)
+    } catch {
       setState({ status: "not-found" })
       return
     }
-
-    const { data: membership } = await supabase
-      .from("group_members")
-      .select()
-      .eq("group_id", group.id)
-      .eq("user_id", userId)
-      .maybeSingle()
-
-    if (!membership) {
+    if (!context) {
       setState({ status: "not-found" })
       return
     }
-
-    const [{ data: members }, { data: expense }] = await Promise.all([
-      supabase.from("group_members").select().eq("group_id", group.id),
-      supabase
-        .from("expenses")
-        .select()
-        .eq("id", expenseId as string)
-        .single(),
-    ])
-
-    if (!expense) {
-      setState({ status: "not-found" })
-      return
-    }
-
     setState({
       status: "ready",
-      expense: expense as DbExpense,
-      members: members ?? [],
-      currency: group.currency,
+      expense: context.expense,
+      members: context.members,
+      currency: context.currency,
     })
   }, [inviteToken, expenseId, userId])
 
   useEffect(() => {
-    load()
+    void load()
   }, [load])
 
   async function handleSave(data: ExpenseFormData) {
     if (state.status !== "ready") return
 
-    const { error } = await supabase
-      .from("expenses")
-      .update({
-        description: data.description,
-        amount: data.amount,
-        paid_by: data.paidBy,
-        split_among: data.splitAmong,
-        split_overrides: data.splitOverrides,
-      })
-      .eq("id", state.expense.id)
-
-    if (error) return
+    try {
+      await manageExpenses(
+        new SupabaseGroupDataSource(),
+        new SupabaseExpenseDataSource(),
+      ).update(state.expense.id, data)
+    } catch {
+      return
+    }
     navigate(groupUrl)
   }
 
   async function handleDelete() {
     if (state.status !== "ready") return
 
-    const { error } = await supabase
-      .from("expenses")
-      .delete()
-      .eq("id", state.expense.id)
-
-    if (error) return
+    try {
+      await manageExpenses(
+        new SupabaseGroupDataSource(),
+        new SupabaseExpenseDataSource(),
+      ).delete(state.expense.id)
+    } catch {
+      return
+    }
     navigate(groupUrl)
   }
 
@@ -119,7 +99,7 @@ export default function EditExpensePage() {
   }
 
   const { expense, members, currency } = state
-  const createdAt = new Date(expense.created_at)
+  const createdAt = new Date(expense.createdAt)
   const dateLabel = createdAt
     .toLocaleDateString("en", {
       month: "short",
@@ -152,9 +132,9 @@ export default function EditExpensePage() {
         currency={currency}
         initialDescription={expense.description}
         initialAmount={String(Number(expense.amount))}
-        initialPaidBy={expense.paid_by}
-        initialSplitAmong={expense.split_among}
-        initialSplitOverrides={expense.split_overrides}
+        initialPaidBy={expense.paidBy}
+        initialSplitAmong={expense.splitAmong}
+        initialSplitOverrides={expense.splitOverrides}
         submitLabel="Save"
         onSubmit={handleSave}
         onCancel={() => navigate(groupUrl)}
