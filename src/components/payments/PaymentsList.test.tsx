@@ -1,30 +1,32 @@
 import { render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
-import type { Member, Settlement } from "@/lib/types"
+import type {
+  Settlement as DomainSettlement,
+  Member,
+} from "@/application/groups/loadGroupSnapshot"
 import PaymentsList from "./PaymentsList"
+
+type Settlement = DomainSettlement & { groupId: string }
 
 const mockMembers: Member[] = [
   {
     id: "member-1",
-    groupId: "group-1",
     name: "Alice",
     userId: "user-1",
-    joinedAt: "2026-01-01",
+    swishPhone: null,
   },
   {
     id: "member-2",
-    groupId: "group-1",
     name: "Bob",
     userId: "user-2",
-    joinedAt: "2026-01-01",
+    swishPhone: null,
   },
   {
     id: "member-3",
-    groupId: "group-1",
     name: "Charlie",
     userId: "user-3",
-    joinedAt: "2026-01-01",
+    swishPhone: null,
   },
 ]
 

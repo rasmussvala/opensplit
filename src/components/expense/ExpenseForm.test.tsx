@@ -1,29 +1,26 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { DbGroupMember } from "@/lib/types"
+import type { Member } from "@/application/groups/loadGroupSnapshot"
 import ExpenseForm from "./ExpenseForm"
 
-const mockMembers: DbGroupMember[] = [
+const mockMembers: Member[] = [
   {
     id: "member-1",
-    group_id: "group-1",
     name: "Alice",
-    user_id: "user-1",
-    joined_at: "2026-01-01",
+    userId: "user-1",
+    swishPhone: null,
   },
   {
     id: "member-2",
-    group_id: "group-1",
     name: "Bob",
-    user_id: "user-2",
-    joined_at: "2026-01-01",
+    userId: "user-2",
+    swishPhone: null,
   },
   {
     id: "member-3",
-    group_id: "group-1",
     name: "Charlie",
-    user_id: "user-3",
-    joined_at: "2026-01-01",
+    userId: "user-3",
+    swishPhone: null,
   },
 ]
 
