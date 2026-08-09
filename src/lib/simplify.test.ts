@@ -269,4 +269,114 @@ describe("suggestedSettlements", () => {
       amount: 106.1,
     })
   })
+
+  it("keeps a small final expense visible after three settlement cycles (#53)", () => {
+    const expenses = [
+      ...Array.from({ length: 10 }, (_, index) => ({
+        paid_by: "alice",
+        amount: 999.99 + index,
+        split_among: ["alice", "bob"],
+      })),
+      ...Array.from({ length: 10 }, (_, index) => ({
+        paid_by: "bob",
+        amount: 999.99 + index,
+        split_among: ["alice", "bob"],
+      })),
+      ...Array.from({ length: 10 }, (_, index) => ({
+        paid_by: "alice",
+        amount: 999.99 + index,
+        split_among: ["alice", "bob"],
+      })),
+    ]
+
+    const firstSettlement = suggestDomain(
+      expenses.slice(0, 10).map(toDomainExpense),
+      [],
+    )
+    const secondSettlement = suggestDomain(
+      expenses.slice(0, 20).map(toDomainExpense),
+      firstSettlement.map((suggestion) =>
+        settlement(suggestion.from, suggestion.to, suggestion.amount),
+      ),
+    )
+    const thirdSettlement = suggestDomain(expenses.map(toDomainExpense), [
+      ...firstSettlement,
+      ...secondSettlement.map((suggestion) =>
+        settlement(suggestion.from, suggestion.to, suggestion.amount),
+      ),
+    ])
+
+    const finalExpenses = [
+      ...expenses,
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["alice", "bob"],
+      },
+    ]
+    const settlements = [
+      ...firstSettlement,
+      ...secondSettlement.map((suggestion) =>
+        settlement(suggestion.from, suggestion.to, suggestion.amount),
+      ),
+      ...thirdSettlement.map((suggestion) =>
+        settlement(suggestion.from, suggestion.to, suggestion.amount),
+      ),
+    ]
+
+    expect(
+      suggestDomain(finalExpenses.map(toDomainExpense), settlements),
+    ).toEqual([{ from: "bob", to: "alice", amount: 50 }])
+  })
+
+  it("keeps small final expenses visible across varied settlement histories (#53)", () => {
+    let seed = 53
+    const random = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0
+      return seed / 2 ** 32
+    }
+
+    for (let attempt = 0; attempt < 100; attempt++) {
+      const expenses: Record<string, unknown>[] = []
+      const settlements: Settlement[] = []
+
+      for (let cycle = 0; cycle < 3; cycle++) {
+        for (let index = 0; index < 10; index++) {
+          expenses.push({
+            paid_by: random() < 0.5 ? "alice" : "bob",
+            amount: Math.round((900 + random() * 200) * 100) / 100,
+            split_among: ["alice", "bob"],
+          })
+        }
+
+        const suggestions = suggestDomain(
+          expenses.map(toDomainExpense),
+          settlements,
+        )
+        settlements.push(
+          ...suggestions.map((suggestion) =>
+            settlement(suggestion.from, suggestion.to, suggestion.amount),
+          ),
+        )
+      }
+
+      const finalExpense = {
+        paid_by: random() < 0.5 ? "alice" : "bob",
+        amount: Math.round(random() * 10000) / 100,
+        split_among: ["alice", "bob"],
+      }
+      const finalSuggestions = suggestDomain(
+        [...expenses, finalExpense].map(toDomainExpense),
+        settlements,
+      )
+      const expected = simplifyDebts(
+        calculateDomainBalances(
+          [...expenses, finalExpense].map(toDomainExpense),
+          settlements,
+        ),
+      )
+
+      expect(finalSuggestions, `attempt ${attempt}`).toEqual(expected)
+    }
+  })
 })
