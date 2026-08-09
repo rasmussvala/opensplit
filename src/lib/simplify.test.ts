@@ -27,6 +27,14 @@ const suggestedSettlements = (
   settlements: Settlement[],
 ) => suggestDomain(expenses.map(toDomainExpense), settlements)
 
+const settlement = (from: string, to: string, amount: number): Settlement => ({
+  id: "test",
+  from,
+  to,
+  amount,
+  settledAt: "test",
+})
+
 describe("simplifyDebts", () => {
   it("returns no transactions when all balances are zero", () => {
     const transactions = simplifyDebts({ alice: 0, bob: 0 })
@@ -142,7 +150,7 @@ describe("simplifyDebts", () => {
 })
 
 describe("suggestedSettlements", () => {
-  const twoPersonExpense: Expense[] = [
+  const twoPersonExpense = [
     { paid_by: "alice", amount: 100, split_among: ["alice", "bob"] },
   ]
 
@@ -153,21 +161,21 @@ describe("suggestedSettlements", () => {
   })
 
   it("reduces only the paying pair's edge by the paid amount", () => {
-    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 20 }]
+    const settlements = [settlement("bob", "alice", 20)]
     expect(suggestedSettlements(twoPersonExpense, settlements)).toEqual([
       { from: "bob", to: "alice", amount: 30 },
     ])
   })
 
   it("removes an edge once it is fully paid", () => {
-    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 50 }]
+    const settlements = [settlement("bob", "alice", 50)]
     expect(suggestedSettlements(twoPersonExpense, settlements)).toEqual([])
   })
 
   it("sums cumulative payments between the same pair", () => {
-    const settlements: Settlement[] = [
-      { from: "bob", to: "alice", amount: 20 },
-      { from: "bob", to: "alice", amount: 15 },
+    const settlements = [
+      settlement("bob", "alice", 20),
+      settlement("bob", "alice", 15),
     ]
     expect(suggestedSettlements(twoPersonExpense, settlements)).toEqual([
       { from: "bob", to: "alice", amount: 15 },
@@ -175,19 +183,19 @@ describe("suggestedSettlements", () => {
   })
 
   it("nets opposite-direction payments between the same pair", () => {
-    const settlements: Settlement[] = [
-      { from: "bob", to: "alice", amount: 60 },
-      { from: "alice", to: "bob", amount: 10 },
+    const settlements = [
+      settlement("bob", "alice", 60),
+      settlement("alice", "bob", 10),
     ]
     expect(suggestedSettlements(twoPersonExpense, settlements)).toEqual([])
   })
 
   it("leaves unrelated pairs untouched when one pair pays", () => {
-    const expenses: Expense[] = [
+    const expenses = [
       { paid_by: "alice", amount: 100, split_among: ["alice", "bob"] },
       { paid_by: "carol", amount: 100, split_among: ["carol", "dave"] },
     ]
-    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 50 }]
+    const settlements = [settlement("bob", "alice", 50)]
     const result = suggestedSettlements(expenses, settlements)
 
     expect(result).toContainEqual({ from: "dave", to: "carol", amount: 50 })
@@ -195,7 +203,7 @@ describe("suggestedSettlements", () => {
   })
 
   it("never emits amounts below one cent", () => {
-    const expenses: Expense[] = [
+    const expenses = [
       { paid_by: "alice", amount: 100, split_among: ["alice", "bob", "carol"] },
     ]
     for (const t of suggestedSettlements(expenses, [])) {
@@ -213,7 +221,7 @@ describe("suggestedSettlements", () => {
     //   rasmus -> john  106.10
     //   rasmus -> arvid  48.85
     //   david  -> arvid 107.20
-    const expenses: Expense[] = [
+    const expenses = [
       {
         paid_by: "john",
         amount: 508.05,
@@ -239,9 +247,7 @@ describe("suggestedSettlements", () => {
     expect(baseDavid).toEqual([{ from: "david", to: "arvid", amount: 107.2 }])
 
     // Rasmus pays the suggested rasmus -> arvid edge in full.
-    const settlements: Settlement[] = [
-      { from: "rasmus", to: "arvid", amount: 48.85 },
-    ]
+    const settlements = [settlement("rasmus", "arvid", 48.85)]
     const result = suggestedSettlements(expenses, settlements)
 
     // David's suggestion is byte-for-byte unchanged (the bug split it into

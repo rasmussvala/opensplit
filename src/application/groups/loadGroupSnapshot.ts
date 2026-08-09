@@ -128,13 +128,23 @@ export function loadGroupSnapshot(dataSource: GroupDataSource) {
 }
 
 export class InMemoryGroupDataSource implements GroupDataSource {
+  private readonly data: {
+    groups?: GroupRow[]
+    members?: MemberRow[]
+    expenses?: ExpenseRow[]
+    settlements?: SettlementRow[]
+  }
+
   constructor(
-    private readonly data: {
+    data: {
       groups?: GroupRow[]
       members?: MemberRow[]
+      expenses?: ExpenseRow[]
       settlements?: SettlementRow[]
     } = {},
-  ) {}
+  ) {
+    this.data = data
+  }
 
   async findGroupByInviteToken(inviteToken: string) {
     return (
