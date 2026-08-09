@@ -89,10 +89,13 @@ export default function ExpenseForm({
   const shares =
     parsedAmount > 0 && splitAmong.length > 0
       ? computeShares({
-          paid_by: paidBy,
+          id: "form",
+          description,
           amount: parsedAmount,
-          split_among: splitAmong,
-          split_overrides: activeOverrides,
+          paidBy,
+          splitAmong,
+          splitOverrides: activeOverrides,
+          createdAt: "form",
         })
       : {}
 

@@ -47,17 +47,8 @@ function renderBalanceSummary(
     inviteToken: overrides.inviteToken ?? "abc",
     currentMemberId: overrides.currentMemberId ?? null,
     suggestions: suggestedSettlements(
-      (overrides.expenses ?? []).map((e) => ({
-        paid_by: e.paidBy,
-        amount: e.amount,
-        split_among: e.splitAmong,
-        split_overrides: e.splitOverrides,
-      })),
-      (overrides.settlements ?? []).map((s) => ({
-        from: s.from,
-        to: s.to,
-        amount: s.amount,
-      })),
+      overrides.expenses ?? [],
+      overrides.settlements ?? [],
     ),
   }
   return render(

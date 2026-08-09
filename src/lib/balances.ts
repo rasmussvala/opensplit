@@ -1,21 +1,16 @@
-import type { SplitOverrides } from "./types"
+import type {
+  Expense,
+  Settlement,
+} from "@/application/groups/loadGroupSnapshot"
 import { round2 } from "./utils"
 
-export interface Expense {
-  paid_by: string
-  amount: number
-  split_among: string[]
-  split_overrides?: SplitOverrides | null
-}
-
-export interface Settlement {
-  from: string
-  to: string
-  amount: number
-}
-
 export function computeShares(expense: Expense): Record<string, number> {
-  const { amount, split_among, split_overrides, paid_by } = expense
+  const {
+    amount,
+    splitAmong: split_among,
+    splitOverrides: split_overrides,
+    paidBy: paid_by,
+  } = expense
   const shares: Record<string, number> = {}
 
   for (const memberId of split_among) {
@@ -70,8 +65,7 @@ export function calculateBalances(
   for (const expense of expenses) {
     const shares = computeShares(expense)
 
-    balances[expense.paid_by] =
-      (balances[expense.paid_by] ?? 0) + expense.amount
+    balances[expense.paidBy] = (balances[expense.paidBy] ?? 0) + expense.amount
 
     for (const [memberId, share] of Object.entries(shares)) {
       balances[memberId] = (balances[memberId] ?? 0) - share

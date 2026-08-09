@@ -35,19 +35,7 @@ export type DeleteSettlementResult = { status: "deleted" }
 export function manageSettlements(dataSource: SettlementDataSource) {
   return {
     async suggest(snapshot: GroupSnapshot): Promise<SettlementSuggestion[]> {
-      return suggestedSettlements(
-        snapshot.expenses.map((expense) => ({
-          paid_by: expense.paidBy,
-          amount: expense.amount,
-          split_among: expense.splitAmong,
-          split_overrides: expense.splitOverrides,
-        })),
-        snapshot.settlements.map((settlement) => ({
-          from: settlement.from,
-          to: settlement.to,
-          amount: settlement.amount,
-        })),
-      )
+      return suggestedSettlements(snapshot.expenses, snapshot.settlements)
     },
 
     async record(
