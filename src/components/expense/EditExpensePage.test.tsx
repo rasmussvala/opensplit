@@ -69,17 +69,22 @@ const mockExpense = {
 }
 
 function mockFrom(responses: Record<string, unknown>) {
-  vi.mocked(supabase.from).mockImplementation(
-    (table: string) =>
-      (responses[table] ?? {}) as ReturnType<typeof supabase.from>,
-  )
+  const emptyTable = {
+    select: vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+    }),
+  }
+  vi.mocked(supabase.from).mockImplementation((table: string) => {
+    const response = responses[table] ?? emptyTable
+    return response as ReturnType<typeof supabase.from>
+  })
 }
 
 function groupsOk(group: unknown = mockGroup) {
   return {
     select: vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({ data: group, error: null }),
+        maybeSingle: vi.fn().mockResolvedValue({ data: group, error: null }),
       }),
     }),
   }
@@ -89,7 +94,7 @@ function groupsMissing() {
   return {
     select: vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({
+        maybeSingle: vi.fn().mockResolvedValue({
           data: null,
           error: { message: "not found" },
         }),
@@ -147,10 +152,17 @@ function expensesTable(opts: {
 }): ExpenseTable {
   const out: ExpenseTable = {}
   if (opts.fetch) {
-    out.select = vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue(opts.fetch),
-      }),
+    let calls = 0
+    out.select = vi.fn().mockImplementation(() => {
+      calls++
+      const eq = vi.fn()
+      if (calls === 1)
+        eq.mockResolvedValue({
+          data: opts.fetch?.data ? [opts.fetch.data] : [],
+          error: null,
+        })
+      else eq.mockReturnValue({ single: vi.fn().mockResolvedValue(opts.fetch) })
+      return { eq }
     })
   }
   if (opts.update) out.update = opts.update

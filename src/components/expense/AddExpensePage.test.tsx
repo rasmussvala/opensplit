@@ -57,17 +57,27 @@ const mockMembers = [
 ]
 
 function mockFrom(responses: Record<string, unknown>) {
-  vi.mocked(supabase.from).mockImplementation(
-    (table: string) =>
-      (responses[table] ?? {}) as ReturnType<typeof supabase.from>,
-  )
+  const emptyTable = {
+    select: vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+    }),
+  }
+  vi.mocked(supabase.from).mockImplementation((table: string) => {
+    const response = responses[table] ?? emptyTable
+    if (table === "expenses" && !(response as { select?: unknown }).select) {
+      ;(response as { select: unknown }).select = vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+      })
+    }
+    return response as ReturnType<typeof supabase.from>
+  })
 }
 
 function groupsOk(group: unknown = mockGroup) {
   return {
     select: vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({ data: group, error: null }),
+        maybeSingle: vi.fn().mockResolvedValue({ data: group, error: null }),
       }),
     }),
   }
@@ -77,7 +87,7 @@ function groupsMissing() {
   return {
     select: vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({
+        maybeSingle: vi.fn().mockResolvedValue({
           data: null,
           error: { message: "not found" },
         }),

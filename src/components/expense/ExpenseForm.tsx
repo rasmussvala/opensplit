@@ -1,5 +1,6 @@
 import { Check, Trash2 } from "lucide-react"
 import { useState } from "react"
+import type { Member } from "@/application/groups/loadGroupSnapshot"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Button } from "@/components/ui/button"
 import { computeShares } from "@/lib/balances"
@@ -8,11 +9,7 @@ import {
   formatRaw,
   getSplitStatus,
 } from "@/lib/expenseForm"
-import type {
-  DbGroupMember,
-  SplitOverrideMode,
-  SplitOverrides,
-} from "@/lib/types"
+import type { SplitOverrideMode, SplitOverrides } from "@/lib/types"
 import { cn, formatAmountNumber } from "@/lib/utils"
 
 export interface ExpenseFormData {
@@ -24,7 +21,7 @@ export interface ExpenseFormData {
 }
 
 interface ExpenseFormProps {
-  members: DbGroupMember[]
+  members: Member[]
   currency: string
   initialDescription?: string
   initialAmount?: string
@@ -75,7 +72,7 @@ export default function ExpenseForm({
 
   const activeOverrides = buildActiveOverrides(overrides, splitAmong, splitMode)
 
-  const payerName = members.find((m) => m.id === paidBy)?.guest_name ?? "Payer"
+  const payerName = members.find((m) => m.id === paidBy)?.name ?? "Payer"
 
   const splitStatus = getSplitStatus({
     parsedAmount,
@@ -226,7 +223,7 @@ export default function ExpenseForm({
               <button
                 key={m.id}
                 type="button"
-                aria-label={`Paid by ${m.guest_name}`}
+                aria-label={`Paid by ${m.name}`}
                 aria-pressed={selected}
                 onClick={() => setPaidBy(m.id)}
                 className={cn(
@@ -238,13 +235,13 @@ export default function ExpenseForm({
               >
                 <MemberAvatar
                   id={m.id}
-                  name={m.guest_name}
+                  name={m.name}
                   className={cn(
                     "h-6 w-6 text-[10px] ring-2 ring-background transition-transform",
                     selected && "ring-primary/30",
                   )}
                 />
-                <span>{m.guest_name}</span>
+                <span>{m.name}</span>
               </button>
             )
           })}
@@ -315,14 +312,14 @@ export default function ExpenseForm({
               >
                 <input
                   type="checkbox"
-                  aria-label={m.guest_name}
+                  aria-label={m.name}
                   checked={checked}
                   onChange={() => toggleMember(m.id)}
                   className="sr-only"
                 />
                 <MemberAvatar
                   id={m.id}
-                  name={m.guest_name}
+                  name={m.name}
                   className="h-7 w-7 text-[11px] shadow-sm ring-2 ring-background"
                 />
                 <div className="flex min-w-0 flex-1 flex-col leading-tight">
@@ -332,7 +329,7 @@ export default function ExpenseForm({
                       isOverride ? "font-semibold" : "font-medium",
                     )}
                   >
-                    {m.guest_name}
+                    {m.name}
                   </span>
                   {shareNumber && (
                     <span
@@ -347,7 +344,7 @@ export default function ExpenseForm({
                   <input
                     type="text"
                     inputMode="decimal"
-                    aria-label={`${m.guest_name} share`}
+                    aria-label={`${m.name} share`}
                     value={inputValue}
                     disabled={!checked}
                     onClick={(e) => e.stopPropagation()}
