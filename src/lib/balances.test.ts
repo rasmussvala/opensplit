@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
+import type { Settlement } from "@/application/groups/loadGroupSnapshot"
 import {
   calculateBalances as calculateDomainBalances,
   computeShares as computeDomainShares,
-  type Settlement,
 } from "./balances"
 
 const calculateBalances = (
@@ -32,6 +32,14 @@ const computeShares = (expense: Record<string, unknown>) =>
     splitOverrides: (expense.split_overrides as null) ?? null,
     createdAt: "test",
   })
+
+const settlement = (from: string, to: string, amount: number): Settlement => ({
+  id: "test",
+  from,
+  to,
+  amount,
+  settledAt: "test",
+})
 
 describe("calculateBalances", () => {
   it("returns empty balances when there are no expenses", () => {
@@ -133,7 +141,7 @@ describe("calculateBalances", () => {
         split_among: ["alice", "bob"],
       },
     ]
-    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 50 }]
+    const settlements = [settlement("bob", "alice", 50)]
 
     const balances = calculateBalances(expenses, settlements)
 
@@ -153,7 +161,7 @@ describe("calculateBalances", () => {
         split_among: ["alice", "bob"],
       },
     ]
-    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 20 }]
+    const settlements = [settlement("bob", "alice", 20)]
 
     const balances = calculateBalances(expenses, settlements)
 
@@ -173,9 +181,9 @@ describe("calculateBalances", () => {
         split_among: ["alice", "bob", "charlie"],
       },
     ]
-    const settlements: Settlement[] = [
-      { from: "bob", to: "alice", amount: 20 },
-      { from: "charlie", to: "alice", amount: 20 },
+    const settlements = [
+      settlement("bob", "alice", 20),
+      settlement("charlie", "alice", 20),
     ]
 
     const balances = calculateBalances(expenses, settlements)
@@ -188,7 +196,7 @@ describe("calculateBalances", () => {
   })
 
   it("handles settlements with no expenses", () => {
-    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 30 }]
+    const settlements = [settlement("bob", "alice", 30)]
 
     const balances = calculateBalances([], settlements)
 
@@ -207,7 +215,7 @@ describe("calculateBalances", () => {
         split_among: ["alice", "bob"],
       },
     ]
-    const settlements: Settlement[] = [{ from: "bob", to: "alice", amount: 60 }]
+    const settlements = [settlement("bob", "alice", 60)]
 
     const balances = calculateBalances(expenses, settlements)
 
