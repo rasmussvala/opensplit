@@ -8,6 +8,11 @@ import SettlePage from "./SettlePage"
 vi.mock("@/lib/supabase", () => ({
   supabase: {
     from: vi.fn(),
+    channel: vi.fn(() => ({
+      on: vi.fn().mockReturnThis(),
+      subscribe: vi.fn(),
+    })),
+    removeChannel: vi.fn(),
   },
 }))
 
@@ -113,7 +118,7 @@ function setupSupabase(options: SetupOptions = {}) {
       return {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
+            maybeSingle: vi.fn().mockResolvedValue({
               data: group,
               error: group ? null : { message: "not found" },
             }),
@@ -154,7 +159,24 @@ function setupSupabase(options: SetupOptions = {}) {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockResolvedValue({ data: settlements, error: null }),
         }),
-        insert: insertMock,
+        insert: vi.fn((payload) => {
+          insertMock(payload)
+          return {
+            select: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({
+                data: {
+                  id: "settlement-1",
+                  group_id: "group-1",
+                  from_member: "member-2",
+                  to_member: "member-1",
+                  amount: 50,
+                  settled_at: "2026-01-02T03:04:05.000Z",
+                },
+                error: null,
+              }),
+            }),
+          }
+        }),
       } as unknown as ReturnType<typeof supabase.from>
     }
     throw new Error(`Unexpected table: ${table}`)

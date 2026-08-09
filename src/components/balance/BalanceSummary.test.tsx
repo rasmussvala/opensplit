@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
+import { suggestedSettlements } from "@/lib/simplify"
 import type { Expense, Member, Settlement } from "@/lib/types"
 import BalanceSummary from "./BalanceSummary"
 
@@ -45,6 +46,19 @@ function renderBalanceSummary(
     currency: overrides.currency ?? "USD",
     inviteToken: overrides.inviteToken ?? "abc",
     currentMemberId: overrides.currentMemberId ?? null,
+    suggestions: suggestedSettlements(
+      (overrides.expenses ?? []).map((e) => ({
+        paid_by: e.paidBy,
+        amount: e.amount,
+        split_among: e.splitAmong,
+        split_overrides: e.splitOverrides,
+      })),
+      (overrides.settlements ?? []).map((s) => ({
+        from: s.from,
+        to: s.to,
+        amount: s.amount,
+      })),
+    ),
   }
   return render(
     <MemoryRouter>
