@@ -1,4 +1,5 @@
 import { Check, Trash2 } from "lucide-react"
+import type { SubmitEvent } from "react"
 import { useState } from "react"
 import type { Member } from "@/application/groups/loadGroupSnapshot"
 import MemberAvatar from "@/components/group/MemberAvatar"
@@ -151,7 +152,7 @@ export default function ExpenseForm({
     }
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     if (!description.trim() || !parsedAmount || splitAmong.length === 0) return
     if (!splitStatus.isValid) return

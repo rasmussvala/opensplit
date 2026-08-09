@@ -12,7 +12,7 @@ export interface SwishPaymentInput {
 }
 
 const SWISH_EMOJI_PATTERN =
-  /(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\u{20E3}|\u{200D}|\u{FE0F})/gu
+  /([\u{1f000}-\u{1faff}]|[\u{2600}-\u{27bf}]|[\u{2300}-\u{23ff}]|[\u{2b00}-\u{2bff}]|\u{20e3}|\u{200d}|\u{fe0f})/gu
 
 export function normalizeSwishPhone(input: string): string | null {
   const cleaned = input.replace(/[\s\-()+]/g, "")

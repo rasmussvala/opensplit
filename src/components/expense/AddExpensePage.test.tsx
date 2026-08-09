@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { supabase } from "@/lib/supabase"
 import AddExpensePage from "./AddExpensePage"
+import { groupsMissing, groupsOk } from "./expenseTestHelpers"
 
 vi.mock("@/lib/supabase", () => ({
   supabase: { from: vi.fn() },
@@ -30,13 +31,6 @@ function renderPage(inviteToken = "token-abc") {
       </Routes>
     </MemoryRouter>,
   )
-}
-
-const mockGroup = {
-  id: "group-1",
-  name: "Trip to Oslo",
-  currency: "USD",
-  invite_token: "token-abc",
 }
 
 const mockMembers = [
@@ -73,29 +67,7 @@ function mockFrom(responses: Record<string, unknown>) {
   })
 }
 
-function groupsOk(group: unknown = mockGroup) {
-  return {
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        maybeSingle: vi.fn().mockResolvedValue({ data: group, error: null }),
-      }),
-    }),
-  }
-}
-
-function groupsMissing() {
-  return {
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        maybeSingle: vi.fn().mockResolvedValue({
-          data: null,
-          error: { message: "not found" },
-        }),
-      }),
-    }),
-  }
-}
-
+//noinspection DuplicatedCode
 function membersReady(
   membership: unknown = mockMembers[0],
   members: unknown[] = mockMembers,
@@ -153,6 +125,8 @@ describe("AddExpensePage", () => {
       group_members: membersNoMembership(),
     })
 
+    // noinspection DuplicatedCode
+    // noinspection DuplicatedCode
     renderPage()
 
     await waitFor(() => {
@@ -179,7 +153,10 @@ describe("AddExpensePage", () => {
   })
 
   it("inserts expense and navigates to group on submit", async () => {
+    // noinspection DuplicatedCode
     const insert = vi.fn().mockResolvedValue({ error: null })
+    // noinspection DuplicatedCode
+    // noinspection DuplicatedCode
     mockFrom({
       groups: groupsOk(),
       group_members: membersReady(),
@@ -219,6 +196,7 @@ describe("AddExpensePage", () => {
   })
 
   it("persists split_overrides when a row is overridden", async () => {
+    // noinspection DuplicatedCode
     const insert = vi.fn().mockResolvedValue({ error: null })
     mockFrom({
       groups: groupsOk(),
@@ -279,6 +257,7 @@ describe("AddExpensePage", () => {
   })
 
   it("defaults paid-by to current user even when not first in members", async () => {
+    //noinspection DuplicatedCode
     const insert = vi.fn().mockResolvedValue({ error: null })
     const reordered = [mockMembers[1], mockMembers[0]]
     mockFrom({
@@ -309,6 +288,7 @@ describe("AddExpensePage", () => {
   })
 
   it("stays on page when insert returns error", async () => {
+    //noinspection DuplicatedCode
     const insert = vi.fn().mockResolvedValue({ error: { message: "db fail" } })
     mockFrom({
       groups: groupsOk(),

@@ -1,3 +1,4 @@
+import type { SubmitEvent } from "react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -6,7 +7,7 @@ export default function JoinByCode() {
   const navigate = useNavigate()
   const [code, setCode] = useState("")
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     const trimmed = code.trim()
     if (!trimmed) return

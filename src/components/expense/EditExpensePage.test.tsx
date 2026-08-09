@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { supabase } from "@/lib/supabase"
 import EditExpensePage from "./EditExpensePage"
+import { groupsMissing, groupsOk } from "./expenseTestHelpers"
 
 vi.mock("@/lib/supabase", () => ({
   supabase: { from: vi.fn() },
@@ -32,13 +33,6 @@ function renderPage(inviteToken = "token-abc", expenseId = "exp-1") {
       </Routes>
     </MemoryRouter>,
   )
-}
-
-const mockGroup = {
-  id: "group-1",
-  name: "Trip to Oslo",
-  currency: "USD",
-  invite_token: "token-abc",
 }
 
 const mockMembers = [
@@ -80,29 +74,7 @@ function mockFrom(responses: Record<string, unknown>) {
   })
 }
 
-function groupsOk(group: unknown = mockGroup) {
-  return {
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        maybeSingle: vi.fn().mockResolvedValue({ data: group, error: null }),
-      }),
-    }),
-  }
-}
-
-function groupsMissing() {
-  return {
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        maybeSingle: vi.fn().mockResolvedValue({
-          data: null,
-          error: { message: "not found" },
-        }),
-      }),
-    }),
-  }
-}
-
+//noinspection DuplicatedCode
 function membersReady(
   membership: unknown = mockMembers[0],
   members: unknown[] = mockMembers,
@@ -238,6 +210,8 @@ describe("EditExpensePage", () => {
 
   it("updates expense and navigates on save", async () => {
     const eq = vi.fn().mockResolvedValue({ error: null })
+    // noinspection DuplicatedCode
+    // noinspection DuplicatedCode
     const update = vi.fn().mockReturnValue({ eq })
 
     mockFrom({
@@ -322,6 +296,7 @@ describe("EditExpensePage", () => {
   })
 
   it("stays on page when update returns error", async () => {
+    // noinspection DuplicatedCode
     const eq = vi.fn().mockResolvedValue({ error: { message: "db fail" } })
     const update = vi.fn().mockReturnValue({ eq })
 

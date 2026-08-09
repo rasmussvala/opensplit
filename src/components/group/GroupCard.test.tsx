@@ -1,10 +1,11 @@
 import { render, screen } from "@testing-library/react"
+import type { ReactElement } from "react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
 import { makeGroup, makeMember } from "@/test-helpers"
 import GroupCard from "./GroupCard"
 
-function renderCard(ui: React.ReactElement) {
+function renderCard(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>)
 }
 

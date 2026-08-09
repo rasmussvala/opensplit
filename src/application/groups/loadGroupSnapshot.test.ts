@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { InMemoryGroupDataSource, loadGroupSnapshot } from "./loadGroupSnapshot"
+import InMemoryGroupDataSource, { loadGroupSnapshot } from "./loadGroupSnapshot"
 
 const group = {
   id: "group-1",

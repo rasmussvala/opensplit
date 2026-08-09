@@ -132,7 +132,6 @@ export class InMemoryGroupDataSource implements GroupDataSource {
     private readonly data: {
       groups?: GroupRow[]
       members?: MemberRow[]
-      expenses?: ExpenseRow[]
       settlements?: SettlementRow[]
     } = {},
   ) {}
@@ -170,6 +169,8 @@ export class InMemoryGroupDataSource implements GroupDataSource {
     )
   }
 }
+
+export default InMemoryGroupDataSource
 
 function toGroup(row: GroupRow): Group {
   return {

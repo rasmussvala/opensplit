@@ -32,7 +32,7 @@ export default function MyGroups() {
       }
       setLoading(false)
     }
-    fetchGroups()
+    void fetchGroups()
   }, [userId])
 
   if (loading) return <LoadingState className="px-0" />
