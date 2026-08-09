@@ -8,6 +8,8 @@ import {
   type Member,
   type Settlement,
 } from "@/application/groups/loadGroupSnapshot"
+import type { SettlementSuggestion } from "@/application/settlements/manageSettlements"
+import { manageSettlements } from "@/application/settlements/manageSettlements"
 import { useAuth } from "@/components/auth/AuthProvider"
 import BalanceSummary from "@/components/balance/BalanceSummary"
 import ExpenseList from "@/components/expense/ExpenseList"
@@ -20,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SupabaseGroupDataSource } from "@/infrastructure/supabase/supabaseGroupDataSource"
+import { SupabaseSettlementDataSource } from "@/infrastructure/supabase/supabaseSettlementDataSource"
 import { supabase } from "@/lib/supabase"
 import { isSwishCurrency } from "@/lib/swish"
 
@@ -42,9 +45,11 @@ type PageState =
       members: Member[]
       expenses: Expense[]
       settlements: Settlement[]
+      suggestions: SettlementSuggestion[]
     }
 
 const groupLoader = loadGroupSnapshot(new SupabaseGroupDataSource())
+const settlementManager = manageSettlements(new SupabaseSettlementDataSource())
 
 export default function GroupPage() {
   const { inviteToken } = useParams<{ inviteToken: string }>()
@@ -78,7 +83,11 @@ export default function GroupPage() {
       } else if (result.status === "join-required") {
         setState({ status: "join", group: result.group })
       } else {
-        setState({ status: "member", ...result.snapshot })
+        setState({
+          status: "member",
+          ...result.snapshot,
+          suggestions: await settlementManager.suggest(result.snapshot),
+        })
       }
     } catch {
       setState({ status: "error" })
@@ -155,7 +164,8 @@ export default function GroupPage() {
     )
   }
 
-  const { group, currentMember, members, expenses, settlements } = state
+  const { group, currentMember, members, expenses, settlements, suggestions } =
+    state
 
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0)
   const showSwishProfile = isSwishCurrency(group.currency)
@@ -195,6 +205,7 @@ export default function GroupPage() {
       <TabsContent value="balances">
         <BalanceSummary
           expenses={expenses}
+          suggestions={suggestions}
           settlements={settlements}
           members={members}
           currency={group.currency}
