@@ -1,3 +1,4 @@
+import type { SubmitEvent } from "react"
 import { useState } from "react"
 import { Outlet } from "react-router-dom"
 import BackLink from "@/components/ui/back-link"
@@ -18,7 +19,7 @@ export default function AdminRoute() {
   const [pin, setPin] = useState("")
   const [pinError, setPinError] = useState(false)
 
-  function handlePinSubmit(e: React.SubmitEvent) {
+  function handlePinSubmit(e: SubmitEvent) {
     e.preventDefault()
     if (pin === getAdminPin()) {
       localStorage.setItem(STORAGE_KEY, pin)

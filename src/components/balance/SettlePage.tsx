@@ -98,7 +98,7 @@ export default function SettlePage() {
   }, [inviteToken, fromMemberId, toMemberId, userId])
 
   useEffect(() => {
-    load()
+    void load()
   }, [load])
 
   const groupId = state.status === "ready" ? state.group.id : null

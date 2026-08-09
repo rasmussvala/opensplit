@@ -20,7 +20,7 @@ export default function GroupList() {
       }
       setLoading(false)
     }
-    fetchGroups()
+    void fetchGroups()
   }, [])
 
   if (loading) return <LoadingState className="px-0" />

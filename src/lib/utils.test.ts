@@ -80,7 +80,7 @@ describe("cn", () => {
   })
 
   it("filters falsy values", () => {
-    expect(cn("a", false && "b", null, undefined, "c")).toBe("a c")
+    expect(cn("a", false, null, undefined, "c")).toBe("a c")
   })
 
   it("supports object and array forms via clsx", () => {

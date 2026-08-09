@@ -1,3 +1,4 @@
+import type { SubmitEvent } from "react"
 import { useState } from "react"
 import { useAuth } from "@/components/auth/AuthProvider"
 import SwishPhoneInput from "@/components/group/SwishPhoneInput"
@@ -29,7 +30,7 @@ export default function JoinGroup({
 
   const showSwish = isSwishCurrency(currency)
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     if (!name.trim()) return
 

@@ -51,8 +51,7 @@ export function isMobileDevice(): boolean {
   const ua = navigator.userAgent
   if (/android|iphone|ipod/i.test(ua)) return true
   return (
-    /ipad/i.test(ua) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+    /ipad/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)
   )
 }
 

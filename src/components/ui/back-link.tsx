@@ -1,9 +1,10 @@
 import { ArrowLeft } from "lucide-react"
+import type { ReactNode } from "react"
 import { Link } from "react-router-dom"
 
 interface BackLinkProps {
   to: string
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
 export default function BackLink({ to, children = "Back" }: BackLinkProps) {
