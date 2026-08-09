@@ -300,7 +300,9 @@ describe("suggestedSettlements", () => {
       ),
     )
     const thirdSettlement = suggestDomain(expenses.map(toDomainExpense), [
-      ...firstSettlement,
+      ...firstSettlement.map((suggestion) =>
+        settlement(suggestion.from, suggestion.to, suggestion.amount),
+      ),
       ...secondSettlement.map((suggestion) =>
         settlement(suggestion.from, suggestion.to, suggestion.amount),
       ),
@@ -315,7 +317,9 @@ describe("suggestedSettlements", () => {
       },
     ]
     const settlements = [
-      ...firstSettlement,
+      ...firstSettlement.map((suggestion) =>
+        settlement(suggestion.from, suggestion.to, suggestion.amount),
+      ),
       ...secondSettlement.map((suggestion) =>
         settlement(suggestion.from, suggestion.to, suggestion.amount),
       ),
