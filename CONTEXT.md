@@ -22,6 +22,10 @@ _Avoid_: bill, charge
 A recorded transfer of money from one member to another to reduce an outstanding balance.
 _Avoid_: payment, transaction
 
+**Suggested settlement**:
+A recommended transfer from one member to another based on the group's current expenses and recorded settlements. It is not recorded until members choose to make it.
+_Avoid_: transaction (when referring to a recommendation)
+
 **Balance**:
 The net amount a member is owed or owes after expenses and settlements are considered.
 _Avoid_: debt, total
