@@ -1,5 +1,37 @@
 import { describe, expect, it } from "vitest"
-import { calculateBalances, computeShares, type Settlement } from "./balances"
+import {
+  calculateBalances as calculateDomainBalances,
+  computeShares as computeDomainShares,
+  type Settlement,
+} from "./balances"
+
+const calculateBalances = (
+  expenses: Record<string, unknown>[],
+  settlements: Settlement[] = [],
+) =>
+  calculateDomainBalances(
+    expenses.map((expense) => ({
+      id: "test",
+      description: "test",
+      amount: expense.amount as number,
+      paidBy: expense.paid_by as string,
+      splitAmong: expense.split_among as string[],
+      splitOverrides: (expense.split_overrides as null) ?? null,
+      createdAt: "test",
+    })),
+    settlements,
+  )
+
+const computeShares = (expense: Record<string, unknown>) =>
+  computeDomainShares({
+    id: "test",
+    description: "test",
+    amount: expense.amount as number,
+    paidBy: expense.paid_by as string,
+    splitAmong: expense.split_among as string[],
+    splitOverrides: (expense.split_overrides as null) ?? null,
+    createdAt: "test",
+  })
 
 describe("calculateBalances", () => {
   it("returns empty balances when there are no expenses", () => {

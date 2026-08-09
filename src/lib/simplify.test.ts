@@ -1,6 +1,31 @@
 import { describe, expect, it } from "vitest"
-import { calculateBalances, type Expense, type Settlement } from "./balances"
-import { simplifyDebts, suggestedSettlements } from "./simplify"
+import type {
+  Expense,
+  Settlement,
+} from "@/application/groups/loadGroupSnapshot"
+import { calculateBalances as calculateDomainBalances } from "./balances"
+import {
+  simplifyDebts,
+  suggestedSettlements as suggestDomain,
+} from "./simplify"
+
+const toDomainExpense = (expense: Record<string, unknown>): Expense => ({
+  id: "test",
+  description: "test",
+  amount: expense.amount as number,
+  paidBy: expense.paid_by as string,
+  splitAmong: expense.split_among as string[],
+  splitOverrides: (expense.split_overrides as null) ?? null,
+  createdAt: "test",
+})
+
+const calculateBalances = (expenses: Record<string, unknown>[]) =>
+  calculateDomainBalances(expenses.map(toDomainExpense))
+
+const suggestedSettlements = (
+  expenses: Record<string, unknown>[],
+  settlements: Settlement[],
+) => suggestDomain(expenses.map(toDomainExpense), settlements)
 
 describe("simplifyDebts", () => {
   it("returns no transactions when all balances are zero", () => {
