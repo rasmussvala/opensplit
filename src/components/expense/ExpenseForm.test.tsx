@@ -255,6 +255,7 @@ describe("ExpenseForm", () => {
   })
 
   it("bolds overridden row and redistributes auto shares", () => {
+    // noinspection DuplicatedCode
     renderForm()
 
     fireEvent.change(screen.getByLabelText(/amount/i), {
@@ -274,6 +275,7 @@ describe("ExpenseForm", () => {
   })
 
   it("reverts a row to auto when the override is cleared", () => {
+    // noinspection DuplicatedCode
     renderForm()
 
     fireEvent.change(screen.getByLabelText(/amount/i), {

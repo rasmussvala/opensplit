@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react"
+import type { ReactElement } from "react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
 import type { Expense, Member } from "@/application/groups/loadGroupSnapshot"
@@ -40,7 +41,7 @@ const mockExpenses: Expense[] = [
   },
 ]
 
-function renderWithRouter(ui: React.ReactElement) {
+function renderWithRouter(ui: ReactElement) {
   return render(<MemoryRouter>{ui}</MemoryRouter>)
 }
 

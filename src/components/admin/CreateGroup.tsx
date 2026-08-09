@@ -1,3 +1,4 @@
+import type { SubmitEvent } from "react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
@@ -12,7 +13,7 @@ export default function CreateGroup() {
   const [name, setName] = useState("")
   const [currency, setCurrency] = useState("SEK")
 
-  async function handleSubmit(e: React.SubmitEvent) {
+  async function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     if (!name.trim()) return
 
