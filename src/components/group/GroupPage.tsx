@@ -1,15 +1,14 @@
 import { Plus } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useParams, useSearchParams } from "react-router-dom"
-import {
-  type Expense,
-  type Group,
-  loadGroupSnapshot,
-  type Member,
-  type Settlement,
+import { application } from "@/application/composition"
+import type {
+  Expense,
+  Group,
+  Member,
+  Settlement,
 } from "@/application/groups/loadGroupSnapshot"
 import type { SettlementSuggestion } from "@/application/settlements/manageSettlements"
-import { manageSettlements } from "@/application/settlements/manageSettlements"
 import { useAuth } from "@/components/auth/AuthProvider"
 import BalanceSummary from "@/components/balance/BalanceSummary"
 import ExpenseList from "@/components/expense/ExpenseList"
@@ -21,8 +20,6 @@ import BackLink from "@/components/ui/back-link"
 import { Button } from "@/components/ui/button"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { SupabaseGroupDataSource } from "@/infrastructure/supabase/supabaseGroupDataSource"
-import { SupabaseSettlementDataSource } from "@/infrastructure/supabase/supabaseSettlementDataSource"
 import { supabase } from "@/lib/supabase"
 import { isSwishCurrency } from "@/lib/swish"
 
@@ -48,9 +45,6 @@ type PageState =
       suggestions: SettlementSuggestion[]
     }
 
-const groupLoader = loadGroupSnapshot(new SupabaseGroupDataSource())
-const settlementManager = manageSettlements(new SupabaseSettlementDataSource())
-
 export default function GroupPage() {
   const { inviteToken } = useParams<{ inviteToken: string }>()
   const { userId } = useAuth()
@@ -73,7 +67,7 @@ export default function GroupPage() {
 
   const loadGroup = useCallback(async () => {
     try {
-      const result = await groupLoader.execute({
+      const result = await application.groups.execute({
         inviteToken: inviteToken as string,
         userId,
       })
@@ -86,7 +80,7 @@ export default function GroupPage() {
         setState({
           status: "member",
           ...result.snapshot,
-          suggestions: await settlementManager.suggest(result.snapshot),
+          suggestions: await application.settlements.suggest(result.snapshot),
         })
       }
     } catch {

@@ -1,18 +1,14 @@
 import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import {
-  type ExpenseCreationContext,
-  manageExpenses,
-} from "@/application/expenses/manageExpenses"
+import { application } from "@/application/composition"
+import type { ExpenseCreationContext } from "@/application/expenses/manageExpenses"
 import type { Member } from "@/application/groups/loadGroupSnapshot"
 import { useAuth } from "@/components/auth/AuthProvider"
 import ExpenseForm, {
   type ExpenseFormData,
 } from "@/components/expense/ExpenseForm"
 import { LoadingState } from "@/components/ui/loading-state"
-import { SupabaseExpenseDataSource } from "@/infrastructure/supabase/supabaseExpenseDataSource"
-import { SupabaseGroupDataSource } from "@/infrastructure/supabase/supabaseGroupDataSource"
 
 type PageState =
   | { status: "loading" }
@@ -34,10 +30,10 @@ export default function AddExpensePage() {
   const load = useCallback(async () => {
     let context: ExpenseCreationContext | null
     try {
-      context = await manageExpenses(
-        new SupabaseGroupDataSource(),
-        new SupabaseExpenseDataSource(),
-      ).loadCreateContext(inviteToken as string, userId)
+      context = await application.expenses.loadCreateContext(
+        inviteToken as string,
+        userId,
+      )
     } catch {
       setState({ status: "not-found" })
       return
@@ -77,10 +73,7 @@ export default function AddExpensePage() {
 
   async function handleSubmit(data: ExpenseFormData) {
     try {
-      await manageExpenses(
-        new SupabaseGroupDataSource(),
-        new SupabaseExpenseDataSource(),
-      ).create(groupId, data)
+      await application.expenses.create(groupId, data)
     } catch {
       return
     }

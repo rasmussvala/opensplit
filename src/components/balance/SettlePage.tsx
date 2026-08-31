@@ -1,22 +1,19 @@
 import { Check, Copy, Smartphone } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+import { application } from "@/application/composition"
 import type {
   Group,
   GroupSnapshot,
   LoadGroupResult,
   Member,
 } from "@/application/groups/loadGroupSnapshot"
-import { loadGroupSnapshot } from "@/application/groups/loadGroupSnapshot"
-import { manageSettlements } from "@/application/settlements/manageSettlements"
 import { useAuth } from "@/components/auth/AuthProvider"
 import MemberPairAvatars from "@/components/group/MemberPairAvatars"
 import BackLink from "@/components/ui/back-link"
 import { Button, buttonVariants } from "@/components/ui/button"
 import CurrencyAmount from "@/components/ui/currency-amount"
 import { LoadingState } from "@/components/ui/loading-state"
-import { SupabaseGroupDataSource } from "@/infrastructure/supabase/supabaseGroupDataSource"
-import { SupabaseSettlementDataSource } from "@/infrastructure/supabase/supabaseSettlementDataSource"
 import { supabase } from "@/lib/supabase"
 import {
   buildSwishDeepLink,
@@ -40,9 +37,6 @@ type PageState =
       amount: number | null
     }
 
-const groupLoader = loadGroupSnapshot(new SupabaseGroupDataSource())
-const settlementManager = manageSettlements(new SupabaseSettlementDataSource())
-
 export default function SettlePage() {
   const { inviteToken, fromMemberId, toMemberId } = useParams<{
     inviteToken: string
@@ -62,7 +56,7 @@ export default function SettlePage() {
   const load = useCallback(async () => {
     let result: LoadGroupResult
     try {
-      result = await groupLoader.execute({
+      result = await application.groups.execute({
         inviteToken: inviteToken as string,
         userId,
       })
@@ -83,7 +77,7 @@ export default function SettlePage() {
       return
     }
 
-    const match = (await settlementManager.suggest(snapshot)).find(
+    const match = (await application.settlements.suggest(snapshot)).find(
       (t) => t.from === fromMemberId && t.to === toMemberId,
     )
 
@@ -194,7 +188,7 @@ export default function SettlePage() {
     setSubmitting(true)
     setSubmitError(null)
     try {
-      const result = await settlementManager.record({
+      const result = await application.settlements.record({
         groupId: state.group.id,
         from: state.from.id,
         to: state.to.id,

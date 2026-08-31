@@ -1,18 +1,14 @@
 import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import {
-  type ExpenseEditingContext,
-  manageExpenses,
-} from "@/application/expenses/manageExpenses"
+import { application } from "@/application/composition"
+import type { ExpenseEditingContext } from "@/application/expenses/manageExpenses"
 import type { Expense, Member } from "@/application/groups/loadGroupSnapshot"
 import { useAuth } from "@/components/auth/AuthProvider"
 import ExpenseForm, {
   type ExpenseFormData,
 } from "@/components/expense/ExpenseForm"
 import { LoadingState } from "@/components/ui/loading-state"
-import { SupabaseExpenseDataSource } from "@/infrastructure/supabase/supabaseExpenseDataSource"
-import { SupabaseGroupDataSource } from "@/infrastructure/supabase/supabaseGroupDataSource"
 
 type PageState =
   | { status: "loading" }
@@ -38,10 +34,11 @@ export default function EditExpensePage() {
   const load = useCallback(async () => {
     let context: ExpenseEditingContext | null
     try {
-      context = await manageExpenses(
-        new SupabaseGroupDataSource(),
-        new SupabaseExpenseDataSource(),
-      ).loadContext(inviteToken as string, userId, expenseId)
+      context = await application.expenses.loadContext(
+        inviteToken as string,
+        userId,
+        expenseId,
+      )
     } catch {
       setState({ status: "not-found" })
       return
@@ -66,10 +63,7 @@ export default function EditExpensePage() {
     if (state.status !== "ready") return
 
     try {
-      await manageExpenses(
-        new SupabaseGroupDataSource(),
-        new SupabaseExpenseDataSource(),
-      ).update(state.expense.id, data)
+      await application.expenses.update(state.expense.id, data)
     } catch {
       return
     }
@@ -80,10 +74,7 @@ export default function EditExpensePage() {
     if (state.status !== "ready") return
 
     try {
-      await manageExpenses(
-        new SupabaseGroupDataSource(),
-        new SupabaseExpenseDataSource(),
-      ).delete(state.expense.id)
+      await application.expenses.delete(state.expense.id)
     } catch {
       return
     }
