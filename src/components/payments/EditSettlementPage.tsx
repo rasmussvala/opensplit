@@ -1,17 +1,14 @@
 import { Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+import { application } from "@/application/composition"
 import type { Member, Settlement } from "@/application/groups/loadGroupSnapshot"
-import { loadGroupSnapshot } from "@/application/groups/loadGroupSnapshot"
-import { manageSettlements } from "@/application/settlements/manageSettlements"
 import { useAuth } from "@/components/auth/AuthProvider"
 import MemberPairAvatars from "@/components/group/MemberPairAvatars"
 import BackLink from "@/components/ui/back-link"
 import { Button } from "@/components/ui/button"
 import CurrencyAmount from "@/components/ui/currency-amount"
 import { LoadingState } from "@/components/ui/loading-state"
-import { SupabaseGroupDataSource } from "@/infrastructure/supabase/supabaseGroupDataSource"
-import { SupabaseSettlementDataSource } from "@/infrastructure/supabase/supabaseSettlementDataSource"
 import { formatAmount } from "@/lib/utils"
 
 type PageState =
@@ -25,9 +22,6 @@ type PageState =
       currency: string
     }
 
-const groupLoader = loadGroupSnapshot(new SupabaseGroupDataSource())
-const settlementManager = manageSettlements(new SupabaseSettlementDataSource())
-
 export default function EditSettlementPage() {
   const { inviteToken, settlementId } = useParams<{
     inviteToken: string
@@ -40,7 +34,7 @@ export default function EditSettlementPage() {
 
   const load = useCallback(async () => {
     try {
-      const result = await groupLoader.execute({
+      const result = await application.groups.execute({
         inviteToken: inviteToken as string,
         userId,
       })
@@ -69,7 +63,7 @@ export default function EditSettlementPage() {
   async function handleDelete() {
     if (state.status !== "ready") return
     try {
-      await settlementManager.delete(state.groupId, state.settlement.id)
+      await application.settlements.delete(state.groupId, state.settlement.id)
       navigate(groupUrl)
     } catch {
       return
