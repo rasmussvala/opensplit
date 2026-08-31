@@ -1,18 +1,24 @@
 import { render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import type { GroupSnapshot } from "@/application/groups/loadGroupSnapshot"
 import { supabase } from "@/lib/supabase"
 import GroupPage from "./GroupPage"
 
 const { executeMock } = vi.hoisted(() => ({ executeMock: vi.fn() }))
 
-vi.mock("@/application/groups/loadGroupSnapshot", () => ({
-  loadGroupSnapshot: vi.fn(() => ({ execute: executeMock })),
-}))
-
-vi.mock("@/infrastructure/supabase/supabaseGroupDataSource", () => ({
-  SupabaseGroupDataSource: vi.fn(),
-}))
+vi.mock("@/application/composition", async () => {
+  const { suggestedSettlements } = await import("@/lib/simplify")
+  return {
+    application: {
+      groups: { execute: executeMock },
+      settlements: {
+        suggest: (snapshot: GroupSnapshot) =>
+          suggestedSettlements(snapshot.expenses, snapshot.settlements),
+      },
+    },
+  }
+})
 
 vi.mock("@/lib/supabase", () => ({
   supabase: {

@@ -27,28 +27,33 @@ vi.mock("@/lib/supabase", () => ({
   },
 }))
 
-vi.mock(
-  "@/application/settlements/manageSettlements",
-  async (importOriginal) => {
-    const actual =
-      await importOriginal<
-        typeof import("@/application/settlements/manageSettlements")
-      >()
-    return {
-      ...actual,
-      manageSettlements: (
-        source: Parameters<typeof actual.manageSettlements>[0],
-      ) => {
-        const manager = actual.manageSettlements(source)
-        return {
-          ...manager,
-          record: async (...args: Parameters<typeof manager.record>) =>
-            recordOverride ? recordOverride() : manager.record(...args),
-        }
+vi.mock("@/application/composition", async () => {
+  const { loadGroupSnapshot } = await import(
+    "@/application/groups/loadGroupSnapshot"
+  )
+  const { manageSettlements } = await import(
+    "@/application/settlements/manageSettlements"
+  )
+  const { SupabaseGroupDataSource } = await import(
+    "@/infrastructure/supabase/supabaseGroupDataSource"
+  )
+  const { SupabaseSettlementDataSource } = await import(
+    "@/infrastructure/supabase/supabaseSettlementDataSource"
+  )
+  const settlementManager = manageSettlements(
+    new SupabaseSettlementDataSource(),
+  )
+  return {
+    application: {
+      groups: loadGroupSnapshot(new SupabaseGroupDataSource()),
+      settlements: {
+        suggest: settlementManager.suggest,
+        record: (...args: Parameters<typeof settlementManager.record>) =>
+          recordOverride ? recordOverride() : settlementManager.record(...args),
       },
-    }
-  },
-)
+    },
+  }
+})
 
 vi.mock("@/components/auth/AuthProvider", () => ({
   useAuth: () => ({ userId: "test-user-id" }),
