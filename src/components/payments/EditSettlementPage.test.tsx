@@ -7,17 +7,11 @@ const { execute, deleteSettlement } = vi.hoisted(() => ({
   deleteSettlement: vi.fn(),
 }))
 
-vi.mock("@/application/groups/loadGroupSnapshot", () => ({
-  loadGroupSnapshot: () => ({ execute }),
-}))
-vi.mock("@/application/settlements/manageSettlements", () => ({
-  manageSettlements: () => ({ delete: deleteSettlement }),
-}))
-vi.mock("@/infrastructure/supabase/supabaseGroupDataSource", () => ({
-  SupabaseGroupDataSource: vi.fn(),
-}))
-vi.mock("@/infrastructure/supabase/supabaseSettlementDataSource", () => ({
-  SupabaseSettlementDataSource: vi.fn(),
+vi.mock("@/application/composition", () => ({
+  application: {
+    groups: { execute },
+    settlements: { delete: deleteSettlement },
+  },
 }))
 vi.mock("@/components/auth/AuthProvider", () => ({
   useAuth: () => ({ userId: "user-1" }),
