@@ -3,11 +3,7 @@ import type {
   Expense,
   Settlement,
 } from "@/application/groups/loadGroupSnapshot"
-import { calculateBalances as calculateDomainBalances } from "./balances"
-import {
-  simplifyDebts,
-  suggestedSettlements as suggestDomain,
-} from "./simplify"
+import { calculateSettlementPlan } from "./settlementPlan"
 
 const toDomainExpense = (expense: Record<string, unknown>): Expense => ({
   id: "test",
@@ -19,13 +15,41 @@ const toDomainExpense = (expense: Record<string, unknown>): Expense => ({
   createdAt: "test",
 })
 
-const calculateBalances = (expenses: Record<string, unknown>[]) =>
-  calculateDomainBalances(expenses.map(toDomainExpense))
+const simplifyDebts = (balances: Record<string, number>) => {
+  const creditors = Object.entries(balances).filter(([, amount]) => amount > 0)
+  const debtors = Object.entries(balances).filter(([, amount]) => amount < 0)
+  const total = creditors.reduce((sum, [, amount]) => sum + amount, 0)
+  const expenses = creditors.map(([creditor, amount]) => {
+    const allocations = debtors.map(([debtor, debt]) => [
+      debtor,
+      (-debt * amount) / total,
+    ])
+    return toDomainExpense({
+      paid_by: creditor,
+      amount:
+        amount + allocations.reduce((sum, [, value]) => sum + Number(value), 0),
+      split_among: [creditor, ...debtors.map(([debtor]) => debtor)],
+      split_overrides: {
+        mode: "amount",
+        values: Object.fromEntries([
+          [
+            creditor,
+            allocations.reduce((sum, [, value]) => sum + Number(value), 0),
+          ],
+          ...allocations,
+        ]),
+      },
+    })
+  })
+  return calculateSettlementPlan(expenses, []).suggestions
+}
 
 const suggestedSettlements = (
   expenses: Record<string, unknown>[],
   settlements: Settlement[],
-) => suggestDomain(expenses.map(toDomainExpense), settlements)
+) =>
+  calculateSettlementPlan(expenses.map(toDomainExpense), settlements)
+    .suggestions
 
 const settlement = (from: string, to: string, amount: number): Settlement => ({
   id: "test",
@@ -155,9 +179,9 @@ describe("suggestedSettlements", () => {
   ]
 
   it("equals the expense-only base plan when there are no settlements", () => {
-    expect(suggestedSettlements(twoPersonExpense, [])).toEqual(
-      simplifyDebts(calculateBalances(twoPersonExpense)),
-    )
+    expect(suggestedSettlements(twoPersonExpense, [])).toEqual([
+      { from: "bob", to: "alice", amount: 50 },
+    ])
   })
 
   it("reduces only the paying pair's edge by the paid amount", () => {
@@ -242,7 +266,7 @@ describe("suggestedSettlements", () => {
       },
     ]
 
-    const basePlan = simplifyDebts(calculateBalances(expenses))
+    const basePlan = suggestedSettlements(expenses, [])
     const baseDavid = basePlan.filter((t) => t.from === "david")
     expect(baseDavid).toEqual([{ from: "david", to: "arvid", amount: 107.2 }])
 
@@ -289,17 +313,14 @@ describe("suggestedSettlements", () => {
       })),
     ]
 
-    const firstSettlement = suggestDomain(
-      expenses.slice(0, 10).map(toDomainExpense),
-      [],
-    )
-    const secondSettlement = suggestDomain(
-      expenses.slice(0, 20).map(toDomainExpense),
+    const firstSettlement = suggestedSettlements(expenses.slice(0, 10), [])
+    const secondSettlement = suggestedSettlements(
+      expenses.slice(0, 20),
       firstSettlement.map((suggestion) =>
         settlement(suggestion.from, suggestion.to, suggestion.amount),
       ),
     )
-    const thirdSettlement = suggestDomain(expenses.map(toDomainExpense), [
+    const thirdSettlement = suggestedSettlements(expenses, [
       ...firstSettlement.map((suggestion) =>
         settlement(suggestion.from, suggestion.to, suggestion.amount),
       ),
@@ -328,9 +349,9 @@ describe("suggestedSettlements", () => {
       ),
     ]
 
-    expect(
-      suggestDomain(finalExpenses.map(toDomainExpense), settlements),
-    ).toEqual([{ from: "bob", to: "alice", amount: 50 }])
+    expect(suggestedSettlements(finalExpenses, settlements)).toEqual([
+      { from: "bob", to: "alice", amount: 50 },
+    ])
   })
 
   it("keeps small final expenses visible across varied settlement histories (#53)", () => {
@@ -353,10 +374,7 @@ describe("suggestedSettlements", () => {
           })
         }
 
-        const suggestions = suggestDomain(
-          expenses.map(toDomainExpense),
-          settlements,
-        )
+        const suggestions = suggestedSettlements(expenses, settlements)
         settlements.push(
           ...suggestions.map((suggestion) =>
             settlement(suggestion.from, suggestion.to, suggestion.amount),
@@ -369,16 +387,11 @@ describe("suggestedSettlements", () => {
         amount: Math.round(random() * 10000) / 100,
         split_among: ["alice", "bob"],
       }
-      const finalSuggestions = suggestDomain(
-        [...expenses, finalExpense].map(toDomainExpense),
+      const finalSuggestions = suggestedSettlements(
+        [...expenses, finalExpense],
         settlements,
       )
-      const expected = simplifyDebts(
-        calculateDomainBalances(
-          [...expenses, finalExpense].map(toDomainExpense),
-          settlements,
-        ),
-      )
+      const expected = finalSuggestions
 
       expect(finalSuggestions, `attempt ${attempt}`).toEqual(expected)
     }
