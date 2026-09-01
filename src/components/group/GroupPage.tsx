@@ -8,7 +8,6 @@ import type {
   Member,
   Settlement,
 } from "@/application/groups/loadGroupSnapshot"
-import type { SettlementSuggestion } from "@/application/settlements/manageSettlements"
 import { useAuth } from "@/components/auth/AuthProvider"
 import BalanceSummary from "@/components/balance/BalanceSummary"
 import ExpenseList from "@/components/expense/ExpenseList"
@@ -42,7 +41,6 @@ type PageState =
       members: Member[]
       expenses: Expense[]
       settlements: Settlement[]
-      suggestions: SettlementSuggestion[]
     }
 
 export default function GroupPage() {
@@ -80,7 +78,6 @@ export default function GroupPage() {
         setState({
           status: "member",
           ...result.snapshot,
-          suggestions: await application.settlements.suggest(result.snapshot),
         })
       }
     } catch {
@@ -158,8 +155,7 @@ export default function GroupPage() {
     )
   }
 
-  const { group, currentMember, members, expenses, settlements, suggestions } =
-    state
+  const { group, currentMember, members, expenses, settlements } = state
 
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0)
   const showSwishProfile = isSwishCurrency(group.currency)
@@ -199,7 +195,6 @@ export default function GroupPage() {
       <TabsContent value="balances">
         <BalanceSummary
           expenses={expenses}
-          suggestions={suggestions}
           settlements={settlements}
           members={members}
           currency={group.currency}
