@@ -1,37 +1,25 @@
 import { describe, expect, it } from "vitest"
-import type { Settlement } from "@/application/groups/loadGroupSnapshot"
-import {
-  calculateBalances as calculateDomainBalances,
-  computeShares as computeDomainShares,
-} from "./balances"
+import type {
+  Expense,
+  Settlement,
+} from "@/application/groups/loadGroupSnapshot"
+import { calculateSettlementPlan } from "./settlementPlan"
+
+const toDomainExpense = (expense: Record<string, unknown>): Expense => ({
+  id: "test",
+  description: "test",
+  amount: expense.amount as number,
+  paidBy: expense.paid_by as string,
+  splitAmong: expense.split_among as string[],
+  splitOverrides: (expense.split_overrides as null) ?? null,
+  createdAt: "test",
+})
 
 const calculateBalances = (
   expenses: Record<string, unknown>[],
   settlements: Settlement[] = [],
 ) =>
-  calculateDomainBalances(
-    expenses.map((expense) => ({
-      id: "test",
-      description: "test",
-      amount: expense.amount as number,
-      paidBy: expense.paid_by as string,
-      splitAmong: expense.split_among as string[],
-      splitOverrides: (expense.split_overrides as null) ?? null,
-      createdAt: "test",
-    })),
-    settlements,
-  )
-
-const computeShares = (expense: Record<string, unknown>) =>
-  computeDomainShares({
-    id: "test",
-    description: "test",
-    amount: expense.amount as number,
-    paidBy: expense.paid_by as string,
-    splitAmong: expense.split_among as string[],
-    splitOverrides: (expense.split_overrides as null) ?? null,
-    createdAt: "test",
-  })
+  calculateSettlementPlan(expenses.map(toDomainExpense), settlements).balances
 
 const settlement = (from: string, to: string, amount: number): Settlement => ({
   id: "test",
@@ -364,27 +352,29 @@ describe("calculateBalances", () => {
       charlie: -33.33,
     })
     const sum = Object.values(balances).reduce((a, b) => a + b, 0)
-    expect(round2Local(sum)).toBe(0)
+    expect(Math.round(sum * 100) / 100).toBe(0)
   })
 
   it("absorbs drift to payer even when payer is not in split_among", () => {
-    const shares = computeShares({
-      paid_by: "alice",
-      amount: 100,
-      split_among: ["bob", "charlie", "dave"],
-      split_overrides: {
-        mode: "percent",
-        values: { bob: 33.33, charlie: 33.33, dave: 33.33 },
+    const balances = calculateBalances([
+      {
+        paid_by: "alice",
+        amount: 100,
+        split_among: ["bob", "charlie", "dave"],
+        split_overrides: {
+          mode: "percent",
+          values: { bob: 33.33, charlie: 33.33, dave: 33.33 },
+        },
       },
-    })
+    ])
 
     // Each 33.33 → sum 99.99 → drift 0.01 assigned to alice (payer, not in split)
-    expect(shares.bob).toBe(33.33)
-    expect(shares.charlie).toBe(33.33)
-    expect(shares.dave).toBe(33.33)
-    expect(shares.alice).toBe(0.01)
-    const sumShares = Object.values(shares).reduce((a, b) => a + b, 0)
-    expect(round2Local(sumShares)).toBe(100)
+    expect(balances).toEqual({
+      alice: 99.99,
+      bob: -33.33,
+      charlie: -33.33,
+      dave: -33.33,
+    })
   })
 
   it("ignores overrides for members no longer in split_among", () => {
@@ -407,7 +397,3 @@ describe("calculateBalances", () => {
     })
   })
 })
-
-function round2Local(value: number): number {
-  return Math.round(value * 100) / 100
-}
