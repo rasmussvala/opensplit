@@ -2,8 +2,7 @@ import type {
   GroupSnapshot,
   Settlement,
 } from "@/application/groups/loadGroupSnapshot"
-import { calculateSettlementPlan } from "@/lib/settlementPlan"
-import { round2 } from "@/lib/utils"
+import { planSettlement, validateSettlement } from "@/lib/settlementPlan"
 
 export type SettlementCommand = {
   groupId: string
@@ -35,31 +34,20 @@ export type DeleteSettlementResult = { status: "deleted" }
 export function manageSettlements(dataSource: SettlementDataSource) {
   return {
     async suggest(snapshot: GroupSnapshot): Promise<SettlementSuggestion[]> {
-      return calculateSettlementPlan(snapshot.expenses, snapshot.settlements)
-        .suggestions
+      return planSettlement(snapshot).suggestions
     },
 
     async record(
       input: SettlementCommand & { snapshot: GroupSnapshot },
     ): Promise<RecordSettlementResult> {
-      const amount = round2(input.amount)
-      if (!Number.isFinite(input.amount) || amount <= 0) {
-        return { status: "invalid-amount" }
-      }
-      if (input.from === input.to) return { status: "same-member" }
-
-      const suggestion = (await this.suggest(input.snapshot)).find(
-        (settlement) =>
-          settlement.from === input.from && settlement.to === input.to,
-      )
-      if (!suggestion) return { status: "no-outstanding" }
-      if (amount > suggestion.amount) return { status: "exceeds-outstanding" }
+      const validation = validateSettlement(input.snapshot, input)
+      if (validation.status !== "valid") return validation
 
       const settlement = await dataSource.record({
         groupId: input.groupId,
         from: input.from,
         to: input.to,
-        amount,
+        amount: validation.amount,
       })
       return { status: "recorded", settlement }
     },

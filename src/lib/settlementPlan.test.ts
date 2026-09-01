@@ -3,7 +3,7 @@ import type {
   Expense,
   Settlement,
 } from "@/application/groups/loadGroupSnapshot"
-import { calculateSettlementPlan } from "./settlementPlan"
+import { calculateSettlementPlan, validateSettlement } from "./settlementPlan"
 
 const expense: Expense = {
   id: "expense-1",
@@ -72,5 +72,31 @@ describe("calculateSettlementPlan", () => {
       bob: -33.33,
       charlie: -33.33,
     })
+  })
+})
+
+describe("validateSettlement", () => {
+  const snapshot = {
+    expenses: [expense],
+    settlements: [],
+  } as Parameters<typeof validateSettlement>[0]
+
+  it("accepts a partial settlement that is within the outstanding amount", () => {
+    expect(
+      validateSettlement(snapshot, {
+        from: "bob",
+        to: "alice",
+        amount: 20,
+      }),
+    ).toEqual({ status: "valid", amount: 20 })
+  })
+
+  it.each([
+    [{ from: "bob", to: "alice", amount: 0 }, "invalid-amount"],
+    [{ from: "alice", to: "alice", amount: 20 }, "same-member"],
+    [{ from: "alice", to: "bob", amount: 20 }, "no-outstanding"],
+    [{ from: "bob", to: "alice", amount: 60 }, "exceeds-outstanding"],
+  ] as const)("rejects invalid settlement with %s", (command, status) => {
+    expect(validateSettlement(snapshot, command)).toEqual({ status })
   })
 })

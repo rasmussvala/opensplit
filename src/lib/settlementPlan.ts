@@ -1,5 +1,6 @@
 import type {
   Expense,
+  GroupSnapshot,
   Settlement,
 } from "@/application/groups/loadGroupSnapshot"
 import { round2 } from "./utils"
@@ -14,6 +15,19 @@ export interface SettlementPlan {
   balances: Record<string, number>
   suggestions: Transaction[]
 }
+
+export type SettlementValidationCommand = {
+  from: string
+  to: string
+  amount: number
+}
+
+export type SettlementValidationResult =
+  | { status: "valid"; amount: number }
+  | { status: "invalid-amount" }
+  | { status: "same-member" }
+  | { status: "no-outstanding" }
+  | { status: "exceeds-outstanding" }
 
 export function calculateExpenseShares(
   expense: Expense,
@@ -140,4 +154,28 @@ export function calculateSettlementPlan(
       ? adjustedPlan
       : simplifyDebts(balances),
   }
+}
+
+export function planSettlement(
+  snapshot: Pick<GroupSnapshot, "expenses" | "settlements">,
+): SettlementPlan {
+  return calculateSettlementPlan(snapshot.expenses, snapshot.settlements)
+}
+
+export function validateSettlement(
+  snapshot: Pick<GroupSnapshot, "expenses" | "settlements">,
+  command: SettlementValidationCommand,
+): SettlementValidationResult {
+  const amount = round2(command.amount)
+  if (!Number.isFinite(command.amount) || amount <= 0)
+    return { status: "invalid-amount" }
+  if (command.from === command.to) return { status: "same-member" }
+
+  const suggestion = planSettlement(snapshot).suggestions.find(
+    (transaction) =>
+      transaction.from === command.from && transaction.to === command.to,
+  )
+  if (!suggestion) return { status: "no-outstanding" }
+  if (amount > suggestion.amount) return { status: "exceeds-outstanding" }
+  return { status: "valid", amount }
 }
