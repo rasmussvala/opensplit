@@ -4,12 +4,12 @@ import { useState } from "react"
 import type { Member } from "@/application/groups/loadGroupSnapshot"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Button } from "@/components/ui/button"
-import { computeShares } from "@/lib/balances"
 import {
   buildActiveOverrides,
   formatRaw,
   getSplitStatus,
 } from "@/lib/expenseForm"
+import { calculateExpenseShares } from "@/lib/settlementPlan"
 import type { SplitOverrideMode, SplitOverrides } from "@/lib/types"
 import { cn, formatAmountNumber } from "@/lib/utils"
 
@@ -86,7 +86,7 @@ export default function ExpenseForm({
 
   const shares =
     parsedAmount > 0 && splitAmong.length > 0
-      ? computeShares({
+      ? calculateExpenseShares({
           id: "form",
           description,
           amount: parsedAmount,

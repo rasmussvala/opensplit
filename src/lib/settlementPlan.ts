@@ -2,7 +2,7 @@ import type {
   Expense,
   Settlement,
 } from "@/application/groups/loadGroupSnapshot"
-import { calculateBalances } from "./balances"
+import { calculateBalances, computeShares } from "./balances"
 import { simplifyDebts } from "./simplify"
 import { round2 } from "./utils"
 
@@ -15,6 +15,12 @@ export interface Transaction {
 export interface SettlementPlan {
   balances: Record<string, number>
   suggestions: Transaction[]
+}
+
+export function calculateExpenseShares(
+  expense: Expense,
+): Record<string, number> {
+  return computeShares(expense)
 }
 
 export function calculateSettlementPlan(

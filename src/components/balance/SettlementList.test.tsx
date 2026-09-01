@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
-import type { Transaction } from "@/lib/simplify"
+import type { Transaction } from "@/lib/settlementPlan"
 import SettlementList from "./SettlementList"
 
 const memberNames = new Map([

@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 import { Link } from "react-router-dom"
 import MemberPairAvatars from "@/components/group/MemberPairAvatars"
 import CurrencyAmount from "@/components/ui/currency-amount"
-import type { Transaction } from "@/lib/simplify"
+import type { Transaction } from "@/lib/settlementPlan"
 import { formatAmount } from "@/lib/utils"
 
 interface SettlementListProps {
