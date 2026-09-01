@@ -6,7 +6,6 @@ import type {
   Settlement as DomainSettlement,
   Member,
 } from "@/application/groups/loadGroupSnapshot"
-import { suggestedSettlements } from "@/lib/simplify"
 import BalanceSummary from "./BalanceSummary"
 
 type Expense = DomainExpense & { groupId: string }
@@ -50,10 +49,6 @@ function renderBalanceSummary(
     currency: overrides.currency ?? "USD",
     inviteToken: overrides.inviteToken ?? "abc",
     currentMemberId: overrides.currentMemberId ?? null,
-    suggestions: suggestedSettlements(
-      overrides.expenses ?? [],
-      overrides.settlements ?? [],
-    ),
   }
   return render(
     <MemoryRouter>

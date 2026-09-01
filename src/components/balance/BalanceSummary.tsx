@@ -5,7 +5,6 @@ import type {
   Member,
   Settlement,
 } from "@/application/groups/loadGroupSnapshot"
-import type { SettlementSuggestion } from "@/application/settlements/manageSettlements"
 import { Button } from "@/components/ui/button"
 import { calculateSettlementPlan } from "@/lib/settlementPlan"
 import { cn } from "@/lib/utils"
@@ -15,7 +14,6 @@ import SettlementList from "./SettlementList"
 interface BalanceSummaryProps {
   expenses: Expense[]
   settlements: Settlement[]
-  suggestions: SettlementSuggestion[]
   members: Member[]
   currency: string
   inviteToken: string
@@ -25,7 +23,6 @@ interface BalanceSummaryProps {
 export default function BalanceSummary({
   expenses,
   settlements,
-  suggestions,
   members,
   currency,
   inviteToken,
@@ -35,8 +32,10 @@ export default function BalanceSummary({
   const [onlyYou, setOnlyYou] = useState(false)
   const memberNames = new Map(members.map((m) => [m.id, m.name]))
 
-  const { balances } = calculateSettlementPlan(expenses, settlements)
-  const transactions = suggestions
+  const { balances, suggestions: transactions } = calculateSettlementPlan(
+    expenses,
+    settlements,
+  )
   const canFilterByCurrentMember = currentMemberId !== null
   const filteredTransactions =
     onlyYou && currentMemberId
