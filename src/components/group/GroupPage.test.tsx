@@ -8,13 +8,14 @@ import GroupPage from "./GroupPage"
 const { executeMock } = vi.hoisted(() => ({ executeMock: vi.fn() }))
 
 vi.mock("@/application/composition", async () => {
-  const { suggestedSettlements } = await import("@/lib/simplify")
+  const { calculateSettlementPlan } = await import("@/lib/settlementPlan")
   return {
     application: {
       groups: { execute: executeMock },
       settlements: {
         suggest: (snapshot: GroupSnapshot) =>
-          suggestedSettlements(snapshot.expenses, snapshot.settlements),
+          calculateSettlementPlan(snapshot.expenses, snapshot.settlements)
+            .suggestions,
       },
     },
   }
