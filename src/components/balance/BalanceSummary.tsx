@@ -7,7 +7,7 @@ import type {
 } from "@/application/groups/loadGroupSnapshot"
 import type { SettlementSuggestion } from "@/application/settlements/manageSettlements"
 import { Button } from "@/components/ui/button"
-import { calculateBalances } from "@/lib/balances"
+import { calculateSettlementPlan } from "@/lib/settlementPlan"
 import { cn } from "@/lib/utils"
 import BalanceList from "./BalanceList"
 import SettlementList from "./SettlementList"
@@ -35,7 +35,7 @@ export default function BalanceSummary({
   const [onlyYou, setOnlyYou] = useState(false)
   const memberNames = new Map(members.map((m) => [m.id, m.name]))
 
-  const balances = calculateBalances(expenses, settlements)
+  const { balances } = calculateSettlementPlan(expenses, settlements)
   const transactions = suggestions
   const canFilterByCurrentMember = currentMemberId !== null
   const filteredTransactions =

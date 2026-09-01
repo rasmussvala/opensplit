@@ -2,7 +2,7 @@ import type {
   GroupSnapshot,
   Settlement,
 } from "@/application/groups/loadGroupSnapshot"
-import { suggestedSettlements } from "@/lib/simplify"
+import { calculateSettlementPlan } from "@/lib/settlementPlan"
 import { round2 } from "@/lib/utils"
 
 export type SettlementCommand = {
@@ -35,7 +35,8 @@ export type DeleteSettlementResult = { status: "deleted" }
 export function manageSettlements(dataSource: SettlementDataSource) {
   return {
     async suggest(snapshot: GroupSnapshot): Promise<SettlementSuggestion[]> {
-      return suggestedSettlements(snapshot.expenses, snapshot.settlements)
+      return calculateSettlementPlan(snapshot.expenses, snapshot.settlements)
+        .suggestions
     },
 
     async record(
