@@ -21,6 +21,9 @@ jobs:
       - name: Lint
         run: npm run check
 
+      - name: Code smells
+        run: npm run smells
+
       - name: Test
         run: npm run test:coverage
 
