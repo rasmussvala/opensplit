@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build && cp dist/index.html dist/404.html",
     "check": "biome check .",
     "check:fix": "biome check --write .",
+    "smells": "node scripts/check-smells.mjs",
     "test": "vitest",
     "test:coverage": "vitest --coverage --run",
     "preview": "vite preview --host",
