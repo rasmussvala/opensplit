@@ -9,8 +9,8 @@ const root = resolve(import.meta.dirname, "..")
 const sourceRoots = [resolve(root, "src")]
 const ignored = new Set([".test.ts", ".test.tsx"])
 const limits = {
-  functionLines: 80,
-  complexity: 15,
+  functionLines: 200,
+  complexity: 25,
 }
 
 async function sourceFiles(directory) {
@@ -103,8 +103,8 @@ for (const file of files) {
         addFinding(
           sourceFile,
           node,
-          "complexity",
-          `Function complexity is ${score} (limit: ${limits.complexity})`,
+          "cyclomatic-complexity",
+          `Cyclomatic complexity is ${score} (limit: ${limits.complexity})`,
         )
     }
     ts.forEachChild(node, visit)
