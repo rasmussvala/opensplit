@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFile } from "node:fs/promises"
+import { readdir, readFile } from "node:fs/promises"
 import { dirname, relative, resolve } from "node:path"
 import process from "node:process"
 import ts from "typescript"
@@ -13,15 +13,20 @@ const limits = {
   complexity: 15,
 }
 
-const files = []
-for (const sourceRoot of sourceRoots) {
-  const output = await import("node:child_process").then(({ execFileSync }) =>
-    execFileSync("rg", ["--files", sourceRoot, "-g", "*.ts", "-g", "*.tsx"], {
-      encoding: "utf8",
+async function sourceFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true })
+  const nested = await Promise.all(
+    entries.map((entry) => {
+      const path = resolve(directory, entry.name)
+      if (entry.isDirectory()) return sourceFiles(path)
+      if (entry.isFile() && /\.tsx?$/.test(entry.name)) return [path]
+      return []
     }),
   )
-  files.push(...output.trim().split("\n").filter(Boolean))
+  return nested.flat()
 }
+
+const files = (await Promise.all(sourceRoots.map(sourceFiles))).flat()
 
 const findings = []
 const sourceByPath = new Map()
