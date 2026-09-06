@@ -211,27 +211,86 @@ export default function SettlePage() {
     }
   }
 
-  if (state.status === "loading") {
-    return <LoadingState centered />
-  }
-
-  if (state.status === "not-found") {
-    return <p className="p-6 text-center">Settlement not found</p>
-  }
+  if (state.status !== "ready") return <PageStateView status={state.status} />
 
   const { group, from, to, amount } = state
 
   if (amount === null) {
-    return (
-      <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-2 py-6">
-        <BackLink to={groupUrl} />
-        <p className="rounded-xl border border-border/70 border-dashed bg-card/20 p-6 text-center text-muted-foreground text-sm">
-          No outstanding debt between {from.name} and {to.name}.
-        </p>
-      </div>
-    )
+    return <NoOutstandingDebt groupUrl={groupUrl} from={from} to={to} />
   }
 
+  return (
+    <SettlementDetails
+      group={group}
+      from={from}
+      to={to}
+      amount={amount}
+      groupUrl={groupUrl}
+      copied={copied}
+      swishEnabled={swishEnabled}
+      qrDataUrl={qrDataUrl}
+      submitting={submitting}
+      submitError={submitError}
+      onCopyAmount={handleCopyAmount}
+      onMarkSettled={handleMarkSettled}
+    />
+  )
+}
+
+function PageStateView({ status }: { status: "loading" | "not-found" }) {
+  return status === "loading" ? (
+    <LoadingState centered />
+  ) : (
+    <p className="p-6 text-center">Settlement not found</p>
+  )
+}
+
+function NoOutstandingDebt({
+  groupUrl,
+  from,
+  to,
+}: {
+  groupUrl: string
+  from: Member
+  to: Member
+}) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-2 py-6">
+      <BackLink to={groupUrl} />
+      <p className="rounded-xl border border-border/70 border-dashed bg-card/20 p-6 text-center text-muted-foreground text-sm">
+        No outstanding debt between {from.name} and {to.name}.
+      </p>
+    </div>
+  )
+}
+
+function SettlementDetails({
+  group,
+  from,
+  to,
+  amount,
+  groupUrl,
+  copied,
+  swishEnabled,
+  qrDataUrl,
+  submitting,
+  submitError,
+  onCopyAmount,
+  onMarkSettled,
+}: {
+  group: Group
+  from: Member
+  to: Member
+  amount: number
+  groupUrl: string
+  copied: boolean
+  swishEnabled: boolean
+  qrDataUrl: string | null
+  submitting: boolean
+  submitError: string | null
+  onCopyAmount: () => void
+  onMarkSettled: () => void
+}) {
   const showSwish = isSwishCurrency(group.currency)
   const recipientHasPhone = !!to.swishPhone
   const isMobileSwish = isMobileSwishDevice()
@@ -248,7 +307,6 @@ export default function SettlePage() {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 px-2 py-6">
       <BackLink to={groupUrl} />
-
       <div className="flex flex-col gap-1">
         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
           Settle up
@@ -257,13 +315,11 @@ export default function SettlePage() {
           {from.name} → {to.name}
         </h2>
       </div>
-
       <div className="flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-4">
         <MemberPairAvatars
           from={{ id: from.id, name: from.name }}
           to={{ id: to.id, name: to.name }}
         />
-
         <div className="flex min-w-0 flex-1 flex-col leading-tight">
           <span className="truncate text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
             {from.name}
@@ -274,19 +330,16 @@ export default function SettlePage() {
             Amount due
           </span>
         </div>
-
         <CurrencyAmount currency={group.currency} amount={amount} />
-
         <span className="sr-only">
           {from.name} owes {to.name} {formatAmount(group.currency, amount)}
         </span>
       </div>
-
       <Button
         type="button"
         variant="outline"
         size="sm"
-        onClick={handleCopyAmount}
+        onClick={onCopyAmount}
         className="w-full gap-1.5"
       >
         {copied ? (
@@ -296,7 +349,6 @@ export default function SettlePage() {
         )}
         {copied ? "Copied" : `Copy amount (${swishAmountStr})`}
       </Button>
-
       {showSwish && (
         <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-card/40 p-4">
           <div className="flex flex-col gap-1">
@@ -305,7 +357,6 @@ export default function SettlePage() {
             </span>
             <h3 className="font-semibold text-sm">Pay {to.name}</h3>
           </div>
-
           {recipientHasPhone ? (
             <>
               {isMobileSwish && (
@@ -320,7 +371,6 @@ export default function SettlePage() {
                   Pay with Swish
                 </a>
               )}
-
               {!isMobileSwish && qrDataUrl && (
                 <div className="flex flex-col items-center gap-1.5 pt-1">
                   <img
@@ -341,10 +391,9 @@ export default function SettlePage() {
           )}
         </div>
       )}
-
       <Button
         type="button"
-        onClick={handleMarkSettled}
+        onClick={onMarkSettled}
         disabled={submitting}
         variant={showSwish ? "outline" : "default"}
         className="w-full"
