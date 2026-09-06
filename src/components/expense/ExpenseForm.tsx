@@ -212,212 +212,279 @@ export default function ExpenseForm({
         />
       </div>
 
-      {/* Paid by — pill picker */}
-      <div className="flex flex-col gap-2">
+      <PaidBySection members={members} paidBy={paidBy} onSelect={setPaidBy} />
+
+      <SplitAmongSection
+        members={members}
+        currency={currency}
+        splitMode={splitMode}
+        splitAmong={splitAmong}
+        overrides={overrides}
+        parsedAmount={parsedAmount}
+        shares={shares}
+        splitStatus={splitStatus}
+        onModeChange={handleModeChange}
+        onToggleMember={toggleMember}
+        onOverrideChange={handleOverrideChange}
+        onOverrideBlur={handleOverrideBlur}
+      />
+
+      <ExpenseActions
+        submitLabel={submitLabel}
+        canSubmit={
+          splitStatus.isValid && !!description.trim() && parsedAmount > 0
+        }
+        onCancel={onCancel}
+        onDelete={onDelete}
+      />
+    </form>
+  )
+}
+
+function ExpenseActions({
+  submitLabel,
+  canSubmit,
+  onCancel,
+  onDelete,
+}: {
+  submitLabel: string
+  canSubmit: boolean
+  onCancel?: () => void
+  onDelete?: () => void
+}) {
+  return (
+    <div className="flex items-center gap-2 pt-1">
+      <Button type="submit" className="flex-1" disabled={!canSubmit}>
+        {submitLabel}
+      </Button>
+      {onCancel && (
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+      )}
+      {onDelete && (
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          aria-label="Delete"
+          onClick={onDelete}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  )
+}
+
+function PaidBySection({
+  members,
+  paidBy,
+  onSelect,
+}: {
+  members: Member[]
+  paidBy: string
+  onSelect: (memberId: string) => void
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
+        Paid by
+      </span>
+      <div className="flex flex-wrap gap-1.5">
+        {members.map((member) => {
+          const selected = paidBy === member.id
+          return (
+            <button
+              key={member.id}
+              type="button"
+              aria-label={`Paid by ${member.name}`}
+              aria-pressed={selected}
+              onClick={() => onSelect(member.id)}
+              className={cn(
+                "group/pill inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-3 pl-0.5 text-[12px] font-medium transition-all",
+                selected
+                  ? "border-primary/60 bg-primary/10 text-foreground shadow-xs"
+                  : "border-border/70 bg-card/40 text-muted-foreground hover:border-border hover:bg-card/70 hover:text-foreground",
+              )}
+            >
+              <MemberAvatar
+                id={member.id}
+                name={member.name}
+                className={cn(
+                  "h-6 w-6 text-[10px] ring-2 ring-background transition-transform",
+                  selected && "ring-primary/30",
+                )}
+              />
+              <span>{member.name}</span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function SplitAmongSection({
+  members,
+  currency,
+  splitMode,
+  splitAmong,
+  overrides,
+  parsedAmount,
+  shares,
+  splitStatus,
+  onModeChange,
+  onToggleMember,
+  onOverrideChange,
+  onOverrideBlur,
+}: {
+  members: Member[]
+  currency: string
+  splitMode: SplitOverrideMode
+  splitAmong: string[]
+  overrides: Record<string, string>
+  parsedAmount: number
+  shares: Record<string, number>
+  splitStatus: ReturnType<typeof getSplitStatus>
+  onModeChange: (mode: SplitOverrideMode) => void
+  onToggleMember: (memberId: string) => void
+  onOverrideChange: (memberId: string, raw: string) => void
+  onOverrideBlur: (memberId: string) => void
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between">
         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
-          Paid by
+          Split among
         </span>
         <div className="flex flex-wrap gap-1.5">
-          {members.map((m) => {
-            const selected = paidBy === m.id
-            return (
-              <button
-                key={m.id}
-                type="button"
-                aria-label={`Paid by ${m.name}`}
-                aria-pressed={selected}
-                onClick={() => setPaidBy(m.id)}
-                className={cn(
-                  "group/pill inline-flex items-center gap-1.5 rounded-full border py-0.5 pr-3 pl-0.5 text-[12px] font-medium transition-all",
-                  selected
-                    ? "border-primary/60 bg-primary/10 text-foreground shadow-xs"
-                    : "border-border/70 bg-card/40 text-muted-foreground hover:border-border hover:bg-card/70 hover:text-foreground",
-                )}
-              >
-                <MemberAvatar
-                  id={m.id}
-                  name={m.name}
-                  className={cn(
-                    "h-6 w-6 text-[10px] ring-2 ring-background transition-transform",
-                    selected && "ring-primary/30",
-                  )}
-                />
-                <span>{m.name}</span>
-              </button>
-            )
-          })}
+          {[
+            { mode: "percent" as const, label: "%" },
+            { mode: "amount" as const, label: currency },
+          ].map(({ mode, label }) => (
+            <button
+              key={mode}
+              type="button"
+              aria-pressed={splitMode === mode}
+              onClick={() => onModeChange(mode)}
+              className={cn(
+                "inline-flex items-center rounded-full border px-3 py-0.5 text-[12px] font-medium transition-all",
+                splitMode === mode
+                  ? "border-primary/60 bg-primary/10 text-foreground shadow-xs"
+                  : "border-border/70 bg-card/40 text-muted-foreground hover:border-border hover:bg-card/70 hover:text-foreground",
+              )}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
-
-      {/* Split among — tappable list */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-[0.14em]">
-            Split among
-          </span>
-          <div className="flex flex-wrap gap-1.5">
-            {[
-              { mode: "percent" as const, label: "%" },
-              { mode: "amount" as const, label: currency },
-            ].map(({ mode, label }) => {
-              const selected = splitMode === mode
-              return (
-                <button
-                  key={mode}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => handleModeChange(mode)}
+      <div className="flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card/40">
+        {members.map((member, index) => {
+          const checked = splitAmong.includes(member.id)
+          const shareValue = shares[member.id]
+          const isOverride = member.id in overrides
+          const shareNumber =
+            checked && shareValue !== undefined
+              ? formatAmountNumber(shareValue)
+              : null
+          const inputValue = !checked
+            ? ""
+            : isOverride
+              ? overrides[member.id]
+              : parsedAmount > 0 && shareValue !== undefined
+                ? formatRaw(
+                    splitMode === "percent"
+                      ? (shareValue / parsedAmount) * 100
+                      : shareValue,
+                  )
+                : ""
+          return (
+            <label
+              key={member.id}
+              className={cn(
+                "flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-card/70",
+                index > 0 && "border-t border-border/50",
+              )}
+            >
+              <input
+                type="checkbox"
+                aria-label={member.name}
+                checked={checked}
+                onChange={() => onToggleMember(member.id)}
+                className="sr-only"
+              />
+              <MemberAvatar
+                id={member.id}
+                name={member.name}
+                className="h-7 w-7 text-[11px] shadow-sm ring-2 ring-background"
+              />
+              <div className="flex min-w-0 flex-1 flex-col leading-tight">
+                <span
                   className={cn(
-                    "inline-flex items-center rounded-full border px-3 py-0.5 text-[12px] font-medium transition-all",
-                    selected
-                      ? "border-primary/60 bg-primary/10 text-foreground shadow-xs"
-                      : "border-border/70 bg-card/40 text-muted-foreground hover:border-border hover:bg-card/70 hover:text-foreground",
+                    "text-sm",
+                    isOverride ? "font-semibold" : "font-medium",
                   )}
                 >
-                  {label}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-        <div className="flex flex-col overflow-hidden rounded-xl border border-border/70 bg-card/40">
-          {members.map((m, i) => {
-            const checked = splitAmong.includes(m.id)
-            const shareValue = shares[m.id]
-            const isOverride = m.id in overrides
-            const shareNumber =
-              checked && shareValue !== undefined
-                ? formatAmountNumber(shareValue)
-                : null
-
-            let inputValue = ""
-            if (checked) {
-              if (isOverride) {
-                inputValue = overrides[m.id]
-              } else if (parsedAmount > 0 && shareValue !== undefined) {
-                const autoValue =
-                  splitMode === "percent"
-                    ? (shareValue / parsedAmount) * 100
-                    : shareValue
-                inputValue = formatRaw(autoValue)
-              }
-            }
-
-            return (
-              <label
-                key={m.id}
-                className={cn(
-                  "flex cursor-pointer items-center gap-3 px-3 py-2.5 transition-colors hover:bg-card/70",
-                  i > 0 && "border-t border-border/50",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  aria-label={m.name}
-                  checked={checked}
-                  onChange={() => toggleMember(m.id)}
-                  className="sr-only"
-                />
-                <MemberAvatar
-                  id={m.id}
-                  name={m.name}
-                  className="h-7 w-7 text-[11px] shadow-sm ring-2 ring-background"
-                />
-                <div className="flex min-w-0 flex-1 flex-col leading-tight">
+                  {member.name}
+                </span>
+                {shareNumber && (
                   <span
-                    className={cn(
-                      "text-sm",
-                      isOverride ? "font-semibold" : "font-medium",
-                    )}
+                    data-testid={`share-${member.id}`}
+                    className="text-[11px] text-muted-foreground tabular-nums"
                   >
-                    {m.name}
+                    {shareNumber} {currency}
                   </span>
-                  {shareNumber && (
-                    <span
-                      data-testid={`share-${m.id}`}
-                      className="text-[11px] text-muted-foreground tabular-nums"
-                    >
-                      {shareNumber} {currency}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    aria-label={`${m.name} share`}
-                    value={inputValue}
-                    disabled={!checked}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => handleOverrideChange(m.id, e.target.value)}
-                    onBlur={() => handleOverrideBlur(m.id)}
-                    className={cn(
-                      "w-24 rounded-md border border-border/70 bg-background/60 px-2 py-1 text-right text-base tabular-nums outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-40",
-                      isOverride ? "font-semibold" : "font-normal",
-                    )}
-                  />
-                  <span className="w-6 text-[10px] text-muted-foreground uppercase tracking-wider">
-                    {splitMode === "percent" ? "%" : currency}
-                  </span>
-                </div>
-                <div
-                  aria-hidden="true"
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  aria-label={`${member.name} share`}
+                  value={inputValue}
+                  disabled={!checked}
+                  onClick={(event) => event.stopPropagation()}
+                  onChange={(event) =>
+                    onOverrideChange(member.id, event.target.value)
+                  }
+                  onBlur={() => onOverrideBlur(member.id)}
                   className={cn(
-                    "flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] border transition-colors",
-                    checked
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border/80 bg-background",
+                    "w-24 rounded-md border border-border/70 bg-background/60 px-2 py-1 text-right text-base tabular-nums outline-none transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-40",
+                    isOverride ? "font-semibold" : "font-normal",
                   )}
-                >
-                  {checked && <Check className="h-3.5 w-3.5" />}
-                </div>
-              </label>
-            )
-          })}
-        </div>
-        {splitStatus.message && (
-          <p
-            data-testid="split-status"
-            className={cn(
-              "px-1 text-[11px] tabular-nums",
-              splitStatus.isValid
-                ? "text-muted-foreground"
-                : "text-destructive",
-            )}
-          >
-            {splitStatus.message}
-          </p>
-        )}
+                />
+                <span className="w-6 text-[10px] text-muted-foreground uppercase tracking-wider">
+                  {splitMode === "percent" ? "%" : currency}
+                </span>
+              </div>
+              <div
+                aria-hidden="true"
+                className={cn(
+                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] border transition-colors",
+                  checked
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border/80 bg-background",
+                )}
+              >
+                {checked && <Check className="h-3.5 w-3.5" />}
+              </div>
+            </label>
+          )
+        })}
       </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 pt-1">
-        <Button
-          type="submit"
-          className="flex-1"
-          disabled={
-            !splitStatus.isValid || !description.trim() || parsedAmount <= 0
-          }
+      {splitStatus.message && (
+        <p
+          data-testid="split-status"
+          className={cn(
+            "px-1 text-[11px] tabular-nums",
+            splitStatus.isValid ? "text-muted-foreground" : "text-destructive",
+          )}
         >
-          {submitLabel}
-        </Button>
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        )}
-        {onDelete && (
-          <Button
-            type="button"
-            variant="destructive"
-            size="icon"
-            aria-label="Delete"
-            onClick={onDelete}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    </form>
+          {splitStatus.message}
+        </p>
+      )}
+    </div>
   )
 }
