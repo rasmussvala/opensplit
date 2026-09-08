@@ -8,6 +8,10 @@ vi.mock("@rasmussvala/opensplit-core", () => ({
   ensureSession: (...args: unknown[]) => mockEnsureSession(...args),
 }))
 
+// AuthProvider imports the client to inject it; ensureSession is mocked, so the
+// stub is never used. It only keeps createClient from running without env vars.
+vi.mock("@/lib/supabase", () => ({ supabase: {} }))
+
 function TestConsumer() {
   const { userId } = useAuth()
   return <div data-testid="user-id">{userId}</div>
