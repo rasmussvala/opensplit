@@ -1,4 +1,4 @@
-import type { Transaction } from "@opensplit/core"
+import type { Transaction } from "@rasmussvala/opensplit-core"
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"

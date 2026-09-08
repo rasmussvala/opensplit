@@ -1,4 +1,4 @@
-import type { Expense, Member } from "@opensplit/core"
+import type { Expense, Member } from "@rasmussvala/opensplit-core"
 import { render, screen } from "@testing-library/react"
 import type { ReactElement } from "react"
 import { MemoryRouter } from "react-router-dom"

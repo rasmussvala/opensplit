@@ -1,4 +1,4 @@
-import type { Member, Settlement } from "@opensplit/core"
+import type { Member, Settlement } from "@rasmussvala/opensplit-core"
 import { Link } from "react-router-dom"
 import MemberPairAvatars from "@/components/group/MemberPairAvatars"
 import CurrencyAmount from "@/components/ui/currency-amount"

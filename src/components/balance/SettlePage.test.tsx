@@ -33,7 +33,7 @@ vi.mock("@/application/composition", async () => {
     manageSettlements,
     SupabaseGroupDataSource,
     SupabaseSettlementDataSource,
-  } = await import("@opensplit/core")
+  } = await import("@rasmussvala/opensplit-core")
   const { supabase } = await import("@/lib/supabase")
   const settlementManager = manageSettlements(
     new SupabaseSettlementDataSource(supabase),

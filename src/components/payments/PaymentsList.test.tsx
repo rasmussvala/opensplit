@@ -1,4 +1,7 @@
-import type { Settlement as DomainSettlement, Member } from "@opensplit/core"
+import type {
+  Settlement as DomainSettlement,
+  Member,
+} from "@rasmussvala/opensplit-core"
 import { render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"

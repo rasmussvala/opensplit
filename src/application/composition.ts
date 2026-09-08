@@ -5,7 +5,7 @@ import {
   SupabaseExpenseDataSource,
   SupabaseGroupDataSource,
   SupabaseSettlementDataSource,
-} from "@opensplit/core"
+} from "@rasmussvala/opensplit-core"
 import { supabase } from "@/lib/supabase"
 
 const groups = new SupabaseGroupDataSource(supabase)

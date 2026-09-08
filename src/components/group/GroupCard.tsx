@@ -1,4 +1,4 @@
-import type { DbGroup, DbGroupMember } from "@opensplit/core"
+import type { DbGroup, DbGroupMember } from "@rasmussvala/opensplit-core"
 import { Link } from "react-router-dom"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Badge } from "@/components/ui/badge"

@@ -7,21 +7,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run check:fix # biome lint + format fix (auto-write)
 npm run typecheck
-npm run test:coverage # tests + coverage (75% overall; 80% web src/lib/**, 90% core lib/**)
+npm run test:coverage # tests + coverage (75% overall, 80% for src/lib/**)
 ```
 
 ## Architecture
 
-**Workspaces:** npm workspaces. `packages/core` (`@opensplit/core`) holds platform-agnostic
-domain logic — `lib/` (pure helpers), `application/` (use cases), `infrastructure/supabase/`
-(data sources). It has no DOM, no `import.meta.env`, and no Supabase singleton: each app
-creates its own `SupabaseClient` and injects it at the composition root
-(`src/application/composition.ts`). Core is consumed as TypeScript source, so it must stay
-bundler-agnostic — relative imports only, no path aliases, no parameter properties.
+**Shared domain logic** lives in `@rasmussvala/opensplit-core`, a separate repo
+(`rasmussvala/opensplit-core`) published to GitHub Packages and shared with the React Native
+app. It holds `lib/` (pure helpers), `application/` (use cases) and `infrastructure/supabase/`
+(data sources). It has no DOM and no Supabase singleton: this app creates the
+`SupabaseClient` and injects it at the composition root (`src/application/composition.ts`).
 
-The root package is the web app. Core has its own vitest + tsconfig; root `typecheck` and
-`test:coverage` run both. Domain logic keeps its 90% `lib/**` coverage rule in `packages/core/vitest.config.ts`;
-the web app's remaining `src/lib/**` platform glue is gated at 80%.
+Installing it needs a token with `read:packages`; CI uses the built-in `GITHUB_TOKEN`.
+Changing domain logic means releasing a new core version, then bumping it here.
+
+This repo's `src/lib/**` is platform glue only (Supabase client, `cn`, PWA and device
+checks), gated at 80% coverage; the domain's 90% rule lives in the core repo.
 
 **Stack:** React 19 + TypeScript, Vite, Tailwind v4, shadcn/ui (Radix), Supabase (auth + DB + Realtime), deployed to GitHub Pages.
 

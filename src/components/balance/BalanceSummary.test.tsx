@@ -2,7 +2,7 @@ import type {
   Expense as DomainExpense,
   Settlement as DomainSettlement,
   Member,
-} from "@opensplit/core"
+} from "@rasmussvala/opensplit-core"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"

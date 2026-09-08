@@ -1,4 +1,7 @@
-import { normalizeSwishPhone, SWISH_PHONE_ERROR } from "@opensplit/core"
+import {
+  normalizeSwishPhone,
+  SWISH_PHONE_ERROR,
+} from "@rasmussvala/opensplit-core"
 import { Pencil } from "lucide-react"
 import { useState } from "react"
 import SwishPhoneInput from "@/components/group/SwishPhoneInput"

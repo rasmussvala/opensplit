@@ -1,4 +1,4 @@
-import type { Member, Settlement } from "@opensplit/core"
+import type { Member, Settlement } from "@rasmussvala/opensplit-core"
 import { Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"

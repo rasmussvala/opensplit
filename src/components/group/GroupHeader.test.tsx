@@ -1,4 +1,4 @@
-import type { Group, Member } from "@opensplit/core"
+import type { Group, Member } from "@rasmussvala/opensplit-core"
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import GroupHeader from "./GroupHeader"

@@ -1,4 +1,4 @@
-import type { Member } from "@opensplit/core"
+import type { Member } from "@rasmussvala/opensplit-core"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import MemberList from "./MemberList"

@@ -1,5 +1,10 @@
-import type { Expense, Group, Member, Settlement } from "@opensplit/core"
-import { isSwishCurrency } from "@opensplit/core"
+import type {
+  Expense,
+  Group,
+  Member,
+  Settlement,
+} from "@rasmussvala/opensplit-core"
+import { isSwishCurrency } from "@rasmussvala/opensplit-core"
 import { Plus } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useParams, useSearchParams } from "react-router-dom"

@@ -1,4 +1,4 @@
-import type { Transaction } from "@opensplit/core"
+import type { Transaction } from "@rasmussvala/opensplit-core"
 import { ChevronRight } from "lucide-react"
 import type { ReactNode } from "react"
 import { Link } from "react-router-dom"

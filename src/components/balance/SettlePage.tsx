@@ -3,14 +3,14 @@ import type {
   GroupSnapshot,
   LoadGroupResult,
   Member,
-} from "@opensplit/core"
+} from "@rasmussvala/opensplit-core"
 import {
   buildSwishDeepLink,
   buildSwishMessage,
   buildSwishQrPayload,
   formatSwishAmount,
   isSwishCurrency,
-} from "@opensplit/core"
+} from "@rasmussvala/opensplit-core"
 import { Check, Copy, Smartphone } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"

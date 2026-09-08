@@ -1,7 +1,11 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
-export { formatAmount, formatAmountNumber, round2 } from "@opensplit/core"
+export {
+  formatAmount,
+  formatAmountNumber,
+  round2,
+} from "@rasmussvala/opensplit-core"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))

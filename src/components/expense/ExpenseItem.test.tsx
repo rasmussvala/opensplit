@@ -1,4 +1,4 @@
-import type { Expense } from "@opensplit/core"
+import type { Expense } from "@rasmussvala/opensplit-core"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import ExpenseItem from "./ExpenseItem"

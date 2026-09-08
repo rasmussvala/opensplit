@@ -1,4 +1,4 @@
-import type { Member } from "@opensplit/core"
+import type { Member } from "@rasmussvala/opensplit-core"
 import MemberAvatar from "./MemberAvatar"
 
 interface MemberListProps {

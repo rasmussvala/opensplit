@@ -2,7 +2,7 @@ import {
   isSwishCurrency,
   normalizeSwishPhone,
   SWISH_PHONE_ERROR,
-} from "@opensplit/core"
+} from "@rasmussvala/opensplit-core"
 import type { SubmitEvent } from "react"
 import { useState } from "react"
 import { useAuth } from "@/components/auth/AuthProvider"

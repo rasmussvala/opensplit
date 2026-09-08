@@ -1,4 +1,4 @@
-import type { DbGroup } from "@opensplit/core"
+import type { DbGroup } from "@rasmussvala/opensplit-core"
 import { useEffect, useState } from "react"
 import GroupCard from "@/components/group/GroupCard"
 import { LoadingState } from "@/components/ui/loading-state"

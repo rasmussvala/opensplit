@@ -1,4 +1,8 @@
-import type { Expense, ExpenseEditingContext, Member } from "@opensplit/core"
+import type {
+  Expense,
+  ExpenseEditingContext,
+  Member,
+} from "@rasmussvala/opensplit-core"
 import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"

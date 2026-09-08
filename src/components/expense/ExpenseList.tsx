@@ -1,4 +1,4 @@
-import type { Expense, Member } from "@opensplit/core"
+import type { Expense, Member } from "@rasmussvala/opensplit-core"
 import { Link } from "react-router-dom"
 import ExpenseItem from "./ExpenseItem"
 

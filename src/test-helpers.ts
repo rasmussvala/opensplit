@@ -1,4 +1,8 @@
-import type { DbExpense, DbGroup, DbGroupMember } from "@opensplit/core"
+import type {
+  DbExpense,
+  DbGroup,
+  DbGroupMember,
+} from "@rasmussvala/opensplit-core"
 export function makeGroup(overrides: Partial<DbGroup> = {}): DbGroup {
   return {
     id: "g1",

@@ -1,5 +1,5 @@
-import type { Expense, Member, Settlement } from "@opensplit/core"
-import { planSettlement } from "@opensplit/core"
+import type { Expense, Member, Settlement } from "@rasmussvala/opensplit-core"
+import { planSettlement } from "@rasmussvala/opensplit-core"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"

@@ -1,4 +1,4 @@
-import { ensureSession } from "@opensplit/core"
+import { ensureSession } from "@rasmussvala/opensplit-core"
 import type { ReactNode } from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import { LoadingState } from "@/components/ui/loading-state"

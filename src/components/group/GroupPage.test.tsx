@@ -1,4 +1,4 @@
-import type { GroupSnapshot } from "@opensplit/core"
+import type { GroupSnapshot } from "@rasmussvala/opensplit-core"
 import { render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -8,7 +8,9 @@ import GroupPage from "./GroupPage"
 const { executeMock } = vi.hoisted(() => ({ executeMock: vi.fn() }))
 
 vi.mock("@/application/composition", async () => {
-  const { calculateSettlementPlan } = await import("@opensplit/core")
+  const { calculateSettlementPlan } = await import(
+    "@rasmussvala/opensplit-core"
+  )
   return {
     application: {
       groups: { execute: executeMock },

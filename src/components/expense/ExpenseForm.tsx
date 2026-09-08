@@ -1,10 +1,14 @@
-import type { Member, SplitOverrideMode, SplitOverrides } from "@opensplit/core"
+import type {
+  Member,
+  SplitOverrideMode,
+  SplitOverrides,
+} from "@rasmussvala/opensplit-core"
 import {
   buildActiveOverrides,
   calculateExpenseShares,
   formatRaw,
   getSplitStatus,
-} from "@opensplit/core"
+} from "@rasmussvala/opensplit-core"
 import { Check, Trash2 } from "lucide-react"
 import type { SubmitEvent } from "react"
 import { useState } from "react"

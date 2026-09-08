@@ -1,4 +1,4 @@
-import type { DbGroup, DbGroupMember } from "@opensplit/core"
+import type { DbGroup, DbGroupMember } from "@rasmussvala/opensplit-core"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/components/auth/AuthProvider"
 import GroupCard from "@/components/group/GroupCard"
