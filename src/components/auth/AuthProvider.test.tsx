@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from "./AuthProvider"
 
 const mockEnsureSession = vi.fn()
 
-vi.mock("@/lib/auth", () => ({
+vi.mock("@opensplit/core", () => ({
   ensureSession: (...args: unknown[]) => mockEnsureSession(...args),
 }))
 

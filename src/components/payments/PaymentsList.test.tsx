@@ -1,10 +1,7 @@
+import type { Settlement as DomainSettlement, Member } from "@opensplit/core"
 import { render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
-import type {
-  Settlement as DomainSettlement,
-  Member,
-} from "@/application/groups/loadGroupSnapshot"
 import PaymentsList from "./PaymentsList"
 
 type Settlement = DomainSettlement & { groupId: string }

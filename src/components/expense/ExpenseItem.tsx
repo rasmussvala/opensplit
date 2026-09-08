@@ -1,4 +1,4 @@
-import type { Expense } from "@/application/groups/loadGroupSnapshot"
+import type { Expense } from "@opensplit/core"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { formatAmount } from "@/lib/utils"
 

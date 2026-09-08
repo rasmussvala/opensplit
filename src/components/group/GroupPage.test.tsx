@@ -1,14 +1,14 @@
+import type { GroupSnapshot } from "@opensplit/core"
 import { render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { GroupSnapshot } from "@/application/groups/loadGroupSnapshot"
 import { supabase } from "@/lib/supabase"
 import GroupPage from "./GroupPage"
 
 const { executeMock } = vi.hoisted(() => ({ executeMock: vi.fn() }))
 
 vi.mock("@/application/composition", async () => {
-  const { calculateSettlementPlan } = await import("@/lib/settlementPlan")
+  const { calculateSettlementPlan } = await import("@opensplit/core")
   return {
     application: {
       groups: { execute: executeMock },

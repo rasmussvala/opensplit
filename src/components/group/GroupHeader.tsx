@@ -1,5 +1,5 @@
+import type { Group, Member } from "@opensplit/core"
 import type { ReactNode } from "react"
-import type { Group, Member } from "@/application/groups/loadGroupSnapshot"
 import InviteCode from "@/components/group/InviteCode"
 import MemberList from "@/components/group/MemberList"
 import { formatAmount } from "@/lib/utils"

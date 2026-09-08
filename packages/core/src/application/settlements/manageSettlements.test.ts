@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import type { GroupSnapshot } from "@/application/groups/loadGroupSnapshot"
+import type { GroupSnapshot } from "../groups/loadGroupSnapshot"
 import {
   InMemorySettlementDataSource,
   manageSettlements,

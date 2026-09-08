@@ -1,12 +1,8 @@
+import type { Expense, Member, Settlement } from "@opensplit/core"
+import { planSettlement } from "@opensplit/core"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useState } from "react"
-import type {
-  Expense,
-  Member,
-  Settlement,
-} from "@/application/groups/loadGroupSnapshot"
 import { Button } from "@/components/ui/button"
-import { planSettlement } from "@/lib/settlementPlan"
 import { cn } from "@/lib/utils"
 import BalanceList from "./BalanceList"
 import SettlementList from "./SettlementList"

@@ -1,11 +1,11 @@
-import { fireEvent, render, screen } from "@testing-library/react"
-import { MemoryRouter } from "react-router-dom"
-import { describe, expect, it } from "vitest"
 import type {
   Expense as DomainExpense,
   Settlement as DomainSettlement,
   Member,
-} from "@/application/groups/loadGroupSnapshot"
+} from "@opensplit/core"
+import { fireEvent, render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
+import { describe, expect, it } from "vitest"
 import BalanceSummary from "./BalanceSummary"
 
 type Expense = DomainExpense & { groupId: string }

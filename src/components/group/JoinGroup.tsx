@@ -1,14 +1,14 @@
+import {
+  isSwishCurrency,
+  normalizeSwishPhone,
+  SWISH_PHONE_ERROR,
+} from "@opensplit/core"
 import type { SubmitEvent } from "react"
 import { useState } from "react"
 import { useAuth } from "@/components/auth/AuthProvider"
 import SwishPhoneInput from "@/components/group/SwishPhoneInput"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
-import {
-  isSwishCurrency,
-  normalizeSwishPhone,
-  SWISH_PHONE_ERROR,
-} from "@/lib/swish"
 
 interface JoinGroupProps {
   groupId: string

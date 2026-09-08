@@ -1,8 +1,8 @@
+import type { Expense, Member } from "@opensplit/core"
 import { render, screen } from "@testing-library/react"
 import type { ReactElement } from "react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
-import type { Expense, Member } from "@/application/groups/loadGroupSnapshot"
 import ExpenseList from "./ExpenseList"
 
 const mockMembers: Member[] = [

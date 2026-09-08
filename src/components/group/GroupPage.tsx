@@ -1,13 +1,9 @@
+import type { Expense, Group, Member, Settlement } from "@opensplit/core"
+import { isSwishCurrency } from "@opensplit/core"
 import { Plus } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useParams, useSearchParams } from "react-router-dom"
 import { application } from "@/application/composition"
-import type {
-  Expense,
-  Group,
-  Member,
-  Settlement,
-} from "@/application/groups/loadGroupSnapshot"
 import { useAuth } from "@/components/auth/AuthProvider"
 import BalanceSummary from "@/components/balance/BalanceSummary"
 import ExpenseList from "@/components/expense/ExpenseList"
@@ -20,7 +16,6 @@ import { Button } from "@/components/ui/button"
 import { LoadingState } from "@/components/ui/loading-state"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { supabase } from "@/lib/supabase"
-import { isSwishCurrency } from "@/lib/swish"
 
 type TabValue = "expenses" | "balances" | "payments"
 

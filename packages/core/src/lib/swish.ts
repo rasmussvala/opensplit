@@ -68,10 +68,3 @@ export function buildSwishMessage(groupName: string): string {
 export function formatSwishAmount(amount: number): string {
   return amount.toFixed(2)
 }
-
-export function isMobileSwishDevice(): boolean {
-  return (
-    window.matchMedia("(pointer: coarse)").matches &&
-    window.matchMedia("(hover: none)").matches
-  )
-}

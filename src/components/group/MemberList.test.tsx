@@ -1,6 +1,6 @@
+import type { Member } from "@opensplit/core"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import type { Member } from "@/application/groups/loadGroupSnapshot"
 import MemberList from "./MemberList"
 
 const members: Member[] = [

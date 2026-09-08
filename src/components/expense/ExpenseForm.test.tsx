@@ -1,6 +1,6 @@
+import type { Member } from "@opensplit/core"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { Member } from "@/application/groups/loadGroupSnapshot"
 import ExpenseForm from "./ExpenseForm"
 
 const mockMembers: Member[] = [

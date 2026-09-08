@@ -1,7 +1,8 @@
+import { ensureSession } from "@opensplit/core"
 import type { ReactNode } from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import { LoadingState } from "@/components/ui/loading-state"
-import { ensureSession } from "@/lib/auth"
+import { supabase } from "@/lib/supabase"
 
 interface AuthContextValue {
   userId: string
@@ -21,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
-    ensureSession().then(setUserId)
+    ensureSession(supabase).then(setUserId)
   }, [])
 
   if (!userId) {

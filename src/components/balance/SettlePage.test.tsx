@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { supabase } from "@/lib/supabase"
-import * as swishLib from "@/lib/swish"
+import * as swishLib from "@/lib/swishDevice"
 import SettlePage from "./SettlePage"
 
 let recordOverride: (() => Promise<unknown>) | null = null
@@ -28,24 +28,19 @@ vi.mock("@/lib/supabase", () => ({
 }))
 
 vi.mock("@/application/composition", async () => {
-  const { loadGroupSnapshot } = await import(
-    "@/application/groups/loadGroupSnapshot"
-  )
-  const { manageSettlements } = await import(
-    "@/application/settlements/manageSettlements"
-  )
-  const { SupabaseGroupDataSource } = await import(
-    "@/infrastructure/supabase/supabaseGroupDataSource"
-  )
-  const { SupabaseSettlementDataSource } = await import(
-    "@/infrastructure/supabase/supabaseSettlementDataSource"
-  )
+  const {
+    loadGroupSnapshot,
+    manageSettlements,
+    SupabaseGroupDataSource,
+    SupabaseSettlementDataSource,
+  } = await import("@opensplit/core")
+  const { supabase } = await import("@/lib/supabase")
   const settlementManager = manageSettlements(
-    new SupabaseSettlementDataSource(),
+    new SupabaseSettlementDataSource(supabase),
   )
   return {
     application: {
-      groups: loadGroupSnapshot(new SupabaseGroupDataSource()),
+      groups: loadGroupSnapshot(new SupabaseGroupDataSource(supabase)),
       settlements: {
         suggest: settlementManager.suggest,
         record: (...args: Parameters<typeof settlementManager.record>) =>

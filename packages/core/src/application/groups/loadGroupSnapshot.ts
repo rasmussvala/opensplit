@@ -1,4 +1,4 @@
-import type { SplitOverrides } from "@/lib/types"
+import type { SplitOverrides } from "../../lib/types"
 
 export interface Group {
   id: string

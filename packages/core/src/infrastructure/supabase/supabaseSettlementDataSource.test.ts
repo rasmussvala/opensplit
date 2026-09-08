@@ -1,11 +1,10 @@
 import { describe, expect, it, vi } from "vitest"
-import type { SettlementCommand } from "@/application/settlements/manageSettlements"
-import { supabase } from "@/lib/supabase"
+import type { SettlementCommand } from "../../application/settlements/manageSettlements"
 import { SupabaseSettlementDataSource } from "./supabaseSettlementDataSource"
 
-vi.mock("@/lib/supabase", () => ({
-  supabase: { from: vi.fn() },
-}))
+const supabase = { from: vi.fn() }
+// biome-ignore lint/suspicious/noExplicitAny: test double for SupabaseClient
+const client = supabase as any
 
 const command: SettlementCommand = {
   groupId: "group-1",
@@ -33,7 +32,7 @@ describe("SupabaseSettlementDataSource", () => {
     vi.mocked(supabase.from).mockReturnValueOnce({ insert } as never)
 
     await expect(
-      new SupabaseSettlementDataSource().record(command),
+      new SupabaseSettlementDataSource(client).record(command),
     ).resolves.toEqual({
       id: "settlement-1",
       from: "member-1",
@@ -68,7 +67,7 @@ describe("SupabaseSettlementDataSource", () => {
     vi.mocked(supabase.from).mockReturnValueOnce({ insert } as never)
 
     await expect(
-      new SupabaseSettlementDataSource().record(command),
+      new SupabaseSettlementDataSource(client).record(command),
     ).resolves.toMatchObject({ amount: 42.5 })
   })
 
@@ -83,7 +82,7 @@ describe("SupabaseSettlementDataSource", () => {
     vi.mocked(supabase.from).mockReturnValueOnce({ insert } as never)
 
     await expect(
-      new SupabaseSettlementDataSource().record(command),
+      new SupabaseSettlementDataSource(client).record(command),
     ).rejects.toThrow("Failed to record settlement: insert denied")
   })
 
@@ -96,7 +95,10 @@ describe("SupabaseSettlementDataSource", () => {
     } as never)
 
     await expect(
-      new SupabaseSettlementDataSource().delete("group-1", "settlement-1"),
+      new SupabaseSettlementDataSource(client).delete(
+        "group-1",
+        "settlement-1",
+      ),
     ).resolves.toBeUndefined()
     expect(deleteQuery).toHaveBeenCalledWith({ count: "exact" })
     expect(eqGroup).toHaveBeenCalledWith("group_id", "group-1")
@@ -114,7 +116,10 @@ describe("SupabaseSettlementDataSource", () => {
     } as never)
 
     await expect(
-      new SupabaseSettlementDataSource().delete("group-1", "settlement-1"),
+      new SupabaseSettlementDataSource(client).delete(
+        "group-1",
+        "settlement-1",
+      ),
     ).rejects.toThrow("Failed to delete settlement: delete denied")
   })
 })

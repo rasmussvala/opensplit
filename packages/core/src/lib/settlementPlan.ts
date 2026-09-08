@@ -2,7 +2,7 @@ import type {
   Expense,
   GroupSnapshot,
   Settlement,
-} from "@/application/groups/loadGroupSnapshot"
+} from "../application/groups/loadGroupSnapshot"
 import { round2 } from "./utils"
 
 export interface Transaction {

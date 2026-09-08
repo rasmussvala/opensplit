@@ -1,9 +1,9 @@
+import { normalizeSwishPhone, SWISH_PHONE_ERROR } from "@opensplit/core"
 import { Pencil } from "lucide-react"
 import { useState } from "react"
 import SwishPhoneInput from "@/components/group/SwishPhoneInput"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
-import { normalizeSwishPhone, SWISH_PHONE_ERROR } from "@/lib/swish"
 
 interface SwishProfileProps {
   memberId: string

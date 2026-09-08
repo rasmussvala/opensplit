@@ -1,12 +1,18 @@
+import type { SupabaseClient } from "@supabase/supabase-js"
 import type {
   ExpenseDataSource,
   ExpenseInput,
-} from "@/application/expenses/manageExpenses"
-import { supabase } from "@/lib/supabase"
+} from "../../application/expenses/manageExpenses"
 
 export class SupabaseExpenseDataSource implements ExpenseDataSource {
+  private readonly supabase: SupabaseClient
+
+  constructor(supabase: SupabaseClient) {
+    this.supabase = supabase
+  }
+
   async create(groupId: string, input: ExpenseInput): Promise<void> {
-    const { error } = await supabase.from("expenses").insert({
+    const { error } = await this.supabase.from("expenses").insert({
       group_id: groupId,
       description: input.description,
       amount: input.amount,
@@ -18,7 +24,7 @@ export class SupabaseExpenseDataSource implements ExpenseDataSource {
   }
 
   async update(expenseId: string, input: ExpenseInput): Promise<void> {
-    const { error } = await supabase
+    const { error } = await this.supabase
       .from("expenses")
       .update({
         description: input.description,
@@ -32,7 +38,7 @@ export class SupabaseExpenseDataSource implements ExpenseDataSource {
   }
 
   async delete(expenseId: string): Promise<void> {
-    const { error } = await supabase
+    const { error } = await this.supabase
       .from("expenses")
       .delete()
       .eq("id", expenseId)

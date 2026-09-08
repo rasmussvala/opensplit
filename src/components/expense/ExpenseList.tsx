@@ -1,5 +1,5 @@
+import type { Expense, Member } from "@opensplit/core"
 import { Link } from "react-router-dom"
-import type { Expense, Member } from "@/application/groups/loadGroupSnapshot"
 import ExpenseItem from "./ExpenseItem"
 
 interface ExpenseListProps {

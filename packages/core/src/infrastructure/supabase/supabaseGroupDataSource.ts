@@ -1,15 +1,21 @@
+import type { SupabaseClient } from "@supabase/supabase-js"
 import type {
   ExpenseRow,
   GroupDataSource,
   GroupRow,
   MemberRow,
   SettlementRow,
-} from "@/application/groups/loadGroupSnapshot"
-import { supabase } from "@/lib/supabase"
+} from "../../application/groups/loadGroupSnapshot"
 
 export class SupabaseGroupDataSource implements GroupDataSource {
+  private readonly supabase: SupabaseClient
+
+  constructor(supabase: SupabaseClient) {
+    this.supabase = supabase
+  }
+
   async findGroupByInviteToken(inviteToken: string): Promise<GroupRow | null> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from("groups")
       .select("id, name, currency, invite_token")
       .eq("invite_token", inviteToken)
@@ -23,7 +29,7 @@ export class SupabaseGroupDataSource implements GroupDataSource {
     groupId: string,
     userId: string,
   ): Promise<MemberRow | null> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from("group_members")
       .select("id, group_id, guest_name, user_id, swish_phone")
       .eq("group_id", groupId)
@@ -37,7 +43,7 @@ export class SupabaseGroupDataSource implements GroupDataSource {
   }
 
   async listMembers(groupId: string): Promise<MemberRow[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from("group_members")
       .select("id, group_id, guest_name, user_id, swish_phone")
       .eq("group_id", groupId)
@@ -47,7 +53,7 @@ export class SupabaseGroupDataSource implements GroupDataSource {
   }
 
   async listExpenses(groupId: string): Promise<ExpenseRow[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from("expenses")
       .select(
         "id, group_id, paid_by, amount, description, split_among, split_overrides, created_at",
@@ -59,7 +65,7 @@ export class SupabaseGroupDataSource implements GroupDataSource {
   }
 
   async listSettlements(groupId: string): Promise<SettlementRow[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from("settlements")
       .select("id, group_id, from_member, to_member, amount, settled_at")
       .eq("group_id", groupId)

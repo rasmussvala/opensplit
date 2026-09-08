@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import type {
   Expense,
   Settlement,
-} from "@/application/groups/loadGroupSnapshot"
+} from "../application/groups/loadGroupSnapshot"
 import { calculateSettlementPlan } from "./settlementPlan"
 
 const toDomainExpense = (expense: Record<string, unknown>): Expense => ({

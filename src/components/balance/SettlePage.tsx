@@ -1,13 +1,20 @@
-import { Check, Copy, Smartphone } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { application } from "@/application/composition"
 import type {
   Group,
   GroupSnapshot,
   LoadGroupResult,
   Member,
-} from "@/application/groups/loadGroupSnapshot"
+} from "@opensplit/core"
+import {
+  buildSwishDeepLink,
+  buildSwishMessage,
+  buildSwishQrPayload,
+  formatSwishAmount,
+  isSwishCurrency,
+} from "@opensplit/core"
+import { Check, Copy, Smartphone } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import { application } from "@/application/composition"
 import { useAuth } from "@/components/auth/AuthProvider"
 import MemberPairAvatars from "@/components/group/MemberPairAvatars"
 import BackLink from "@/components/ui/back-link"
@@ -15,14 +22,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import CurrencyAmount from "@/components/ui/currency-amount"
 import { LoadingState } from "@/components/ui/loading-state"
 import { supabase } from "@/lib/supabase"
-import {
-  buildSwishDeepLink,
-  buildSwishMessage,
-  buildSwishQrPayload,
-  formatSwishAmount,
-  isMobileSwishDevice,
-  isSwishCurrency,
-} from "@/lib/swish"
+import { isMobileSwishDevice } from "@/lib/swishDevice"
 import { cn, formatAmount } from "@/lib/utils"
 
 type PageState =

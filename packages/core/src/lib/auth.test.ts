@@ -1,15 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { supabase } from "@/lib/supabase"
 import { ensureSession } from "./auth"
 
-vi.mock("@/lib/supabase", () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn(),
-      signInAnonymously: vi.fn(),
-    },
+const supabase = {
+  auth: {
+    getSession: vi.fn(),
+    signInAnonymously: vi.fn(),
   },
-}))
+}
+// biome-ignore lint/suspicious/noExplicitAny: test double for SupabaseClient
+const client = supabase as any
 
 describe("ensureSession", () => {
   beforeEach(() => {
@@ -26,7 +25,7 @@ describe("ensureSession", () => {
       ? R
       : never)
 
-    const userId = await ensureSession()
+    const userId = await ensureSession(client)
 
     expect(userId).toBe("existing-user-id")
     expect(supabase.auth.signInAnonymously).not.toHaveBeenCalled()
@@ -49,7 +48,7 @@ describe("ensureSession", () => {
       ? R
       : never)
 
-    const userId = await ensureSession()
+    const userId = await ensureSession(client)
 
     expect(userId).toBe("new-anon-id")
     expect(supabase.auth.signInAnonymously).toHaveBeenCalledOnce()
@@ -72,7 +71,7 @@ describe("ensureSession", () => {
       ? R
       : never)
 
-    await expect(ensureSession()).rejects.toThrow(
+    await expect(ensureSession(client)).rejects.toThrow(
       "Failed to create anonymous session",
     )
   })

@@ -1,13 +1,16 @@
-import { manageExpenses } from "@/application/expenses/manageExpenses"
-import { loadGroupSnapshot } from "@/application/groups/loadGroupSnapshot"
-import { manageSettlements } from "@/application/settlements/manageSettlements"
-import { SupabaseExpenseDataSource } from "@/infrastructure/supabase/supabaseExpenseDataSource"
-import { SupabaseGroupDataSource } from "@/infrastructure/supabase/supabaseGroupDataSource"
-import { SupabaseSettlementDataSource } from "@/infrastructure/supabase/supabaseSettlementDataSource"
+import {
+  loadGroupSnapshot,
+  manageExpenses,
+  manageSettlements,
+  SupabaseExpenseDataSource,
+  SupabaseGroupDataSource,
+  SupabaseSettlementDataSource,
+} from "@opensplit/core"
+import { supabase } from "@/lib/supabase"
 
-const groups = new SupabaseGroupDataSource()
-const expenses = new SupabaseExpenseDataSource()
-const settlements = new SupabaseSettlementDataSource()
+const groups = new SupabaseGroupDataSource(supabase)
+const expenses = new SupabaseExpenseDataSource(supabase)
+const settlements = new SupabaseSettlementDataSource(supabase)
 
 export const application = {
   groups: loadGroupSnapshot(groups),

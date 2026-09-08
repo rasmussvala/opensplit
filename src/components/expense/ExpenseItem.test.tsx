@@ -1,6 +1,6 @@
+import type { Expense } from "@opensplit/core"
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
-import type { Expense } from "@/application/groups/loadGroupSnapshot"
 import ExpenseItem from "./ExpenseItem"
 
 const makeExpense = (overrides: Partial<Expense> = {}): Expense => ({

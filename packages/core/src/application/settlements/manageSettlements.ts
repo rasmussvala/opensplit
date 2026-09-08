@@ -1,8 +1,5 @@
-import type {
-  GroupSnapshot,
-  Settlement,
-} from "@/application/groups/loadGroupSnapshot"
-import { planSettlement, validateSettlement } from "@/lib/settlementPlan"
+import { planSettlement, validateSettlement } from "../../lib/settlementPlan"
+import type { GroupSnapshot, Settlement } from "../groups/loadGroupSnapshot"
 
 export type SettlementCommand = {
   groupId: string

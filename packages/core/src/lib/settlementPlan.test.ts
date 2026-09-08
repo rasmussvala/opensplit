@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import type {
   Expense,
   Settlement,
-} from "@/application/groups/loadGroupSnapshot"
+} from "../application/groups/loadGroupSnapshot"
 import { calculateSettlementPlan, validateSettlement } from "./settlementPlan"
 
 const expense: Expense = {

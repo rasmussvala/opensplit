@@ -1,9 +1,8 @@
+import type { DbGroup } from "@opensplit/core"
 import { useEffect, useState } from "react"
 import GroupCard from "@/components/group/GroupCard"
 import { LoadingState } from "@/components/ui/loading-state"
 import { supabase } from "@/lib/supabase"
-import type { DbGroup } from "@/lib/types"
-
 export default function GroupList() {
   const [groups, setGroups] = useState<DbGroup[]>([])
   const [loading, setLoading] = useState(true)

@@ -1,3 +1,4 @@
+import type { DbGroup, DbGroupMember } from "@opensplit/core"
 import { Link } from "react-router-dom"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import type { DbGroup, DbGroupMember } from "@/lib/types"
 import { formatAmount } from "@/lib/utils"
 
 interface GroupCardProps {

@@ -10,14 +10,15 @@
     "check:fix": "biome check --write .",
     "smells": "node scripts/check-smells.mjs",
     "test": "vitest",
-    "test:coverage": "vitest --coverage --run",
+    "test:coverage": "vitest --coverage --run && npm run test:coverage -w @opensplit/core",
     "preview": "vite preview --host",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && npm run typecheck -w @opensplit/core"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.2.9",
     "@fontsource-variable/geist": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@opensplit/core": "*",
     "@supabase/supabase-js": "^2.101.1",
     "@tailwindcss/vite": "^4.2.2",
     "class-variance-authority": "^0.7.1",
@@ -47,5 +48,8 @@
     "typescript": "~5.9.3",
     "vite": "^8.0.1",
     "vitest": "^4.1.2"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
-import type { GroupDataSource } from "@/application/groups/loadGroupSnapshot"
-import { InMemoryGroupDataSource } from "@/application/groups/loadGroupSnapshot"
+import type { GroupDataSource } from "../groups/loadGroupSnapshot"
+import { InMemoryGroupDataSource } from "../groups/loadGroupSnapshot"
 import {
   type ExpenseDataSource,
   type ExpenseInput,

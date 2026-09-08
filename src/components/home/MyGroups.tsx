@@ -1,9 +1,9 @@
+import type { DbGroup, DbGroupMember } from "@opensplit/core"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/components/auth/AuthProvider"
 import GroupCard from "@/components/group/GroupCard"
 import { LoadingState } from "@/components/ui/loading-state"
 import { supabase } from "@/lib/supabase"
-import type { DbGroup, DbGroupMember } from "@/lib/types"
 
 type GroupSummary = DbGroup & {
   members: Pick<DbGroupMember, "id" | "guest_name">[]

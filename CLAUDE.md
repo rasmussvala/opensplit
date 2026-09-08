@@ -12,6 +12,17 @@ npm run test:coverage # tests + coverage report (must pass 75% overall, 90% for 
 
 ## Architecture
 
+**Workspaces:** npm workspaces. `packages/core` (`@opensplit/core`) holds platform-agnostic
+domain logic — `lib/` (pure helpers), `application/` (use cases), `infrastructure/supabase/`
+(data sources). It has no DOM, no `import.meta.env`, and no Supabase singleton: each app
+creates its own `SupabaseClient` and injects it at the composition root
+(`src/application/composition.ts`). Core is consumed as TypeScript source, so it must stay
+bundler-agnostic — relative imports only, no path aliases, no parameter properties.
+
+The root package is the web app. Core has its own vitest + tsconfig; root `typecheck` and
+`test:coverage` run both. The 90% `lib/**` coverage rule now lives in
+`packages/core/vitest.config.ts`, where the domain logic is.
+
 **Stack:** React 19 + TypeScript, Vite, Tailwind v4, shadcn/ui (Radix), Supabase (auth + DB + Realtime), deployed to GitHub Pages.
 
 **Auth:** Anonymous Supabase sessions only — no accounts.

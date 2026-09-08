@@ -1,9 +1,8 @@
+import type { Expense, ExpenseEditingContext, Member } from "@opensplit/core"
 import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { application } from "@/application/composition"
-import type { ExpenseEditingContext } from "@/application/expenses/manageExpenses"
-import type { Expense, Member } from "@/application/groups/loadGroupSnapshot"
 import { useAuth } from "@/components/auth/AuthProvider"
 import ExpenseForm, {
   type ExpenseFormData,

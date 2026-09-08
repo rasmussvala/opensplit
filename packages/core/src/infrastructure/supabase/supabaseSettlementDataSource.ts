@@ -1,12 +1,12 @@
+import type { SupabaseClient } from "@supabase/supabase-js"
 import type {
   Settlement,
   SettlementRow,
-} from "@/application/groups/loadGroupSnapshot"
+} from "../../application/groups/loadGroupSnapshot"
 import type {
   SettlementCommand,
   SettlementDataSource,
-} from "@/application/settlements/manageSettlements"
-import { supabase } from "@/lib/supabase"
+} from "../../application/settlements/manageSettlements"
 
 function toSettlement(row: SettlementRow): Settlement {
   return {
@@ -19,8 +19,14 @@ function toSettlement(row: SettlementRow): Settlement {
 }
 
 export class SupabaseSettlementDataSource implements SettlementDataSource {
+  private readonly supabase: SupabaseClient
+
+  constructor(supabase: SupabaseClient) {
+    this.supabase = supabase
+  }
+
   async record(command: SettlementCommand): Promise<Settlement> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from("settlements")
       .insert({
         group_id: command.groupId,
@@ -36,7 +42,7 @@ export class SupabaseSettlementDataSource implements SettlementDataSource {
   }
 
   async delete(groupId: string, settlementId: string): Promise<void> {
-    const { error } = await supabase
+    const { error } = await this.supabase
       .from("settlements")
       .delete({ count: "exact" })
       .eq("group_id", groupId)

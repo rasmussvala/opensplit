@@ -1,10 +1,10 @@
+import type { SplitOverrides } from "../../lib/types"
 import {
   type Expense,
   type GroupDataSource,
   loadGroupSnapshot,
   type Member,
-} from "@/application/groups/loadGroupSnapshot"
-import type { SplitOverrides } from "@/lib/types"
+} from "../groups/loadGroupSnapshot"
 
 export interface ExpenseInput {
   description: string
