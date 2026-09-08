@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run check:fix # biome lint + format fix (auto-write)
 npm run typecheck
-npm run test:coverage # tests + coverage report (must pass 75% overall, 90% for src/lib/**)
+npm run test:coverage # tests + coverage (75% overall; 80% web src/lib/**, 90% core lib/**)
 ```
 
 ## Architecture
@@ -20,8 +20,8 @@ creates its own `SupabaseClient` and injects it at the composition root
 bundler-agnostic — relative imports only, no path aliases, no parameter properties.
 
 The root package is the web app. Core has its own vitest + tsconfig; root `typecheck` and
-`test:coverage` run both. The 90% `lib/**` coverage rule now lives in
-`packages/core/vitest.config.ts`, where the domain logic is.
+`test:coverage` run both. Domain logic keeps its 90% `lib/**` coverage rule in `packages/core/vitest.config.ts`;
+the web app's remaining `src/lib/**` platform glue is gated at 80%.
 
 **Stack:** React 19 + TypeScript, Vite, Tailwind v4, shadcn/ui (Radix), Supabase (auth + DB + Realtime), deployed to GitHub Pages.
 
