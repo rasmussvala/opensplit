@@ -1,6 +1,6 @@
 import type { Expense } from "@rasmussvala/opensplit-core"
+import { formatAmount } from "@rasmussvala/opensplit-core"
 import MemberAvatar from "@/components/group/MemberAvatar"
-import { formatAmount } from "@/lib/utils"
 
 interface ExpenseItemProps {
   expense: Expense

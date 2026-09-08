@@ -1,4 +1,5 @@
 import type { DbGroup, DbGroupMember } from "@rasmussvala/opensplit-core"
+import { formatAmount } from "@rasmussvala/opensplit-core"
 import { Link } from "react-router-dom"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Badge } from "@/components/ui/badge"
@@ -9,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { formatAmount } from "@/lib/utils"
 
 interface GroupCardProps {
   group: DbGroup

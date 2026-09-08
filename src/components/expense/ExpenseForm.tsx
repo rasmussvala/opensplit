@@ -6,6 +6,7 @@ import type {
 import {
   buildActiveOverrides,
   calculateExpenseShares,
+  formatAmountNumber,
   formatRaw,
   getSplitStatus,
 } from "@rasmussvala/opensplit-core"
@@ -14,7 +15,7 @@ import type { SubmitEvent } from "react"
 import { useState } from "react"
 import MemberAvatar from "@/components/group/MemberAvatar"
 import { Button } from "@/components/ui/button"
-import { cn, formatAmountNumber } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 export interface ExpenseFormData {
   description: string

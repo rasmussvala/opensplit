@@ -1,8 +1,8 @@
 import type { Member, Settlement } from "@rasmussvala/opensplit-core"
+import { formatAmount } from "@rasmussvala/opensplit-core"
 import { Link } from "react-router-dom"
 import MemberPairAvatars from "@/components/group/MemberPairAvatars"
 import CurrencyAmount from "@/components/ui/currency-amount"
-import { formatAmount } from "@/lib/utils"
 
 interface PaymentsListProps {
   settlements: Settlement[]

@@ -1,4 +1,5 @@
 import type { Member, Settlement } from "@rasmussvala/opensplit-core"
+import { formatAmount } from "@rasmussvala/opensplit-core"
 import { Trash2 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
@@ -9,7 +10,6 @@ import BackLink from "@/components/ui/back-link"
 import { Button } from "@/components/ui/button"
 import CurrencyAmount from "@/components/ui/currency-amount"
 import { LoadingState } from "@/components/ui/loading-state"
-import { formatAmount } from "@/lib/utils"
 
 type PageState =
   | { status: "loading" }

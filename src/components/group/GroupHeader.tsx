@@ -1,8 +1,8 @@
 import type { Group, Member } from "@rasmussvala/opensplit-core"
+import { formatAmount } from "@rasmussvala/opensplit-core"
 import type { ReactNode } from "react"
 import InviteCode from "@/components/group/InviteCode"
 import MemberList from "@/components/group/MemberList"
-import { formatAmount } from "@/lib/utils"
 
 interface GroupHeaderProps {
   group: Group

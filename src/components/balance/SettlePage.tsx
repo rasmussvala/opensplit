@@ -8,6 +8,7 @@ import {
   buildSwishDeepLink,
   buildSwishMessage,
   buildSwishQrPayload,
+  formatAmount,
   formatSwishAmount,
   isSwishCurrency,
 } from "@rasmussvala/opensplit-core"
@@ -23,7 +24,7 @@ import CurrencyAmount from "@/components/ui/currency-amount"
 import { LoadingState } from "@/components/ui/loading-state"
 import { supabase } from "@/lib/supabase"
 import { isMobileSwishDevice } from "@/lib/swishDevice"
-import { cn, formatAmount } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
 type PageState =
   | { status: "loading" }

@@ -1,5 +1,5 @@
+import { formatAmount } from "@rasmussvala/opensplit-core"
 import MemberAvatar from "@/components/group/MemberAvatar"
-import { formatAmount } from "@/lib/utils"
 
 interface BalanceItemProps {
   memberId: string

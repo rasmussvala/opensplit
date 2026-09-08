@@ -1,4 +1,4 @@
-import { formatAmountNumber } from "@/lib/utils"
+import { formatAmountNumber } from "@rasmussvala/opensplit-core"
 
 interface CurrencyAmountProps {
   currency: string
