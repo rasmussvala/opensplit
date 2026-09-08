@@ -19,6 +19,9 @@ app. It holds `lib/` (pure helpers), `application/` (use cases) and `infrastruct
 `SupabaseClient` and injects it at the composition root (`src/application/composition.ts`).
 
 Installing it needs a token with `read:packages`; CI uses the built-in `GITHUB_TOKEN`.
+That token only works because the package grants this repo read access under
+**Manage Actions access** in its package settings (the Codespaces box next to it does
+not cover workflows). Without that grant `npm ci` fails with a 403 `read_package`.
 Changing domain logic means releasing a new core version, then bumping it here.
 
 This repo's `src/lib/**` is platform glue only (Supabase client, `cn`, PWA and device
