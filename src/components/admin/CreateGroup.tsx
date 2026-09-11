@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/components/auth/AuthProvider"
 import { Button } from "@/components/ui/button"
+import { DB_GROUP_COLUMNS } from "@/lib/groupColumns"
 import { supabase } from "@/lib/supabase"
 
 const CURRENCIES = ["SEK", "EUR", "USD", "GBP", "NOK"]
@@ -20,12 +21,12 @@ export default function CreateGroup() {
     const { data: group, error: groupError } = await supabase
       .from("groups")
       .insert({ name: name.trim(), currency, created_by: userId })
-      .select()
+      .select(DB_GROUP_COLUMNS)
       .single()
 
     if (groupError || !group) return
 
-    navigate(`/groups/${group.invite_token}`)
+    navigate(`/groups/${group.invite_code}`)
   }
 
   return (

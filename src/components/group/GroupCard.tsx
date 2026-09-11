@@ -48,7 +48,7 @@ export default function GroupCard({
 
   return (
     <Link
-      to={`/groups/${group.invite_token}`}
+      to={`/groups/${group.invite_code}`}
       aria-label={ariaLabel}
       className="group block rounded-4xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >

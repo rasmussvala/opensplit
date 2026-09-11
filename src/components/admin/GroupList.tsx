@@ -2,6 +2,7 @@ import type { DbGroup } from "@rasmussvala/opensplit-core"
 import { useEffect, useState } from "react"
 import GroupCard from "@/components/group/GroupCard"
 import { LoadingState } from "@/components/ui/loading-state"
+import { DB_GROUP_COLUMNS } from "@/lib/groupColumns"
 import { supabase } from "@/lib/supabase"
 export default function GroupList() {
   const [groups, setGroups] = useState<DbGroup[]>([])
@@ -11,7 +12,7 @@ export default function GroupList() {
     async function fetchGroups() {
       const { data, error } = await supabase
         .from("groups")
-        .select("*")
+        .select(DB_GROUP_COLUMNS)
         .order("created_at", { ascending: false })
 
       if (!error && data) {

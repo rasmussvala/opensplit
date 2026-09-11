@@ -26,7 +26,7 @@ export default function GroupHeader({
         </span>
       </div>
       <MemberList members={members} />
-      <InviteCode inviteToken={group.inviteToken} />
+      <InviteCode inviteToken={group.inviteCode} />
       {children}
     </div>
   )

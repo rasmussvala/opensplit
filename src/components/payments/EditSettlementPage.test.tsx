@@ -20,7 +20,7 @@ vi.mock("@/components/auth/AuthProvider", () => ({
 import EditSettlementPage from "./EditSettlementPage"
 
 const snapshot = {
-  group: { id: "group-1", name: "Trip", currency: "USD", inviteToken: "token" },
+  group: { id: "group-1", name: "Trip", currency: "USD", inviteCode: "token" },
   currentMember: {
     id: "member-1",
     name: "Alice",

@@ -58,7 +58,7 @@ export default function SettlePage() {
     let result: LoadGroupResult
     try {
       result = await application.groups.execute({
-        inviteToken: inviteToken as string,
+        inviteCode: inviteToken as string,
         userId,
       })
     } catch {

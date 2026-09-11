@@ -1,7 +1,4 @@
-import {
-  InMemoryMembershipDataSource,
-  manageMembership,
-} from "@rasmussvala/opensplit-core"
+import { InMemoryStore, manageMembership } from "@rasmussvala/opensplit-core"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import SwishProfile from "./SwishProfile"
@@ -10,7 +7,7 @@ const group = {
   id: "group-1",
   name: "Trip",
   currency: "SEK",
-  invite_token: "trip-code",
+  invite_code: "trip-code",
 }
 
 const alice = {
@@ -41,10 +38,10 @@ async function savedPhone() {
 describe("SwishProfile", () => {
   beforeEach(() => {
     membership = manageMembership(
-      new InMemoryMembershipDataSource({
+      new InMemoryStore({
         groups: [group],
         members: [{ ...alice }],
-      }),
+      }).memberships,
     )
   })
 
