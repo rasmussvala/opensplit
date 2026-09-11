@@ -35,14 +35,14 @@ function renderPaymentsList(
     settlements?: Settlement[]
     members?: Member[]
     currency?: string
-    inviteToken?: string
+    inviteCode?: string
   } = {},
 ) {
   const props = {
     settlements: overrides.settlements ?? [],
     members: overrides.members ?? mockMembers,
     currency: overrides.currency ?? "USD",
-    inviteToken: overrides.inviteToken ?? "token-abc",
+    inviteCode: overrides.inviteCode ?? "token-abc",
   }
   return render(
     <MemoryRouter>
@@ -155,7 +155,7 @@ describe("PaymentsList", () => {
       },
     ]
 
-    renderPaymentsList({ settlements, inviteToken: "token-abc" })
+    renderPaymentsList({ settlements, inviteCode: "token-abc" })
 
     const links = screen.getAllByRole("link")
     expect(links).toHaveLength(2)

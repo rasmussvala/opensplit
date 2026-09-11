@@ -39,8 +39,8 @@ type PageState =
     }
 
 export default function SettlePage() {
-  const { inviteToken, fromMemberId, toMemberId } = useParams<{
-    inviteToken: string
+  const { inviteCode, fromMemberId, toMemberId } = useParams<{
+    inviteCode: string
     fromMemberId: string
     toMemberId: string
   }>()
@@ -52,13 +52,13 @@ export default function SettlePage() {
   const [copied, setCopied] = useState(false)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
 
-  const groupUrl = `/groups/${inviteToken}?tab=balances`
+  const groupUrl = `/groups/${inviteCode}?tab=balances`
 
   const load = useCallback(async () => {
     let result: LoadGroupResult
     try {
       result = await application.groups.execute({
-        inviteCode: inviteToken as string,
+        inviteCode: inviteCode as string,
         userId,
       })
     } catch {
@@ -90,7 +90,7 @@ export default function SettlePage() {
       to,
       amount: match ? match.amount : null,
     })
-  }, [inviteToken, fromMemberId, toMemberId, userId])
+  }, [inviteCode, fromMemberId, toMemberId, userId])
 
   useEffect(() => {
     void load()
@@ -101,7 +101,7 @@ export default function SettlePage() {
   useEffect(() => {
     if (!groupId) return
     const channel = supabase
-      .channel(`settle-${inviteToken}`)
+      .channel(`settle-${inviteCode}`)
       .on(
         "postgres_changes",
         {
@@ -136,7 +136,7 @@ export default function SettlePage() {
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [inviteToken, load, groupId])
+  }, [inviteCode, load, groupId])
 
   const ready = state.status === "ready" ? state : null
   const swishEnabled =
@@ -204,7 +204,7 @@ export default function SettlePage() {
         )
         return
       }
-      navigate(`/groups/${inviteToken}?tab=payments`)
+      navigate(`/groups/${inviteCode}?tab=payments`)
     } catch {
       setSubmitError("Unable to record settlement. Please try again.")
     } finally {

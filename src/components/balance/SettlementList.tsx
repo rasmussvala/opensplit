@@ -10,7 +10,7 @@ interface SettlementListProps {
   transactions: Transaction[]
   memberNames: Map<string, string>
   currency: string
-  inviteToken: string
+  inviteCode: string
   headerAction?: ReactNode
 }
 
@@ -18,7 +18,7 @@ export default function SettlementList({
   transactions,
   memberNames,
   currency,
-  inviteToken,
+  inviteCode,
   headerAction,
 }: SettlementListProps) {
   return (
@@ -34,7 +34,7 @@ export default function SettlementList({
           return (
             <Link
               key={`${t.from}-${t.to}`}
-              to={`/groups/${inviteToken}/settle/${t.from}/${t.to}`}
+              to={`/groups/${inviteCode}/settle/${t.from}/${t.to}`}
               className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 transition-colors hover:border-border hover:bg-card/70"
             >
               <MemberPairAvatars

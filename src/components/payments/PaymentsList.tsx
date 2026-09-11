@@ -8,14 +8,14 @@ interface PaymentsListProps {
   settlements: Settlement[]
   members: Member[]
   currency: string
-  inviteToken: string
+  inviteCode: string
 }
 
 export default function PaymentsList({
   settlements,
   members,
   currency,
-  inviteToken,
+  inviteCode,
 }: PaymentsListProps) {
   const memberNames = new Map(members.map((m) => [m.id, m.name]))
 
@@ -50,7 +50,7 @@ export default function PaymentsList({
           return (
             <Link
               key={settlement.id}
-              to={`/groups/${inviteToken}/settlements/${settlement.id}`}
+              to={`/groups/${inviteCode}/settlements/${settlement.id}`}
               className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 transition-colors hover:border-border hover:bg-card/70"
             >
               <MemberPairAvatars

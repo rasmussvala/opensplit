@@ -48,11 +48,11 @@ const member = {
   swishPhone: null,
 }
 
-function renderWithRoute(inviteToken = "token-abc") {
+function renderWithRoute(inviteCode = "token-abc") {
   return render(
-    <MemoryRouter initialEntries={[`/groups/${inviteToken}`]}>
+    <MemoryRouter initialEntries={[`/groups/${inviteCode}`]}>
       <Routes>
-        <Route path="/groups/:inviteToken" element={<GroupPage />} />
+        <Route path="/groups/:inviteCode" element={<GroupPage />} />
       </Routes>
     </MemoryRouter>,
   )

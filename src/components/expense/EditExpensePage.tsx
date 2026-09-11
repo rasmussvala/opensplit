@@ -24,21 +24,21 @@ type PageState =
     }
 
 export default function EditExpensePage() {
-  const { inviteToken, expenseId } = useParams<{
-    inviteToken: string
+  const { inviteCode, expenseId } = useParams<{
+    inviteCode: string
     expenseId: string
   }>()
   const { userId } = useAuth()
   const navigate = useNavigate()
   const [state, setState] = useState<PageState>({ status: "loading" })
 
-  const groupUrl = `/groups/${inviteToken}`
+  const groupUrl = `/groups/${inviteCode}`
 
   const load = useCallback(async () => {
     let context: ExpenseEditingContext | null
     try {
       context = await application.expenses.loadContext(
-        inviteToken as string,
+        inviteCode as string,
         userId,
         expenseId,
       )
@@ -56,7 +56,7 @@ export default function EditExpensePage() {
       members: context.members,
       currency: context.currency,
     })
-  }, [inviteToken, expenseId, userId])
+  }, [inviteCode, expenseId, userId])
 
   useEffect(() => {
     void load()

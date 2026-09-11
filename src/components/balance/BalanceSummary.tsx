@@ -12,7 +12,7 @@ interface BalanceSummaryProps {
   settlements: Settlement[]
   members: Member[]
   currency: string
-  inviteToken: string
+  inviteCode: string
   currentMemberId: string | null
 }
 
@@ -21,7 +21,7 @@ export default function BalanceSummary({
   settlements,
   members,
   currency,
-  inviteToken,
+  inviteCode,
   currentMemberId,
 }: BalanceSummaryProps) {
   const [showBalances, setShowBalances] = useState(true)
@@ -84,7 +84,7 @@ export default function BalanceSummary({
           transactions={filteredTransactions}
           memberNames={memberNames}
           currency={currency}
-          inviteToken={inviteToken}
+          inviteCode={inviteCode}
           headerAction={
             canFilterByCurrentMember ? (
               <button

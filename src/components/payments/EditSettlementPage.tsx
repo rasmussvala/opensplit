@@ -23,19 +23,19 @@ type PageState =
     }
 
 export default function EditSettlementPage() {
-  const { inviteToken, settlementId } = useParams<{
-    inviteToken: string
+  const { inviteCode, settlementId } = useParams<{
+    inviteCode: string
     settlementId: string
   }>()
   const { userId } = useAuth()
   const navigate = useNavigate()
   const [state, setState] = useState<PageState>({ status: "loading" })
-  const groupUrl = `/groups/${inviteToken}?tab=payments`
+  const groupUrl = `/groups/${inviteCode}?tab=payments`
 
   const load = useCallback(async () => {
     try {
       const result = await application.groups.execute({
-        inviteCode: inviteToken as string,
+        inviteCode: inviteCode as string,
         userId,
       })
       if (result.status !== "member") return setState({ status: "not-found" })
@@ -54,7 +54,7 @@ export default function EditSettlementPage() {
     } catch {
       setState({ status: "not-found" })
     }
-  }, [inviteToken, settlementId, userId])
+  }, [inviteCode, settlementId, userId])
 
   useEffect(() => {
     void load()
