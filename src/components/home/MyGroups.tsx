@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/components/auth/AuthProvider"
 import GroupCard from "@/components/group/GroupCard"
 import { LoadingState } from "@/components/ui/loading-state"
+import { DB_GROUP_COLUMNS } from "@/lib/groupColumns"
 import { supabase } from "@/lib/supabase"
 
 type GroupSummary = DbGroup & {
@@ -20,7 +21,7 @@ export default function MyGroups() {
       const { data, error } = await supabase
         .from("group_members")
         .select(
-          "group:groups(*, members:group_members(id, guest_name), expenses(amount))",
+          `group:groups(${DB_GROUP_COLUMNS}, members:group_members(id, guest_name), expenses(amount))`,
         )
         .eq("user_id", userId)
 

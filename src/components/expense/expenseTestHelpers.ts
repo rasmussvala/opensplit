@@ -4,7 +4,7 @@ const defaultGroup = {
   id: "group-1",
   name: "Trip to Oslo",
   currency: "USD",
-  invite_token: "token-abc",
+  invite_code: "token-abc",
 }
 
 export function groupsOk(group: unknown = defaultGroup) {

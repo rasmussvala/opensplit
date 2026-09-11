@@ -35,7 +35,7 @@ export default function EditSettlementPage() {
   const load = useCallback(async () => {
     try {
       const result = await application.groups.execute({
-        inviteToken: inviteToken as string,
+        inviteCode: inviteToken as string,
         userId,
       })
       if (result.status !== "member") return setState({ status: "not-found" })

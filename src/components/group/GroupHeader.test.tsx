@@ -7,7 +7,7 @@ const group: Group = {
   id: "g1",
   name: "Test Group",
   currency: "USD",
-  inviteToken: "invite-abc",
+  inviteCode: "invite-abc",
 }
 
 const member: Member = {
@@ -63,7 +63,7 @@ describe("GroupHeader", () => {
   it("renders the copy code button (InviteCode)", () => {
     render(
       <GroupHeader
-        group={{ ...group, inviteToken: "abc-123" }}
+        group={{ ...group, inviteCode: "abc-123" }}
         members={[member]}
         totalSpent={0}
       />,

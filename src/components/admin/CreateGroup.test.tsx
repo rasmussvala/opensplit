@@ -43,7 +43,7 @@ describe("CreateGroup", () => {
   })
 
   it("creates group in supabase and navigates to it on submit", async () => {
-    const mockGroup = { id: "group-uuid", invite_token: "token-abc" }
+    const mockGroup = { id: "group-uuid", invite_code: "token-abc" }
 
     const mockInsertGroup = {
       insert: vi.fn().mockReturnValue({

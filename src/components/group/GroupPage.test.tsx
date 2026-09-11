@@ -38,7 +38,7 @@ const group = {
   id: "group-1",
   name: "Trip to Oslo",
   currency: "USD",
-  inviteToken: "token-abc",
+  inviteCode: "token-abc",
 }
 
 const member = {
@@ -107,7 +107,7 @@ describe("GroupPage", () => {
       expect(screen.getByText(/group not found/i)).toBeInTheDocument()
     })
     expect(executeMock).toHaveBeenCalledWith({
-      inviteToken: "invalid-token",
+      inviteCode: "invalid-token",
       userId: "test-user-id",
     })
   })

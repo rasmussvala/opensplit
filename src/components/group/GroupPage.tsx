@@ -66,7 +66,7 @@ export default function GroupPage() {
   const loadGroup = useCallback(async () => {
     try {
       const result = await application.groups.execute({
-        inviteToken: inviteToken as string,
+        inviteCode: inviteToken as string,
         userId,
       })
 

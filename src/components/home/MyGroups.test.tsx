@@ -16,10 +16,11 @@ vi.mock("@/components/auth/AuthProvider", () => ({
 
 function mockMembership(data: unknown[], error: unknown = null) {
   const eq = vi.fn().mockResolvedValue({ data, error })
+  const select = vi.fn().mockReturnValue({ eq })
   vi.mocked(supabase.from).mockReturnValue({
-    select: vi.fn().mockReturnValue({ eq }),
+    select,
   } as unknown as ReturnType<typeof supabase.from>)
-  return { eq }
+  return { select, eq }
 }
 
 function renderMyGroups() {
@@ -36,12 +37,15 @@ describe("MyGroups", () => {
   })
 
   it("queries memberships for the current user", async () => {
-    const { eq } = mockMembership([])
+    const { select, eq } = mockMembership([])
     renderMyGroups()
     await waitFor(() => {
       expect(supabase.from).toHaveBeenCalledWith("group_members")
       expect(eq).toHaveBeenCalledWith("user_id", "test-user-id")
     })
+    expect(select).toHaveBeenCalledWith(
+      expect.stringContaining("invite_code:invite_token"),
+    )
   })
 
   it("renders joined groups with member previews and total spending", async () => {
@@ -51,7 +55,7 @@ describe("MyGroups", () => {
           id: "g1",
           name: "Trip to Oslo",
           currency: "NOK",
-          invite_token: "token-1",
+          invite_code: "token-1",
           created_at: "2026-04-01T00:00:00Z",
           members: [
             { id: "m1", guest_name: "Ada" },
@@ -67,7 +71,7 @@ describe("MyGroups", () => {
           id: "g2",
           name: "Dinner Club",
           currency: "USD",
-          invite_token: "token-2",
+          invite_code: "token-2",
           created_at: "2026-04-02T00:00:00Z",
           members: [{ id: "m5", guest_name: "Pat" }],
           expenses: [],

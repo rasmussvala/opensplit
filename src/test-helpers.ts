@@ -8,7 +8,7 @@ export function makeGroup(overrides: Partial<DbGroup> = {}): DbGroup {
     id: "g1",
     name: "Test Group",
     currency: "USD",
-    invite_token: "invite-abc",
+    invite_code: "invite-abc",
     created_by: "u1",
     created_at: "2026-01-01T00:00:00Z",
     ...overrides,

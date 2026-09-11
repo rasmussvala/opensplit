@@ -66,7 +66,7 @@ const baseGroup = {
   id: "group-1",
   name: "Trip",
   currency: "USD",
-  invite_token: "token-abc",
+  invite_code: "token-abc",
 }
 
 const baseMembers = [

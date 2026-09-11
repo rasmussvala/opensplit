@@ -11,16 +11,35 @@ vi.mock("@/lib/supabase", () => ({
 }))
 
 function mockSupabaseSelect(data: unknown[], error: unknown = null) {
+  const select = vi.fn().mockReturnValue({
+    order: vi.fn().mockResolvedValue({ data, error }),
+  })
   vi.mocked(supabase.from).mockReturnValue({
-    select: vi.fn().mockReturnValue({
-      order: vi.fn().mockResolvedValue({ data, error }),
-    }),
+    select,
   } as unknown as ReturnType<typeof supabase.from>)
+  return { select }
 }
 
 describe("GroupList", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+  })
+
+  it("reads each group's invite code from the invite_token column", async () => {
+    const { select } = mockSupabaseSelect([])
+
+    render(
+      <MemoryRouter>
+        <GroupList />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(/no groups yet/i)).toBeInTheDocument()
+    })
+    expect(select).toHaveBeenCalledWith(
+      expect.stringContaining("invite_code:invite_token"),
+    )
   })
 
   it("renders loading state initially", async () => {
@@ -46,14 +65,14 @@ describe("GroupList", () => {
         id: "g1",
         name: "Trip to Oslo",
         currency: "NOK",
-        invite_token: "token-1",
+        invite_code: "token-1",
         created_at: "2026-04-01T00:00:00Z",
       },
       {
         id: "g2",
         name: "Dinner Club",
         currency: "USD",
-        invite_token: "token-2",
+        invite_code: "token-2",
         created_at: "2026-04-02T00:00:00Z",
       },
     ])
@@ -93,7 +112,7 @@ describe("GroupList", () => {
         id: "g1",
         name: "Trip to Oslo",
         currency: "NOK",
-        invite_token: "token-1",
+        invite_code: "token-1",
         created_at: "2026-04-01T00:00:00Z",
       },
     ])
