@@ -1,26 +1,51 @@
+import {
+  InMemoryMembershipDataSource,
+  manageMembership,
+} from "@rasmussvala/opensplit-core"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { supabase } from "@/lib/supabase"
 import SwishProfile from "./SwishProfile"
 
-vi.mock("@/lib/supabase", () => ({
-  supabase: {
-    from: vi.fn(),
+const group = {
+  id: "group-1",
+  name: "Trip",
+  currency: "SEK",
+  invite_token: "trip-code",
+}
+
+const alice = {
+  id: "m1",
+  group_id: "group-1",
+  guest_name: "Alice",
+  user_id: "user-1",
+  swish_phone: "46701234567",
+}
+
+/** The real membership module over data the test can read back. */
+let membership: ReturnType<typeof manageMembership>
+
+vi.mock("@/application/composition", () => ({
+  application: {
+    get membership() {
+      return membership
+    },
   },
 }))
 
-function mockUpdate() {
-  const eqMock = vi.fn().mockResolvedValue({ error: null })
-  const updateMock = vi.fn().mockReturnValue({ eq: eqMock })
-  vi.mocked(supabase.from).mockReturnValue({
-    update: updateMock,
-  } as unknown as ReturnType<typeof supabase.from>)
-  return { updateMock, eqMock }
+/** The number the module has saved against Alice. */
+async function savedPhone() {
+  const [held] = await membership.listGroups("user-1")
+  return held.member.swishPhone
 }
 
 describe("SwishProfile", () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    membership = manageMembership(
+      new InMemoryMembershipDataSource({
+        groups: [group],
+        members: [{ ...alice }],
+      }),
+    )
   })
 
   it("shows the current phone and an Edit button", () => {
@@ -45,29 +70,24 @@ describe("SwishProfile", () => {
   })
 
   it("opens the editor and saves a normalized phone number", async () => {
-    const { updateMock, eqMock } = mockUpdate()
     const onUpdated = vi.fn()
     render(
       <SwishProfile memberId="m1" currentPhone={null} onUpdated={onUpdated} />,
     )
 
     fireEvent.click(screen.getByRole("button", { name: /edit swish phone/i }))
-
     fireEvent.change(screen.getByLabelText(/your swish phone/i), {
-      target: { value: "070 123 45 67" },
+      target: { value: "070 765 43 21" },
     })
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }))
 
-    await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith("group_members")
-      expect(updateMock).toHaveBeenCalledWith({ swish_phone: "46701234567" })
-      expect(eqMock).toHaveBeenCalledWith("id", "m1")
+    await waitFor(async () => {
+      expect(await savedPhone()).toBe("46707654321")
       expect(onUpdated).toHaveBeenCalled()
     })
   })
 
-  it("blocks save and shows an error for an invalid phone", () => {
-    const { updateMock } = mockUpdate()
+  it("blocks save and shows an error for an invalid phone", async () => {
     render(
       <SwishProfile memberId="m1" currentPhone={null} onUpdated={vi.fn()} />,
     )
@@ -79,13 +99,12 @@ describe("SwishProfile", () => {
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }))
 
     expect(
-      screen.getByText(/enter a valid swedish mobile number/i),
+      await screen.findByText(/enter a valid swedish mobile number/i),
     ).toBeInTheDocument()
-    expect(updateMock).not.toHaveBeenCalled()
+    expect(await savedPhone()).toBe("46701234567")
   })
 
-  it("saves null when the input is left blank", async () => {
-    const { updateMock } = mockUpdate()
+  it("removes the number when the input is left blank", async () => {
     render(
       <SwishProfile
         memberId="m1"
@@ -100,13 +119,10 @@ describe("SwishProfile", () => {
     })
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }))
 
-    await waitFor(() => {
-      expect(updateMock).toHaveBeenCalledWith({ swish_phone: null })
-    })
+    await waitFor(async () => expect(await savedPhone()).toBeNull())
   })
 
-  it("Cancel returns to the read-only view without calling supabase", () => {
-    const { updateMock } = mockUpdate()
+  it("Cancel returns to the read-only view without saving", async () => {
     render(
       <SwishProfile
         memberId="m1"
@@ -116,9 +132,12 @@ describe("SwishProfile", () => {
     )
 
     fireEvent.click(screen.getByRole("button", { name: /edit swish phone/i }))
+    fireEvent.change(screen.getByLabelText(/your swish phone/i), {
+      target: { value: "0709999999" },
+    })
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }))
 
     expect(screen.getByText("46701234567")).toBeInTheDocument()
-    expect(updateMock).not.toHaveBeenCalled()
+    expect(await savedPhone()).toBe("46701234567")
   })
 })

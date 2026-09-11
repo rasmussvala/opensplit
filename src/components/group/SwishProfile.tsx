@@ -1,12 +1,8 @@
-import {
-  normalizeSwishPhone,
-  SWISH_PHONE_ERROR,
-} from "@rasmussvala/opensplit-core"
 import { Pencil } from "lucide-react"
 import { useState } from "react"
+import { application } from "@/application/composition"
 import SwishPhoneInput from "@/components/group/SwishPhoneInput"
 import { Button } from "@/components/ui/button"
-import { supabase } from "@/lib/supabase"
 
 interface SwishProfileProps {
   memberId: string
@@ -36,22 +32,20 @@ export default function SwishProfile({
   }
 
   async function handleSave() {
-    let normalized: string | null = null
-    if (value.trim()) {
-      normalized = normalizeSwishPhone(value)
-      if (!normalized) {
-        setError(SWISH_PHONE_ERROR)
-        return
-      }
-    }
     setError(null)
     setSaving(true)
     try {
-      const { error: updateError } = await supabase
-        .from("group_members")
-        .update({ swish_phone: normalized })
-        .eq("id", memberId)
-      if (updateError) return
+      // A blank field is how this screen says the number should go; the
+      // membership module validates whatever else is typed into it.
+      const result = await application.membership.saveSwishPhone({
+        memberId,
+        phone: value.trim() ? value : null,
+      })
+      if (result.status === "invalid-phone") {
+        setError(result.message)
+        return
+      }
+      if (result.status === "member-not-found") return
       setEditing(false)
       onUpdated()
     } finally {
