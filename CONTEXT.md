@@ -12,6 +12,10 @@ _Avoid_: account, project
 A person participating in a group and associated with an authenticated user identity.
 _Avoid_: guest, account
 
+**Invite code**:
+The shareable string identifying a group, which a person redeems to become a member of it.
+_Avoid_: token, invite token, link
+
 ## Money and settlement
 
 **Expense**:
