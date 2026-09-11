@@ -3,14 +3,14 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 
 interface InviteCodeProps {
-  inviteToken: string
+  inviteCode: string
 }
 
-export default function InviteCode({ inviteToken }: InviteCodeProps) {
+export default function InviteCode({ inviteCode }: InviteCodeProps) {
   const [copied, setCopied] = useState(false)
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(inviteToken)
+    await navigator.clipboard.writeText(inviteCode)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

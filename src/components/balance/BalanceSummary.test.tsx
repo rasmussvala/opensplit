@@ -38,7 +38,7 @@ function renderBalanceSummary(
     settlements?: Settlement[]
     members?: Member[]
     currency?: string
-    inviteToken?: string
+    inviteCode?: string
     currentMemberId?: string | null
   } = {},
 ) {
@@ -47,7 +47,7 @@ function renderBalanceSummary(
     settlements: overrides.settlements ?? [],
     members: overrides.members ?? mockMembers,
     currency: overrides.currency ?? "USD",
-    inviteToken: overrides.inviteToken ?? "abc",
+    inviteCode: overrides.inviteCode ?? "abc",
     currentMemberId: overrides.currentMemberId ?? null,
   }
   return render(
@@ -253,7 +253,7 @@ describe("BalanceSummary", () => {
       },
     ]
 
-    renderBalanceSummary({ expenses, inviteToken: "abc" })
+    renderBalanceSummary({ expenses, inviteCode: "abc" })
 
     const link = screen.getByRole("link", { name: /bob owes alice/i })
     expect(link).toHaveAttribute("href", "/groups/abc/settle/member-2/member-1")

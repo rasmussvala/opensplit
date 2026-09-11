@@ -18,16 +18,16 @@ function LocationProbe() {
   return <div data-testid="location">{loc.pathname}</div>
 }
 
-function renderPage(inviteToken = "token-abc") {
+function renderPage(inviteCode = "token-abc") {
   return render(
-    <MemoryRouter initialEntries={[`/groups/${inviteToken}/add-expense`]}>
+    <MemoryRouter initialEntries={[`/groups/${inviteCode}/add-expense`]}>
       <LocationProbe />
       <Routes>
         <Route
-          path="/groups/:inviteToken/add-expense"
+          path="/groups/:inviteCode/add-expense"
           element={<AddExpensePage />}
         />
-        <Route path="/groups/:inviteToken" element={null} />
+        <Route path="/groups/:inviteCode" element={null} />
       </Routes>
     </MemoryRouter>,
   )

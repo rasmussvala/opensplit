@@ -24,7 +24,7 @@ type PageState =
     }
 
 export default function AddExpensePage() {
-  const { inviteToken } = useParams<{ inviteToken: string }>()
+  const { inviteCode } = useParams<{ inviteCode: string }>()
   const { userId } = useAuth()
   const navigate = useNavigate()
   const [state, setState] = useState<PageState>({ status: "loading" })
@@ -33,7 +33,7 @@ export default function AddExpensePage() {
     let context: ExpenseCreationContext | null
     try {
       context = await application.expenses.loadCreateContext(
-        inviteToken as string,
+        inviteCode as string,
         userId,
       )
     } catch {
@@ -56,7 +56,7 @@ export default function AddExpensePage() {
       members: ordered,
       currentMemberId: context.currentMemberId,
     })
-  }, [inviteToken, userId])
+  }, [inviteCode, userId])
 
   useEffect(() => {
     void load()
@@ -71,7 +71,7 @@ export default function AddExpensePage() {
   }
 
   const { groupId, members, currency, currentMemberId } = state
-  const groupUrl = `/groups/${inviteToken}`
+  const groupUrl = `/groups/${inviteCode}`
 
   async function handleSubmit(data: ExpenseFormData) {
     try {

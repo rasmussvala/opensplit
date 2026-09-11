@@ -44,7 +44,7 @@ type PageState =
     }
 
 export default function GroupPage() {
-  const { inviteToken } = useParams<{ inviteToken: string }>()
+  const { inviteCode } = useParams<{ inviteCode: string }>()
   const { userId } = useAuth()
   const [state, setState] = useState<PageState>({ status: "loading" })
   const [searchParams, setSearchParams] = useSearchParams()
@@ -66,7 +66,7 @@ export default function GroupPage() {
   const loadGroup = useCallback(async () => {
     try {
       const result = await application.groups.execute({
-        inviteCode: inviteToken as string,
+        inviteCode: inviteCode as string,
         userId,
       })
 
@@ -83,7 +83,7 @@ export default function GroupPage() {
     } catch {
       setState({ status: "error" })
     }
-  }, [inviteToken, userId])
+  }, [inviteCode, userId])
 
   useEffect(() => {
     void loadGroup()
@@ -188,7 +188,7 @@ export default function GroupPage() {
           expenses={expenses}
           members={members}
           currency={group.currency}
-          inviteToken={inviteToken as string}
+          inviteCode={inviteCode as string}
         />
       </TabsContent>
 
@@ -198,7 +198,7 @@ export default function GroupPage() {
           settlements={settlements}
           members={members}
           currency={group.currency}
-          inviteToken={inviteToken as string}
+          inviteCode={inviteCode as string}
           currentMemberId={currentMember?.id ?? null}
         />
       </TabsContent>
@@ -208,7 +208,7 @@ export default function GroupPage() {
           settlements={settlements}
           members={members}
           currency={group.currency}
-          inviteToken={inviteToken as string}
+          inviteCode={inviteCode as string}
         />
       </TabsContent>
 
@@ -217,7 +217,7 @@ export default function GroupPage() {
         size="icon"
         className="fixed right-6 bottom-6 h-14 w-14 rounded-full shadow-lg"
       >
-        <Link to={`/groups/${inviteToken}/add-expense`}>
+        <Link to={`/groups/${inviteCode}/add-expense`}>
           <Plus className="h-6 w-6" />
           <span className="sr-only">Add expense</span>
         </Link>

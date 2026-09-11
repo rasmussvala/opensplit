@@ -48,10 +48,10 @@ function renderPage() {
     <MemoryRouter initialEntries={["/groups/token/settlements/settlement-1"]}>
       <Routes>
         <Route
-          path="/groups/:inviteToken/settlements/:settlementId"
+          path="/groups/:inviteCode/settlements/:settlementId"
           element={<EditSettlementPage />}
         />
-        <Route path="/groups/:inviteToken" element={<div>Group page</div>} />
+        <Route path="/groups/:inviteCode" element={<div>Group page</div>} />
       </Routes>
     </MemoryRouter>,
   )

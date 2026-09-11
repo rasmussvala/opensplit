@@ -20,21 +20,21 @@ export default function App() {
             <Route element={<AdminRoute />}>
               <Route path="/admin" element={<AdminPage />} />
             </Route>
-            <Route path="/groups/:inviteToken" element={<GroupPage />} />
+            <Route path="/groups/:inviteCode" element={<GroupPage />} />
             <Route
-              path="/groups/:inviteToken/add-expense"
+              path="/groups/:inviteCode/add-expense"
               element={<AddExpensePage />}
             />
             <Route
-              path="/groups/:inviteToken/edit-expense/:expenseId"
+              path="/groups/:inviteCode/edit-expense/:expenseId"
               element={<EditExpensePage />}
             />
             <Route
-              path="/groups/:inviteToken/settle/:fromMemberId/:toMemberId"
+              path="/groups/:inviteCode/settle/:fromMemberId/:toMemberId"
               element={<SettlePage />}
             />
             <Route
-              path="/groups/:inviteToken/settlements/:settlementId"
+              path="/groups/:inviteCode/settlements/:settlementId"
               element={<EditSettlementPage />}
             />
           </Routes>

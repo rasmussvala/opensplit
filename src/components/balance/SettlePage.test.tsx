@@ -222,22 +222,22 @@ function setupSupabase(options: SetupOptions = {}) {
 }
 
 function renderRoute(
-  inviteToken = "token-abc",
+  inviteCode = "token-abc",
   fromMemberId = "member-2",
   toMemberId = "member-1",
 ) {
   return render(
     <MemoryRouter
       initialEntries={[
-        `/groups/${inviteToken}/settle/${fromMemberId}/${toMemberId}`,
+        `/groups/${inviteCode}/settle/${fromMemberId}/${toMemberId}`,
       ]}
     >
       <Routes>
         <Route
-          path="/groups/:inviteToken/settle/:fromMemberId/:toMemberId"
+          path="/groups/:inviteCode/settle/:fromMemberId/:toMemberId"
           element={<SettlePage />}
         />
-        <Route path="/groups/:inviteToken" element={<div>Group page</div>} />
+        <Route path="/groups/:inviteCode" element={<div>Group page</div>} />
       </Routes>
     </MemoryRouter>,
   )

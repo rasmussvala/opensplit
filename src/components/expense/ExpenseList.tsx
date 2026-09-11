@@ -6,14 +6,14 @@ interface ExpenseListProps {
   expenses: Expense[]
   members: Member[]
   currency: string
-  inviteToken: string
+  inviteCode: string
 }
 
 export default function ExpenseList({
   expenses,
   members,
   currency,
-  inviteToken,
+  inviteCode,
 }: ExpenseListProps) {
   const memberNames = new Map(members.map((m) => [m.id, m.name]))
 
@@ -43,7 +43,7 @@ export default function ExpenseList({
         {ordered.map((expense) => (
           <Link
             key={expense.id}
-            to={`/groups/${inviteToken}/edit-expense/${expense.id}`}
+            to={`/groups/${inviteCode}/edit-expense/${expense.id}`}
             className="group relative block overflow-hidden rounded-xl border border-border/70 bg-card/40 p-3 transition-colors hover:border-border hover:bg-card/70"
           >
             <ExpenseItem

@@ -9,14 +9,14 @@ const memberNames = new Map([
   ["m2", "Bob"],
 ])
 
-function renderWith(transactions: Transaction[], inviteToken = "abc") {
+function renderWith(transactions: Transaction[], inviteCode = "abc") {
   return render(
     <MemoryRouter>
       <SettlementList
         transactions={transactions}
         memberNames={memberNames}
         currency="USD"
-        inviteToken={inviteToken}
+        inviteCode={inviteCode}
       />
     </MemoryRouter>,
   )

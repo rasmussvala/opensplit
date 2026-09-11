@@ -52,7 +52,7 @@ describe("ExpenseList", () => {
         expenses={mockExpenses}
         members={mockMembers}
         currency="USD"
-        inviteToken="token-abc"
+        inviteCode="token-abc"
       />,
     )
 
@@ -68,7 +68,7 @@ describe("ExpenseList", () => {
         expenses={mockExpenses}
         members={mockMembers}
         currency="USD"
-        inviteToken="token-abc"
+        inviteCode="token-abc"
       />,
     )
 
@@ -82,7 +82,7 @@ describe("ExpenseList", () => {
         expenses={[mockExpenses[0]]}
         members={mockMembers}
         currency="USD"
-        inviteToken="token-abc"
+        inviteCode="token-abc"
       />,
     )
 
@@ -95,7 +95,7 @@ describe("ExpenseList", () => {
         expenses={[]}
         members={mockMembers}
         currency="USD"
-        inviteToken="token-abc"
+        inviteCode="token-abc"
       />,
     )
 
@@ -108,7 +108,7 @@ describe("ExpenseList", () => {
         expenses={[mockExpenses[0]]}
         members={mockMembers}
         currency="USD"
-        inviteToken="token-abc"
+        inviteCode="token-abc"
       />,
     )
 
@@ -125,7 +125,7 @@ describe("ExpenseList", () => {
         expenses={mockExpenses}
         members={mockMembers}
         currency="USD"
-        inviteToken="token-abc"
+        inviteCode="token-abc"
       />,
     )
 

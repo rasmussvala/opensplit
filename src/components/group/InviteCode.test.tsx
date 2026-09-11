@@ -10,7 +10,7 @@ describe("InviteCode", () => {
   })
 
   it("renders a copy code button", () => {
-    render(<InviteCode inviteToken="abc-123" />)
+    render(<InviteCode inviteCode="abc-123" />)
 
     expect(
       screen.getByRole("button", { name: /copy code/i }),
@@ -18,7 +18,7 @@ describe("InviteCode", () => {
   })
 
   it("copies the bare code (not a URL) on button click", async () => {
-    render(<InviteCode inviteToken="abc-123" />)
+    render(<InviteCode inviteCode="abc-123" />)
 
     fireEvent.click(screen.getByRole("button", { name: /copy code/i }))
 
@@ -28,7 +28,7 @@ describe("InviteCode", () => {
   })
 
   it("shows copied feedback after click", async () => {
-    render(<InviteCode inviteToken="abc-123" />)
+    render(<InviteCode inviteCode="abc-123" />)
 
     fireEvent.click(screen.getByRole("button", { name: /copy code/i }))
 
