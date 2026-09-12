@@ -14,10 +14,8 @@ Sign up at [supabase.com](https://supabase.com) and create a new project.
 
 ### 3. Run migrations
 
-```bash
-supabase link --project-ref <your-project-ref>
-supabase db push
-```
+The database schema lives in [opensplit-core](https://github.com/rasmussvala/opensplit-core).
+Follow the Database section of its README to apply the migrations to your project.
 
 ### 4. Add GitHub secrets
 
@@ -27,14 +25,11 @@ In your fork, go to **Settings > Secrets and variables > Actions** and add:
 |-----------------------------------------|----------------------------------------------------------------------------------------|
 | `VITE_SUPABASE_URL`                     | Supabase dashboard > Project Settings > API > Project URL                              |
 | `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase dashboard > Project Settings > API > Publishable key                          |
-| `SUPABASE_ACCESS_TOKEN`                 | [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens) |
-| `SUPABASE_DB_PASSWORD`                  | The database password you set when creating the project                                |
-| `SUPABASE_PROJECT_ID`                   | Supabase dashboard > Project Settings > General > Reference ID                         |
 | `VITE_ADMIN_PIN`                        | Any short PIN you choose — required to create new groups                               |
 
 ### 5. Push to main
 
-GitHub Actions will automatically deploy the frontend to GitHub Pages and apply any new database migrations.
+GitHub Actions will automatically deploy the frontend to GitHub Pages.
 
 ## Local Development
 

@@ -33,7 +33,7 @@ checks), gated at 80% coverage; the domain's 90% rule lives in the core repo.
 
 **UI components:** `src/components/ui/` are shadcn primitives — edit sparingly. Feature components live in domain folders
 
-**Database:** Supabase with RLS enabled. Migrations in `supabase/migrations/`. All tables use Postgres RLS; anonymous users can only access groups they are members of.
+**Database:** Supabase with RLS enabled. Migrations live in `opensplit-core` under `supabase/migrations/`. All tables use Postgres RLS; anonymous users can only access groups they are members of.
 
 ## Agent skills
 
