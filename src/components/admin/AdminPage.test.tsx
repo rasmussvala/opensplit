@@ -4,13 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import AdminPage from "./AdminPage"
 
 vi.mock("@/lib/supabase", () => ({
-  supabase: {
-    from: vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        order: vi.fn().mockResolvedValue({ data: [], error: null }),
-      }),
-    }),
-  },
+  supabase: { from: vi.fn() },
 }))
 
 vi.mock("@/components/auth/AuthProvider", () => ({
@@ -18,7 +12,7 @@ vi.mock("@/components/auth/AuthProvider", () => ({
 }))
 
 describe("AdminPage", () => {
-  it("renders create group form and groups section", async () => {
+  it("renders the create group form and no list of groups", async () => {
     render(
       <MemoryRouter>
         <AdminPage />
@@ -26,9 +20,6 @@ describe("AdminPage", () => {
     )
 
     expect(screen.getByText(/create a group/i)).toBeInTheDocument()
-    expect(screen.getByText(/existing groups/i)).toBeInTheDocument()
-
-    // Let the embedded GroupList finish its fetch so updates land inside act.
-    await screen.findByText(/no groups yet/i)
+    expect(screen.queryByText(/existing groups/i)).not.toBeInTheDocument()
   })
 })
